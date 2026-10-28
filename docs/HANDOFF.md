@@ -21,6 +21,15 @@ WIP snapshot commit: `67371621b1d650fcd16533a179993905bd7da79c`. A subsequent do
 - Latest local frontend is `http://127.0.0.1:4176/`; API `127.0.0.1:8080`, dedicated PostgreSQL `127.0.0.1:55432`. Design-only prototype remains on4180 for reference.
 - The following T14 snapshot/acceptance history is retained; the new scoped review does not approve T14/T16 or external browser/LiveKit acceptance.
 
+## Rencana adjustment baru — belum diimplementasikan
+
+28 Oktober 2026, setelah publikasi GitHub: user meminta **plan dulu** untuk pingpong, capit boneka, free ride mobil/sepeda, area steril saat race/penalti, bola bebas dan penonton, Blaster top-down, fishing tanpa history, minimap interaktif, SFX, dan popup terpusat. User memilih shooting solo/co-op melawan bot. Tidak ada implementasi fitur baru pada tahap perencanaan ini.
+
+- [Design proposal](superpowers/specs/2026-10-28-world-activities-design.md)
+- [Implementation plan](superpowers/plans/2026-10-28-world-activities-adjustment.md)
+- Batas entitas, frame time, network, audio dan memory adalah target yang akan diukur, bukan klaim performa yang sudah lulus. Angka rules baru adalah usulan untuk direview.
+- Mulai implementasi hanya setelah user meminta lanjut. Plan baru tidak menghapus gate T14/T15/T16 maupun acceptance yang tertunda di bawah.
+
 ## Current implementation and acceptance
 
 Authoritative ledger: [PROGRESS.md](PROGRESS.md). Plan/spec are tracked under `docs/superpowers/`.
