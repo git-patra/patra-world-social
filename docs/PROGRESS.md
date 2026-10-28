@@ -8,13 +8,13 @@ Ledger aktif eksekusi. Tabel di bawah adalah status terkini; catatan kronologis 
 |---|---|
 | `source_repo` | `/Users/patra/Project/patra-world` |
 | `source_commit` | `8d969212d91804e06225f5b1a75eed49e8c25307` |
-| `target_repo` | `/Users/patra/Project/patra-world-social` — clone independen, tanpa remote |
-| `working_branch` | `feat/social-world` |
+| `target_repo` | `/Users/patra/Project/patra-world-social` — public remote git-patra/patra-world-social |
+| `working_branch` | `main` tracking `origin/main`; inherited `feat/social-world` remains local |
 | `highest_contiguous_passed_checkpoint` | CP1 PASS — 1/8 |
 | `last_verified_task_commit` | d4f60a27bd41048c7ed16a103fbcf4875046ece5 — 2/16 task done |
 | `latest_code_commit` | See current Git tip for Kampung Senja integration; prior T14 snapshot6737162 retains its pending review |
 | `current_task` | Kampung Senja fullscreen integration verified/reviewed; T14 independent re-review remains pending |
-| `next_task` | Authenticate git-patra and publish verified main snapshot; then T14 scoped review and remaining T15/T16 acceptance |
+| `next_task` | T14 scoped review and remaining T15/T16 acceptance |
 | `blockers` | Uji browser akun ditunda pengguna (T3/CP2); LiveKit staging belum tersedia (CP7). Pekerjaan backend dan fitur lain tetap berjalan. |
 | `source_changes` | `.idea/` sudah untracked sebelum perencanaan; jangan dihapus atau dibawa ke repo baru |
 | `planning_files` | Snapshot awal di `/Users/patra/Project/docs/superpowers/`; salinan aktif dan ledger tersimpan dalam Git repo baru di `docs/` |
@@ -444,4 +444,4 @@ User approved the outdoor design and requested fullscreen production integration
 
 Verification: 103 frontend tests, typecheck, syntax lint, production build; full Go race/integration across20 packages and242 primary tests, vet/build; actual guest penalty/Race/Duck completions and history after reload;390/768 responsive previews. Full evidence is in `docs/checkpoints/evidence/CP8/kampung-senja-integration.md`. This does not approve T14/T16 or deferred account/LiveKit/physical-device acceptance. CP1 remains the only PASS.
 
-Public main will use a clean snapshot to omit inherited CV/PDF history. User selected git-patra; clean local main snapshot is prepared, but remote creation/push awaits that account’s authentication. Existing CLI credentials belong to patra-digital; in-app GitHub is signed out. No deployment.
+Public main uses a clean snapshot to omit inherited CV/PDF history. Published https://github.com/git-patra/patra-world-social as PUBLIC, default branch main; clean root snapshot0adf204 pushed and verified. Inherited feat/social-world remains local. No deployment.

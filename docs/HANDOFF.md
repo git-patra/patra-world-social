@@ -4,7 +4,7 @@ Updated 28 October 2026. User resumed with an approved Gather-like outdoor villa
 
 ## Project and non-negotiable scope
 
-- Repo `/Users/patra/Project/patra-world-social`, branch `feat/social-world`; independent clone retaining local source history. Local public-ready `main` starts from a clean game snapshot to exclude historical CV assets. User selected `git-patra` as GitHub owner; remote creation/push awaits authentication for that account.
+- Repo `/Users/patra/Project/patra-world-social`, active branch `main`, tracking `origin/main`. Public repository: https://github.com/git-patra/patra-world-social. Public history starts from clean game snapshot `0adf204`; inherited development/CV history remains only on local `feat/social-world`.
 - Source `/Users/patra/Project/patra-world` must remain unchanged, baseline `8d969212d91804e06225f5b1a75eed49e8c25307`; its pre-existing untracked `.idea/` is not ours.
 - Go backend; responsive web for desktop and mobile, no native app. Preserve autumn/Halloween world theme. Remove CV/portfolio content; active game tree cleanup already completed.
 - Private worlds through invitations; guests only solo; username/password accounts for multiplayer, friends, history. Race five laps/five slots with bots, penalty three-second choice, Duck Arcade/top three, warkop mic/chat.

@@ -72,8 +72,8 @@
 
 ### Publication follow-up
 
-- [x] Resolve intended personal account: user selected `git-patra` on28 October2026. Account existence verified. CLI is currently authenticated as `patra-digital`; in-app GitHub browser has no signed-in session.
-- [ ] Create public `patra-world-social`, publish a clean snapshot as `main`, verify remote default branch/tree and repo visibility. Preserve existing local `feat/social-world` history; do not publish old resume/PDF history.
+- [x] Resolve intended personal account: user selected `git-patra` on28 October2026. Account existence and completed CLI login verified as `git-patra`. Existing personal SSH identity also verified as `git-patra`.
+- [x] Create public `patra-world-social`, publish a clean snapshot as `main`, verify remote default branch/tree and repo visibility. Preserve existing local `feat/social-world` history; do not publish old resume/PDF history.
 
 ### Verification record
 
@@ -82,4 +82,4 @@
 - Fresh review: Map-close cancellation, semantic direction release and zoom-aware culling fixed and rechecked. See CP8 evidence and review reports.
 - Obsolete CV screenshots omitted from current/public tree; inherited history retained locally. Commit result is reported via Git/final response rather than a self-referential SHA.
 
-- Publication preparation: clean local `main` snapshot uses the verified game tree and this plan/evidence, without parents from the inherited CV history. Remote creation/push remains pending authentication for `git-patra`; no repo under another owner is authorized.
+- Publication complete: https://github.com/git-patra/patra-world-social is PUBLIC with default branch `main`. Root snapshot `0adf204` matches the verified game tree plus publication docs, includes this plan/evidence, and has no inherited CV-history parents. Local `main` tracks `origin/main`; `feat/social-world` retains the old local history. Verification is recorded in `docs/checkpoints/evidence/CP8/github-publication.md`.
