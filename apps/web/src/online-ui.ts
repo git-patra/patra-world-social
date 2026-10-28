@@ -115,20 +115,17 @@ export function mountOnline(world: ReturnType<typeof createWorld>) {
             void stop();
         } else if (socket) status(socket.status);
     });
-    let animation = 0;
-    const render = () => {
+    world.setOnlineSampler(() => {
         if (attached && socket?.status === 'online' && latest) {
             world.setOnlineSnapshot(latest, buffer.at(clock.now() - 100));
         }
-        animation = requestAnimationFrame(render);
-    };
-    animation = requestAnimationFrame(render);
+    });
     window.addEventListener('pagehide', event => {
         if (!event.persisted) {
             intent++;
             authenticated = false;
             void stop();
-            cancelAnimationFrame(animation);
+            world.setOnlineSampler(undefined);
         }
     });
 }

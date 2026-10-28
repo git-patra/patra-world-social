@@ -23,14 +23,15 @@ func wireLobbiesClock(pool *pgxpool.Pool, hub *realtime.Hub, m world.MapDefiniti
 	if err != nil {
 		panic(err)
 	}
-	g := lobby.New(&lobby.PGStore{Pool: pool}, clock, model.Version{MapID: m.ID, MapVersion: m.V, MapChecksum: m.Checksum, RulesID: rules.ID, RulesVersion: rules.V, RulesChecksum: rules.Checksum, ProtocolVersion: 1})
+	g := lobby.New(&lobby.PGStore{Pool: pool}, clock, model.Version{MapID: m.ID, MapVersion: m.V, MapChecksum: m.Checksum, RulesID: rules.ID, RulesVersion: rules.V, RulesChecksum: rules.Checksum, ProtocolVersion: 2})
+	g.SetAreaCoordinator(areaCoordinator{hub})
 	g.Register("penalty", penalty.Factory(clock))
 	dr := duck.DefaultRules()
 	if err := g.RegisterVersioned("duck", duck.Factory(clock), lobby.RulesMetadata{ID: dr.ID, Version: dr.Version, Checksum: duck.RulesChecksum()}); err != nil {
 		panic(err)
 	}
 	g.RegisterPrepared("race", race.Factory(clock), race.Prepare)
-	hub.GameBusy = g.Busy
+	hub.GameBusy = g.MovementBusy
 	hub.VoiceExcluded = g.VoiceExcluded
 	// Notify only coalesces presence in a bounded-by-admitted-users mailbox. It
 	// never calls storage, publishes, or reenters the hub while its lock is held.
@@ -191,7 +192,7 @@ func wireLobbiesClock(pool *pgxpool.Pool, hub *realtime.Hub, m world.MapDefiniti
 					return err
 				}
 				result = v
-				return hub.SetActivity(ctx, j.WorldID, user, g.Busy(user), nil)
+				return hub.SetActivity(ctx, j.WorldID, user, g.MovementBusy(user), nil)
 			}
 			if c.Type == "lobby.leave" {
 				return g.Leave(ctx, user, j.WorldID)
@@ -215,7 +216,7 @@ func wireLobbiesClock(pool *pgxpool.Pool, hub *realtime.Hub, m world.MapDefiniti
 			case "lobby.bot":
 				return g.ChooseBot(ctx, user, p.LobbyID, p.Enabled)
 			case "match.start":
-				_, err := g.StartMatch(ctx, user, p.LobbyID, c.CommandID)
+				_, err := g.RequestStart(ctx, user, p.LobbyID, c.CommandID)
 				if err != nil {
 					return err
 				}
@@ -277,9 +278,7 @@ func publishLobbies(ctx context.Context, g *lobby.Service, hub *realtime.Hub) {
 						hub.Publish(w, "match.started", l)
 					}
 					for _, p := range l.Players {
-						if g.Busy(p.UserID) {
-							hub.SetActivity(ctx, w, p.UserID, true, nil)
-						}
+						hub.SetActivity(ctx, w, p.UserID, g.MovementBusy(p.UserID), nil)
 					}
 				}
 			}

@@ -58,6 +58,11 @@
     "tests/audio.test.ts",
     "tests/activities-performance.fixture.ts",
     "tests/world-ui.e2e.spec.ts",
-    "tests/app-shell.test.ts"
+    "tests/app-shell.test.ts",
+    "src/activities/**/*.ts",
+    "src/activities/**/*.tsx",
+    "tests/activities.test.ts",
+    "tests/activity-contract.test.ts",
+    "src/guest/lifecycle.ts"
   ]
 }

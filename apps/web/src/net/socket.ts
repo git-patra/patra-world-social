@@ -1,3 +1,4 @@
+import {validateActivitySnapshot,type ActivitySnapshot} from '../activities/contracts';
 import {ServerClock} from './clock';
 import { validateEvent } from '../world/avatars';
 import { validateSnapshot, type Snapshot } from './reconcile';
@@ -43,6 +44,7 @@ export class WorldSocket {
         const url = new URL('/api/v1/realtime', this.origin);
         url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
         url.searchParams.set('worldId', this.worldId);
+ url.searchParams.set('protocolVersion','2');
         if (takeover)
             url.searchParams.set('takeover', 'true');
         if (this.seat) {
@@ -73,7 +75,8 @@ export class WorldSocket {
                             pending.resolve(e.payload.result);
                     }
                 }
-                if (['race.snapshot','race.finished','duck.snapshot','duck.finished','duck.shot_resolved'].includes(e.type)) {
+                if(e.type==='activity.snapshot'||e.type==='activity.lifecycle'){if(e.payload.worldId===this.worldId)this.onEvent(e.type,e.payload);return;}
+ if (['race.snapshot','race.finished','duck.snapshot','duck.finished','duck.shot_resolved'].includes(e.type)) {
  if(e.payload.worldId === this.worldId) this.onEvent(e.type,e.payload);
  return;
  }
@@ -83,7 +86,7 @@ export class WorldSocket {
                 }
                 if (e.type === 'command.error') {
                     const code = String(e.payload.code);
-                    if (['takeover_required', 'world_full', 'access_denied', 'resume_expired'].includes(code)) {
+                    if (['incompatible','takeover_required', 'world_full', 'access_denied', 'resume_expired'].includes(code)) {
                         this.terminal = true;
                         this.state(code as ConnectionStatus);
                     }
@@ -138,7 +141,7 @@ export class WorldSocket {
             return;
         this.seq++;
         const id = commandId ?? `${this.seat?.epoch ?? 1}-${this.seq}`;
-        this.ws.send(JSON.stringify({ v: 1, commandId: id, seq: this.seq, worldId: this.worldId, type, payload }));
+        this.ws.send(JSON.stringify({ v: 2, commandId: id, seq: this.seq, worldId: this.worldId, type, payload }));
         return id;
     }
     sendChat(clientMessageId: string, text: string): Promise<unknown> {
@@ -156,10 +159,11 @@ export class WorldSocket {
         const id = this.send(type, payload, commandId);
         if (!id) return Promise.reject(new Error('Lobby memerlukan koneksi dunia aktif.'));
         return new Promise((resolve,reject) => {
-            const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('Belum dikonfirmasi. Sambungkan ulang untuk menyinkronkan lobby.'));},5000);
+            const timer=setTimeout(()=>{this.pending.delete(id);reject(new Error('Belum dikonfirmasi. Sambungkan ulang untuk menyinkronkan lobby.'));},type==='match.start'?15000:5000);
             this.pending.set(id,{resolve,reject,timer});
         });
     }
+    async activitySnapshots():Promise<ActivitySnapshot[]> {const result=await this.gameCommand('activity.snapshot',{}) as {activities:unknown[]};if(!Array.isArray(result?.activities)||result.activities.length!==4)throw Error('Invalid activity resync');const snapshots=result.activities.map(a=>validateActivitySnapshot(a,this.worldId));if(new Set(snapshots.map(a=>a.areaId)).size!==4)throw Error('Invalid activity resync');return snapshots;}
     input(dx: number, dy: number) { this.send('player.input', { dx, dy }); }
     destination(x: number, y: number) { this.send('player.destination', { x, y }); }
     /** A deliberate exit is complete only after the server releases its seat. */

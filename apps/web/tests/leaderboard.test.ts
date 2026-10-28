@@ -17,7 +17,7 @@ test('late board response cannot restore data after world switch/logout; retry r
  let finish:any;const accepted:any[]=[];const c=new BoardController('w','duck-v1@1',()=>new Promise(r=>finish=r),v=>accepted.push(v));const load=c.load();c.dispose();finish(empty);await load;assert.equal(accepted.length,0);
  let first:any,calls=0;const d=new BoardController('w','duck-v1@1',()=>++calls===1?new Promise(r=>first=r):Promise.resolve({...empty,top:[{score:200}]}),v=>accepted.push(v));const prior=d.load();await d.load();first(empty);await prior;assert.equal(accepted.length,1);assert.equal(accepted[0].top[0].score,200);d.dispose();
 });
-test('public invalidation protocol rejects expanded private payload',()=>{const event:any={v:1,eventId:'e',serverTick:1,serverTimeMs:1,type:'leaderboard.changed',payload:{worldId:'w',ruleset:'duck-v1@1',resultId:'r'}};assert.equal(validateEvent(event).type,'leaderboard.changed');assert.throws(()=>validateEvent({...event,payload:{...event.payload,score:100}}));});
+test('public invalidation protocol rejects expanded private payload',()=>{const event:any={v:2,eventId:'e',serverTick:1,serverTimeMs:1,type:'leaderboard.changed',payload:{worldId:'w',ruleset:'duck-v1@1',resultId:'r'}};assert.equal(validateEvent(event).type,'leaderboard.changed');assert.throws(()=>validateEvent({...event,payload:{...event.payload,score:100}}));});
 
 import {ChampionBoard} from '../src/features/leaderboard/ChampionBoard';
 import {componentLifecycle} from './component-lifecycle';

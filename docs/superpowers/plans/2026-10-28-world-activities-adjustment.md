@@ -10,7 +10,7 @@
 
 **Spec:** [World activities design](../specs/2026-10-28-world-activities-design.md).
 
-**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–2 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md).
+**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–4 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
 
 ## Ringkasan tahap dan cakupan
 
@@ -101,12 +101,12 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 
 **Produces:** kontrak lease/coordinator/ActivitySnapshot/intent di atas; handshake protocol 2. Data menetapkan masks, boundary/entrance/safe-return/spectator strips, scene transforms, slot kendaraan/fishing. Regenerator tetap `scripts/generate-kampung-senja.mjs`.
 
-- [ ] Tambah RED `start_waits_for_clear_ack_and_durability`, `clearing_blocks_existing_paths_and_last_tick_intent`, `old_generation_cannot_release_rematch`, `recreated_runtime_restores_active_leases`, `definite_abort_releases_but_unknown_start_does_not` di owner/application tests; jalankan untuk membuktikan kegagalan baseline.
-- [ ] Definisikan geometri map baru dalam 64×64, validasi bahwa safe anchor di luar arena tidak berada di obstacle/area lain, lalu perbarui static art/map/voice checksum/Go mirrors bersama. Return registry berasal dari kontrak, bukan angka lama yang hardcoded.
-- [ ] Implementasi OPEN→CLEARING 3 s→RESERVED→ACTIVE→RESETTING ≤2 s→OPEN; dynamic mask dicek tiap movement step dan path node, bukan hanya saat destination dikirim. Bersihkan input/path/mount/ball ketika menutup.
-- [ ] Hubungkan async acknowledged lease handshake sebelum Engine.Start/persist activation. Spatial release setelah gameplay selesai terpisah dari durable busy/result claims; rematch acquire ulang. Hydrate lease sebelum admission setelah runtime recreation.
+- [x] Tambah RED `start_waits_for_clear_ack_and_durability`, `clearing_blocks_existing_paths_and_last_tick_intent`, `old_generation_cannot_release_rematch`, `recreated_runtime_restores_active_leases`, `definite_abort_releases_but_unknown_start_does_not` di owner/application tests; jalankan untuk membuktikan kegagalan baseline.
+- [x] Definisikan geometri map baru dalam 64×64, validasi bahwa safe anchor di luar arena tidak berada di obstacle/area lain, lalu perbarui static art/map/voice checksum/Go mirrors bersama. Return registry berasal dari kontrak, bukan angka lama yang hardcoded.
+- [x] Implementasi OPEN→CLEARING 3 s→RESERVED→ACTIVE→RESETTING ≤2 s→OPEN; dynamic mask dicek tiap movement step dan path node, bukan hanya saat destination dikirim. Bersihkan input/path/mount/ball ketika menutup.
+- [x] Hubungkan async acknowledged lease handshake sebelum Engine.Start/persist activation. Spatial release setelah gameplay selesai terpisah dari durable busy/result claims; rematch acquire ulang. Hydrate lease sebelum admission setelah runtime recreation.
 - [ ] Input continuous baru memakai movement budget (maksimum 20 Hz di client, server limiter tetap dibatasi); lifecycle events berurutan, snapshot yang dapat diganti memakai coalescing. Semua command memeriksa world/user epoch/seq/generation, proximity dan membership.
-- [ ] Uji logout/kick/deletion/takeover/disconnect/kegagalan storage, client protocol 1 ditolak dengan instruksi reload, hasil historis protocol 1 tetap terbaca. Jalankan JS goldens dan Go world/lobby/realtime/application integration+race; review integrasi, commit atomik dengan kompatibilitas asset/protocol.
+- [x] Uji logout/kick/deletion/takeover/disconnect/kegagalan storage, client protocol 1 ditolak dengan instruksi reload, hasil historis protocol 1 tetap terbaca. Jalankan JS goldens dan Go world/lobby/realtime/application integration+race; review integrasi, commit atomik dengan kompatibilitas asset/protocol.
 
 ### Task 4: Scene store, penonton dan input owner
 
@@ -114,10 +114,10 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 
 **Consumes:** kontrak Task 3. **Produces:** persistent store/input modes, world.setActivityState; React HUD hanya projection dengan ≤10 update/s, Canvas memakai satu RAF.
 
-- [ ] Tambah RED `closing_menu_does_not_unsubscribe_game`, `one_input_owner_only`, `modal_and_text_neutralize_active_mode`, `passive_spectator_has_no_input_or_history`, `resync_swaps_generation_without_replaying_effects`.
-- [ ] Ekstrak transport/session lifetime dari React modal ke persistent store. Pisahkan UI render dari fixed-step model. Lazy-load modul aktivitas; cull entities/labels/props, jangan duplikasi Canvas untuk seluruh world.
-- [ ] Implementasi public scene snapshots/depth order; actor peserta menggantikan avatar berjalan tanpa duplikasi. Penonton pasif di dekat arena melihat state tanpa otomatis lobby.join; tidak memodifikasi voice admission.
-- [ ] InputRouter menangani walk/ride/race/penalty/pingpong/claw/blaster/fishing/modal; cleanup pointer/key/visibility/disconnect. Menu/hasil tetap centered, tanpa mematikan authoritative snapshots/deadline.
+- [x] Tambah RED `closing_menu_does_not_unsubscribe_game`, `one_input_owner_only`, `modal_and_text_neutralize_active_mode`, `passive_spectator_has_no_input_or_history`, `resync_swaps_generation_without_replaying_effects`.
+- [x] Ekstrak transport/session lifetime dari React modal ke persistent store. Pisahkan UI render dari fixed-step model. Lazy-load modul aktivitas; cull entities/labels/props, jangan duplikasi Canvas untuk seluruh world.
+- [x] Implementasi public scene snapshots/depth order; actor peserta menggantikan avatar berjalan tanpa duplikasi. Penonton pasif di dekat arena melihat state tanpa otomatis lobby.join; tidak memodifikasi voice admission.
+- [x] InputRouter menangani walk/ride/race/penalty/pingpong/claw/blaster/fishing/modal; cleanup pointer/key/visibility/disconnect. Menu/hasil tetap centered, tanpa mematikan authoritative snapshots/deadline.
 - [ ] Uji local→online→local, dua match di area berbeda, keluar/masuk radius spectator dan reconnect. Daftarkan semua file test/production baru di test-map runner serta tsconfig, jangan mengandalkan import coverage kebetulan. Review dan commit.
 
 ### Task 5: Free ride dan race satu lintasan

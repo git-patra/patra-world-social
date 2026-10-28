@@ -5,102 +5,8 @@
       "selfId": "u",
       "sessionId": "opaque",
       "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
-      "rulesId": "beta-v1",
-      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
-      "protocolVersion": 1,
-      "tick": 20,
-      "timeMs": 1000,
-      "avatars": [
-        {
-          "id": "u",
-          "name": "User",
-          "status": "available",
-          "x": 32,
-          "y": 32,
-          "seq": 0
-        }
-      ]
-    },
-    {
-      "worldId": "a",
-      "selfId": "u",
-      "sessionId": "opaque",
-      "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
-      "rulesId": "beta-v1",
-      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
-      "protocolVersion": 1,
-      "tick": 20,
-      "timeMs": 1000,
-      "avatars": [
-        {
-          "id": "u",
-          "name": "👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋",
-          "status": "available",
-          "x": 32,
-          "y": 32,
-          "seq": 0
-        }
-      ]
-    }
-  ],
-  "invalid": [
-    {
-      "worldId": "a",
-      "selfId": "u",
-      "sessionId": "opaque",
-      "epoch": 0,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
-      "rulesId": "beta-v1",
-      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
-      "protocolVersion": 1,
-      "tick": 20,
-      "timeMs": 1000,
-      "avatars": [
-        {
-          "id": "u",
-          "name": "User",
-          "status": "available",
-          "x": 32,
-          "y": 32,
-          "seq": 0
-        }
-      ]
-    },
-    {
-      "worldId": "a",
-      "selfId": "u",
-      "sessionId": "opaque",
-      "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "untrusted",
-      "rulesId": "beta-v1",
-      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
-      "protocolVersion": 1,
-      "tick": 20,
-      "timeMs": 1000,
-      "avatars": [
-        {
-          "id": "u",
-          "name": "User",
-          "status": "available",
-          "x": 32,
-          "y": 32,
-          "seq": 0
-        }
-      ]
-    },
-    {
-      "worldId": "a",
-      "selfId": "u",
-      "sessionId": "opaque",
-      "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
       "rulesId": "beta-v1",
       "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
       "protocolVersion": 2,
@@ -122,11 +28,105 @@
       "selfId": "u",
       "sessionId": "opaque",
       "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
       "rulesId": "beta-v1",
       "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
-      "protocolVersion": 1,
+      "protocolVersion": 2,
+      "tick": 20,
+      "timeMs": 1000,
+      "avatars": [
+        {
+          "id": "u",
+          "name": "👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋👋",
+          "status": "available",
+          "x": 32,
+          "y": 32,
+          "seq": 0
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "worldId": "a",
+      "selfId": "u",
+      "sessionId": "opaque",
+      "epoch": 0,
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
+      "rulesId": "beta-v1",
+      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
+      "protocolVersion": 2,
+      "tick": 20,
+      "timeMs": 1000,
+      "avatars": [
+        {
+          "id": "u",
+          "name": "User",
+          "status": "available",
+          "x": 32,
+          "y": 32,
+          "seq": 0
+        }
+      ]
+    },
+    {
+      "worldId": "a",
+      "selfId": "u",
+      "sessionId": "opaque",
+      "epoch": 1,
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "untrusted",
+      "rulesId": "beta-v1",
+      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
+      "protocolVersion": 2,
+      "tick": 20,
+      "timeMs": 1000,
+      "avatars": [
+        {
+          "id": "u",
+          "name": "User",
+          "status": "available",
+          "x": 32,
+          "y": 32,
+          "seq": 0
+        }
+      ]
+    },
+    {
+      "worldId": "a",
+      "selfId": "u",
+      "sessionId": "opaque",
+      "epoch": 1,
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
+      "rulesId": "beta-v1",
+      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
+      "protocolVersion": 3,
+      "tick": 20,
+      "timeMs": 1000,
+      "avatars": [
+        {
+          "id": "u",
+          "name": "User",
+          "status": "available",
+          "x": 32,
+          "y": 32,
+          "seq": 0
+        }
+      ]
+    },
+    {
+      "worldId": "a",
+      "selfId": "u",
+      "sessionId": "opaque",
+      "epoch": 1,
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
+      "rulesId": "beta-v1",
+      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
+      "protocolVersion": 2,
       "tick": 20,
       "timeMs": 1000,
       "avatars": [
@@ -146,11 +146,11 @@
       "selfId": "missing",
       "sessionId": "opaque",
       "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
       "rulesId": "beta-v1",
       "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
-      "protocolVersion": 1,
+      "protocolVersion": 2,
       "tick": 20,
       "timeMs": 1000,
       "avatars": [
@@ -169,11 +169,11 @@
       "selfId": "u",
       "sessionId": "opaque",
       "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
       "rulesId": "beta-v1",
       "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
-      "protocolVersion": 1,
+      "protocolVersion": 2,
       "tick": 20,
       "timeMs": 1000,
       "avatars": [
@@ -200,11 +200,11 @@
       "selfId": "u",
       "sessionId": "opaque",
       "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
       "rulesId": "beta-v1",
       "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
-      "protocolVersion": 1,
+      "protocolVersion": 2,
       "tick": 20,
       "timeMs": 1000,
       "avatars": [
@@ -223,8 +223,31 @@
       "selfId": "u",
       "sessionId": "opaque",
       "epoch": 1,
-      "mapId": "kampung-senja-v1",
-      "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
+      "rulesId": "beta-v1",
+      "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
+      "protocolVersion": 2,
+      "tick": 20,
+      "timeMs": 1000,
+      "avatars": [
+        {
+          "id": "u",
+          "name": "User",
+          "status": "available",
+          "x": 32,
+          "y": 32,
+          "seq": -1
+        }
+      ]
+    },
+    {
+      "worldId": "a",
+      "selfId": "u",
+      "sessionId": "opaque",
+      "epoch": 1,
+      "mapId": "kampung-senja-v2",
+      "mapChecksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9",
       "rulesId": "beta-v1",
       "rulesChecksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
       "protocolVersion": 1,
@@ -237,7 +260,7 @@
           "status": "available",
           "x": 32,
           "y": 32,
-          "seq": -1
+          "seq": 0
         }
       ]
     }

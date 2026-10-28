@@ -17,7 +17,7 @@ test('cancelled pending admission never connects and releases server seat',async
  const joining=s.join(0);await new Promise(r=>setTimeout(r,0));const leaving=s.leave();resolve({id:'seat'});await Promise.all([joining,leaving]);assert.equal(connected,0);assert.equal(calls.at(-1),'voice.leave');
 });
 test('permission, device and network failures stay distinct',()=>{assert.match(mediaError({name:'NotAllowedError'}),/izin/i);assert.match(mediaError({name:'NotFoundError'}),/perangkat/i);assert.match(mediaError(Error('network')),/jaringan/i)});
-test('table geometry is separate and nonoverlapping',()=>{assert.equal(TABLES.mapId,'kampung-senja-v1');assert.equal(TABLES.mapChecksum,data.checksum);for(const t of TABLES.tables){assert.ok(InTable(t.id,t.x,t.y));assert.ok(!InTable(1-t.id,t.x,t.y))}});
+test('table geometry is separate and nonoverlapping',()=>{assert.equal(TABLES.mapId,'kampung-senja-v2');assert.equal(TABLES.mapChecksum,data.checksum);for(const t of TABLES.tables){assert.ok(InTable(t.id,t.x,t.y));assert.ok(!InTable(1-t.id,t.x,t.y))}});
 test('audio network failure keeps the authorized table chat seat until explicit leave',async()=>{
  const calls:string[]=[];const s=new VoiceSession(async(type)=>{calls.push(type);return type==='voice.token'?{url:'wss://example',token:'opaque'}:{id:'seat'}},async()=>({connect:async()=>{throw Error('network blocked')},disconnect:async()=>{calls.push('disconnect')},mic:async()=>{}}));
  await assert.rejects(s.join(0));assert.ok(!calls.includes('voice.leave'));await s.leave();assert.equal(calls.at(-1),'voice.leave');
@@ -65,7 +65,7 @@ test('VoicePanel explicit retry keeps submitted ID/text; expired retry resyncs w
 
 import {validateCommand} from '../src/world/avatars';
 test('voice wire contract accepts only canonical admission sequence IDs in JS safe range',()=>{
- const prefix='a'.repeat(48)+':';const command=(id:string)=>({v:1,commandId:'c',seq:1,worldId:'w',type:'voice.chat',payload:{clientMessageId:id,text:'text'}});
+ const prefix='a'.repeat(48)+':';const command=(id:string)=>({v:2,commandId:'c',seq:1,worldId:'w',type:'voice.chat',payload:{clientMessageId:id,text:'text'}});
  for(const suffix of ['1','9007199254740991'])assert.equal(validateCommand(command(prefix+suffix)).type,'voice.chat');
  for(const id of ['random',prefix+'0',prefix+'01',prefix+'+1',prefix+'1e0',prefix+'9007199254740992','A'.repeat(48)+':1'])assert.throws(()=>validateCommand(command(id)));
 });

@@ -43,6 +43,11 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 			return
 		}
 		defer c.CloseNow()
+		if r.URL.Query().Get("protocolVersion") != "2" {
+			h.writeEvent(r.Context(), c, "command.error", 0, map[string]string{"code": "incompatible", "message": "World updated. Reload to use protocol 2."})
+			c.Close(websocket.StatusPolicyViolation, "incompatible: reload required")
+			return
+		}
 		c.SetReadLimit(16 * 1024)
 		ctx, cancel := context.WithCancel(r.Context())
 		defer cancel()
@@ -70,6 +75,13 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 		defer h.Disconnect(j.SessionID, "transport closed")
 		if e = h.writeEvent(ctx, c, "world.snapshot", snap.Tick, snap); e != nil {
 			return
+		}
+		if activities, err := h.ActivitySnapshots(ctx, j); err == nil {
+			for _, a := range activities {
+				if h.writeEvent(ctx, c, "activity.snapshot", a.Tick, a) != nil {
+					return
+				}
+			}
 		}
 		// One reader and one writer. A bounded queue never grows with slow readers.
 		out := make(chan Command, 32)
@@ -137,6 +149,8 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 			}
 		}()
 		defer func() { cancel(); c.CloseNow(); <-readDone }()
+		activityTick := time.NewTicker(200 * time.Millisecond)
+		defer activityTick.Stop()
 		snapshotTick := time.NewTicker(100 * time.Millisecond)
 		defer snapshotTick.Stop()
 		validationTick := time.NewTicker(time.Second)
@@ -148,6 +162,7 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 			select {
 			case delivery := <-deliveries:
 				if h.Validate(ctx, j) != nil {
+					c.Close(websocket.StatusPolicyViolation, "access revoked")
 					return
 				}
 				if h.writeEvent(ctx, c, delivery.Type, 0, delivery.Payload) != nil {
@@ -207,9 +222,21 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 				if err != nil {
 					return
 				}
+			case <-activityTick.C:
+				activities, err := h.ActivitySnapshots(ctx, j)
+				if err != nil {
+					c.Close(websocket.StatusPolicyViolation, "access revoked")
+					return
+				}
+				for _, a := range activities {
+					if h.writeEvent(ctx, c, "activity.snapshot", a.Tick, a) != nil {
+						return
+					}
+				}
 			case <-snapshotTick.C:
 				s, e := h.Snapshot(ctx, j)
 				if e != nil {
+					c.Close(websocket.StatusPolicyViolation, "access revoked")
 					return
 				}
 				if h.writeEvent(ctx, c, "world.delta", s.Tick, s) != nil {
@@ -233,7 +260,7 @@ func (h *Hub) writeEvent(ctx context.Context, c *websocket.Conn, kind string, ti
 			return e
 		}
 	}
-	raw, e := json.Marshal(Event{V: 1, EventID: randomID(), ServerTick: tick, ServerTimeMs: time.Now().UnixMilli(), Type: kind, Payload: p})
+	raw, e := json.Marshal(Event{V: 2, EventID: randomID(), ServerTick: tick, ServerTimeMs: time.Now().UnixMilli(), Type: kind, Payload: p})
 	if e != nil {
 		return e
 	}

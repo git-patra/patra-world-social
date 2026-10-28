@@ -1,3 +1,4 @@
+import {registerGuestSession} from '../../guest/lifecycle';
 import {audio} from '../../audio/service';
 import {gameAudio} from '../../audio/events';
 import {Completion} from '../../guest/completion';
@@ -43,3 +44,5 @@ export class GuestRaceSession {
 }
 
 export const guestRace = new GuestRaceSession();
+
+registerGuestSession(guestRace);

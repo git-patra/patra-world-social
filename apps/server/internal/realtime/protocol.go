@@ -30,7 +30,7 @@ func ValidateCommand(raw []byte) (Command, error) {
 	var command Command
 	v, e := c.Object(raw)
 	bad := errors.New("invalid command")
-	if e != nil || !c.Keys(v, "v", "commandId", "seq", "worldId", "type", "payload") || len(raw) > 8192 || v["v"] != float64(1) || !c.Text(v["commandId"], 128) || !c.Text(v["worldId"], 128) || !c.Integer(v["seq"], 0, 9007199254740991) {
+	if e != nil || !c.Keys(v, "v", "commandId", "seq", "worldId", "type", "payload") || len(raw) > 8192 || v["v"] != float64(2) || !c.Text(v["commandId"], 128) || !c.Text(v["worldId"], 128) || !c.Integer(v["seq"], 0, 9007199254740991) {
 		return command, bad
 	}
 	p, ok := v["payload"].(map[string]any)
@@ -38,7 +38,7 @@ func ValidateCommand(raw []byte) (Command, error) {
 		return command, bad
 	}
 	switch v["type"] {
-	case "world.join", "world.leave", "lobby.list", "lobby.leave", "voice.leave", "voice.state", "voice.token", "voice.unmute", "session.resume":
+	case "activity.snapshot", "world.join", "world.leave", "lobby.list", "lobby.leave", "voice.leave", "voice.state", "voice.token", "voice.unmute", "session.resume":
 	case "player.destination":
 		ok = c.Point(p)
 	case "player.input":
@@ -76,7 +76,7 @@ func ValidateCommand(raw []byte) (Command, error) {
 	default:
 		ok = false
 	}
-	allowed := map[string][]string{"voice.leave": {}, "voice.state": {}, "voice.token": {}, "voice.unmute": {}, "voice.chat": {"clientMessageId", "text"}, "voice.moderate": {"target", "action"}, "penalty.snapshot": {"matchId"}, "match.return": {"matchId"}, "match.rematch": {"matchId"}, "penalty.choose": {"zone", "matchId", "turnId"}, "player.input": {"dx", "dy"}, "player.destination": {"x", "y"}, "player.interact": {"targetId"}, "lobby.list": {}, "lobby.leave": {}, "lobby.join": {"arenaId"}, "match.start": {"lobbyId"}, "lobby.bot": {"lobbyId", "enabled"}, "lobby.ready": {"lobbyId", "ready"}, "race.snapshot": {"matchId"}, "race.input": {"matchId", "steer", "throttle", "brake"}, "duck.snapshot": {"matchId"}, "duck.clock": {"matchId"}, "duck.clock_reply": {"matchId", "nonce", "clientTimeMs"}, "duck.shoot": {"matchId", "x", "y", "clientTimeMs"}, "chat.send": {"channelId", "clientMessageId", "text"}, "voice.join": {"table"}}
+	allowed := map[string][]string{"activity.snapshot": {}, "voice.leave": {}, "voice.state": {}, "voice.token": {}, "voice.unmute": {}, "voice.chat": {"clientMessageId", "text"}, "voice.moderate": {"target", "action"}, "penalty.snapshot": {"matchId"}, "match.return": {"matchId"}, "match.rematch": {"matchId"}, "penalty.choose": {"zone", "matchId", "turnId"}, "player.input": {"dx", "dy"}, "player.destination": {"x", "y"}, "player.interact": {"targetId"}, "lobby.list": {}, "lobby.leave": {}, "lobby.join": {"arenaId"}, "match.start": {"lobbyId"}, "lobby.bot": {"lobbyId", "enabled"}, "lobby.ready": {"lobbyId", "ready"}, "race.snapshot": {"matchId"}, "race.input": {"matchId", "steer", "throttle", "brake"}, "duck.snapshot": {"matchId"}, "duck.clock": {"matchId"}, "duck.clock_reply": {"matchId", "nonce", "clientTimeMs"}, "duck.shoot": {"matchId", "x", "y", "clientTimeMs"}, "chat.send": {"channelId", "clientMessageId", "text"}, "voice.join": {"table"}}
 	if fields, known := allowed[func() string { s, _ := v["type"].(string); return s }()]; known && !c.Keys(p, fields...) {
 		ok = false
 	}
@@ -94,16 +94,21 @@ func ValidateEvent(raw []byte) (Event, error) {
 	var event Event
 	v, e := c.Object(raw)
 	bad := errors.New("invalid event")
-	if e != nil || !c.Keys(v, "v", "eventId", "serverTick", "serverTimeMs", "type", "payload") || v["v"] != float64(1) || !c.Text(v["eventId"], 128) || !c.Integer(v["serverTick"], 0, 9007199254740991) || !c.Integer(v["serverTimeMs"], 0, 9007199254740991) {
+	if e != nil || !c.Keys(v, "v", "eventId", "serverTick", "serverTimeMs", "type", "payload") || v["v"] != float64(2) || !c.Text(v["eventId"], 128) || !c.Integer(v["serverTick"], 0, 9007199254740991) || !c.Integer(v["serverTimeMs"], 0, 9007199254740991) {
 		return event, bad
 	}
 	if p, ok := v["payload"].(map[string]any); !ok || p == nil {
 		return event, bad
 	}
 	switch v["type"] {
-	case "world.snapshot", "presence.changed", "world.delta", "command.ack", "lobby.updated", "match.started", "match.result_status", "leaderboard.changed", "race.snapshot", "race.finished", "penalty.snapshot", "penalty.choice_ack", "penalty.turn_opened", "penalty.revealed", "duck.shot_resolved", "duck.snapshot", "duck.finished", "chat.message", "chat.deleted", "command.error", "voice.seat_granted", "voice.seat_revoked":
+	case "activity.snapshot", "activity.lifecycle", "world.snapshot", "presence.changed", "world.delta", "command.ack", "lobby.updated", "match.started", "match.result_status", "leaderboard.changed", "race.snapshot", "race.finished", "penalty.snapshot", "penalty.choice_ack", "penalty.turn_opened", "penalty.revealed", "duck.shot_resolved", "duck.snapshot", "duck.finished", "chat.message", "chat.deleted", "command.error", "voice.seat_granted", "voice.seat_revoked":
 	default:
 		return event, bad
+	}
+	if v["type"] == "activity.snapshot" || v["type"] == "activity.lifecycle" {
+		if err := validateActivityPayload(v["payload"]); err != nil {
+			return event, err
+		}
 	}
 	if v["type"] == "leaderboard.changed" {
 		p := v["payload"].(map[string]any)

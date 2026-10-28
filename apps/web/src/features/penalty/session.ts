@@ -1,3 +1,4 @@
+import {registerGuestSession} from '../../guest/lifecycle';
 import {audio} from '../../audio/service';
 import {gameAudio} from '../../audio/events';
 import {Completion} from '../../guest/completion';
@@ -15,3 +16,5 @@ export class GuestPenaltySession{
  clear(){audio.stopMode('penalty');if(this.timer!==null)clearInterval(this.timer);this.timer=null;this.engine=null;this.completion=null}
 }
 export const guestSession=new GuestPenaltySession();
+
+registerGuestSession(guestSession);

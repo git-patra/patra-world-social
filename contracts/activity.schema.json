@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://patra.world/contracts/activity.schema.json",
+  "title": "Activity snapshot protocol 2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "worldId",
+    "areaId",
+    "incarnation",
+    "generation",
+    "serverTimeMs",
+    "tick",
+    "kind",
+    "payload"
+  ],
+  "properties": {
+    "worldId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "areaId": {
+      "enum": [
+        "race",
+        "penalty",
+        "pingpong",
+        "blaster"
+      ]
+    },
+    "incarnation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "serverTimeMs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "kind": {
+      "const": "area"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase",
+        "matchId",
+        "startsAt",
+        "clearAt",
+        "resetAt"
+      ],
+      "properties": {
+        "phase": {
+          "enum": [
+            "OPEN",
+            "CLEARING",
+            "RESERVED",
+            "ACTIVE",
+            "RESETTING"
+          ]
+        },
+        "matchId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "startsAt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "clearAt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "resetAt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "phase": {
+                "const": "OPEN"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "matchId": {
+                "const": ""
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "generation": {
+            "minimum": 1
+          },
+          "payload": {
+            "properties": {
+              "matchId": {
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "phase": {
+                "const": "CLEARING"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "clearAt": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "phase": {
+                "const": "ACTIVE"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "startsAt": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "phase": {
+                "const": "RESETTING"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "properties": {
+              "resetAt": {
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

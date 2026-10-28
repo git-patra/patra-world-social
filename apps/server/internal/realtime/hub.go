@@ -71,7 +71,8 @@ type room interface {
 // Hub serializes admission and cross-world ownership; per-world runtimes own movement.
 // Authentication runs before locking, fenced by revision so a committed revoke wins.
 type Hub struct {
-	mu sync.Mutex
+	areaStates map[string]world.ActivitySnapshot
+	mu         sync.Mutex
 	// lease is acquired before mu or storage; runtime ticks never acquire it.
 	lease         sync.RWMutex
 	RedactPayload func([]byte) ([]byte, error)
@@ -105,7 +106,7 @@ func NewHub(a SessionChecker, m MembershipChecker, definition world.MapDefinitio
 	if err != nil {
 		panic(err)
 	}
-	h := &Hub{rules: rules, accountRev: map[string]uint64{}, worldRev: map[string]uint64{}, memberRev: map[[2]string]uint64{}, auth: a, members: m, m: definition, clock: c, rooms: map[string]room{}, seats: map[string]*seat{}, users: map[string]*seat{}, stop: make(chan struct{}), done: make(chan struct{})}
+	h := &Hub{areaStates: map[string]world.ActivitySnapshot{}, rules: rules, accountRev: map[string]uint64{}, worldRev: map[string]uint64{}, memberRev: map[[2]string]uint64{}, auth: a, members: m, m: definition, clock: c, rooms: map[string]room{}, seats: map[string]*seat{}, users: map[string]*seat{}, stop: make(chan struct{}), done: make(chan struct{})}
 	go func() {
 		defer close(h.done)
 		t := time.NewTicker(time.Second)
@@ -126,7 +127,14 @@ func (h *Hub) expireTick() {
 	defer h.lease.Unlock()
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	if h.closed {
+		return
+	}
 	h.expire()
+	for w := range h.rooms {
+		h.areaLifecycleLocked(context.Background(), w)
+		h.closeEmptyRoom(w)
+	}
 }
 func (h *Hub) Close() {
 	h.lease.Lock()
@@ -150,17 +158,18 @@ func (h *Hub) authorize(ctx context.Context, j JoinContext) (auth.Session, uint6
 	h.mu.Lock()
 	rev := h.revision
 	closed := h.closed
+	authChecker, membershipChecker := h.auth, h.members
 	h.mu.Unlock()
 	if closed {
 		return auth.Session{}, rev, world.ErrClosed
 	}
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
-	s, e := h.auth.RequireSession(ctx, j.Token)
+	s, e := authChecker.RequireSession(ctx, j.Token)
 	if e != nil {
 		return s, rev, ErrUnauthorized
 	}
-	if _, e = h.members.AuthorizeMember(ctx, s.User.ID, j.WorldID); e != nil {
+	if _, e = membershipChecker.AuthorizeMember(ctx, s.User.ID, j.WorldID); e != nil {
 		return s, rev, ErrUnauthorized
 	}
 	return s, rev, nil
@@ -292,7 +301,7 @@ func (h *Hub) snapshot(ctx context.Context, s *seat) (PublicSnapshot, error) {
 			h.VoiceObserve(s.world, a.ID, a.X, a.Y, a.Status == "playing" || h.VoiceExcluded != nil && h.VoiceExcluded(a.ID))
 		}
 	}
-	return PublicSnapshot{Snapshot: v, WorldID: s.world, SelfID: s.user, SessionID: s.id, Epoch: s.epoch, MapID: h.m.ID, MapChecksum: h.m.Checksum, RulesID: h.rules.ID, RulesChecksum: h.rules.Checksum, ProtocolVersion: 1}, e
+	return PublicSnapshot{Snapshot: v, WorldID: s.world, SelfID: s.user, SessionID: s.id, Epoch: s.epoch, MapID: h.m.ID, MapChecksum: h.m.Checksum, RulesID: h.rules.ID, RulesChecksum: h.rules.Checksum, ProtocolVersion: 2}, e
 }
 func (h *Hub) Snapshot(ctx context.Context, j JoinContext) (PublicSnapshot, error) {
 	h.mu.Lock()
@@ -363,12 +372,18 @@ func (h *Hub) Submit(ctx context.Context, j JoinContext, c Command) error {
 		if h.GameBusy != nil && h.GameBusy(s.user) {
 			return ErrUnsupported
 		}
+		if h.GameBusy != nil {
+			r.Activity(ctx, s.user, false, nil)
+		}
 		var p struct{ DX, DY float64 }
 		json.Unmarshal(c.Payload, &p)
 		return r.Input(ctx, s.user, s.epoch, c.Seq, p.DX, p.DY)
 	case "player.destination":
 		if h.GameBusy != nil && h.GameBusy(s.user) {
 			return ErrUnsupported
+		}
+		if h.GameBusy != nil {
+			r.Activity(ctx, s.user, false, nil)
 		}
 		var p struct{ X, Y float64 }
 		json.Unmarshal(c.Payload, &p)
@@ -429,6 +444,12 @@ func (h *Hub) closeEmptyRoom(worldID string) {
 		}
 	}
 	if r := h.rooms[worldID]; r != nil {
+		if owner, ok := r.(areaRoom); ok {
+			active, err := owner.HasAreaLeases(context.Background())
+			if err != nil || active {
+				return
+			}
+		}
 		r.Close()
 		delete(h.rooms, worldID)
 	}

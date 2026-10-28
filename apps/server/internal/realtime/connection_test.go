@@ -17,7 +17,7 @@ func TestTransportAdmissionMovementAndRevocation(t *testing.T) {
 	defer srv.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	url := "ws" + strings.TrimPrefix(srv.URL, "http") + "?worldId=a"
+	url := "ws" + strings.TrimPrefix(srv.URL, "http") + "?protocolVersion=2&worldId=a"
 	for _, header := range []http.Header{{"Origin": {"http://evil.test"}, "Cookie": {"patra_session=u"}}, {"Origin": {"http://village.test"}}} {
 		c, res, e := websocket.Dial(ctx, url, &websocket.DialOptions{HTTPHeader: header})
 		if e == nil {
@@ -43,7 +43,7 @@ func TestTransportAdmissionMovementAndRevocation(t *testing.T) {
 	}
 	var first PublicSnapshot
 	json.Unmarshal(ev.Payload, &first)
-	cmd := []byte(`{"v":1,"commandId":"move","seq":1,"worldId":"a","type":"player.input","payload":{"dx":1,"dy":0}}`)
+	cmd := []byte(`{"v":2,"commandId":"move","seq":1,"worldId":"a","type":"player.input","payload":{"dx":1,"dy":0}}`)
 	if e = c.Write(ctx, websocket.MessageText, cmd); e != nil {
 		t.Fatal(e)
 	}
@@ -80,7 +80,7 @@ func TestMalformedFrameClosesWithPolicyReason(t *testing.T) {
 	defer srv.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?worldId=a", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
+	c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?protocolVersion=2&worldId=a", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -89,7 +89,9 @@ func TestMalformedFrameClosesWithPolicyReason(t *testing.T) {
 		t.Fatal(e)
 	}
 	c.Write(ctx, websocket.MessageText, []byte(`{"bad":true}`))
-	_, _, e = c.Read(ctx)
+	for e == nil {
+		_, _, e = c.Read(ctx)
+	}
 	if websocket.CloseStatus(e) != websocket.StatusPolicyViolation {
 		t.Fatalf("malformed frame needs policy close: %v", e)
 	}
@@ -103,7 +105,7 @@ func TestTransportTakeoverAndFloodAreFenced(t *testing.T) {
 	defer cancel()
 	dial := func(extra string) (*websocket.Conn, Event) {
 		t.Helper()
-		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?worldId=a"+extra, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
+		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?protocolVersion=2&worldId=a"+extra, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -141,7 +143,7 @@ func TestTransportTakeoverAndFloodAreFenced(t *testing.T) {
 		}
 	}
 	for i := 0; i < 100; i++ {
-		raw, _ := json.Marshal(Command{V: 1, CommandID: "flood", Seq: uint64(i + 1), WorldID: "a", Type: "player.input", Payload: []byte(`{"dx":1,"dy":0}`)})
+		raw, _ := json.Marshal(Command{V: 2, CommandID: "flood", Seq: uint64(i + 1), WorldID: "a", Type: "player.input", Payload: []byte(`{"dx":1,"dy":0}`)})
 		if e := next.Write(ctx, websocket.MessageText, raw); e != nil {
 			break
 		}
@@ -162,7 +164,7 @@ func TestHeartbeatDisconnectsUnreadClient(t *testing.T) {
 	defer srv.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
-	c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?worldId=a", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
+	c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?protocolVersion=2&worldId=a", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -187,7 +189,7 @@ func TestReceivedLeaveSurvivesImmediateTransportClose(t *testing.T) {
 	defer srv.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?worldId=a", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
+	c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?protocolVersion=2&worldId=a", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -201,10 +203,12 @@ func TestReceivedLeaveSurvivesImmediateTransportClose(t *testing.T) {
 	var snapshot PublicSnapshot
 	json.Unmarshal(ev.Payload, &snapshot)
 	entered, release := make(chan struct{}), make(chan struct{})
+	h.mu.Lock()
 	h.members = blockingMembers{entered, release}
-	c.Write(ctx, websocket.MessageText, []byte(`{"v":1,"commandId":"input","seq":1,"worldId":"a","type":"player.input","payload":{"dx":1,"dy":0}}`))
+	h.mu.Unlock()
+	c.Write(ctx, websocket.MessageText, []byte(`{"v":2,"commandId":"input","seq":1,"worldId":"a","type":"player.input","payload":{"dx":1,"dy":0}}`))
 	<-entered
-	c.Write(ctx, websocket.MessageText, []byte(`{"v":1,"commandId":"leave","seq":2,"worldId":"a","type":"world.leave","payload":{}}`))
+	c.Write(ctx, websocket.MessageText, []byte(`{"v":2,"commandId":"leave","seq":2,"worldId":"a","type":"world.leave","payload":{}}`))
 	c.Close(websocket.StatusNormalClosure, "leaving")
 	close(release)
 	select {
@@ -225,7 +229,7 @@ func TestAcknowledgedLeaveAllowsAnotherWorld(t *testing.T) {
 	defer cancel()
 	dial := func(worldID string) *websocket.Conn {
 		t.Helper()
-		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?worldId="+worldID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
+		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?protocolVersion=2&worldId="+worldID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -241,7 +245,7 @@ func TestAcknowledgedLeaveAllowsAnotherWorld(t *testing.T) {
 		return c
 	}
 	first := dial("a")
-	first.Write(ctx, websocket.MessageText, []byte(`{"v":1,"commandId":"leave","seq":1,"worldId":"a","type":"world.leave","payload":{}}`))
+	first.Write(ctx, websocket.MessageText, []byte(`{"v":2,"commandId":"leave","seq":1,"worldId":"a","type":"world.leave","payload":{}}`))
 	for {
 		_, raw, e := first.Read(ctx)
 		if e != nil {
@@ -267,5 +271,36 @@ func TestAcknowledgedLeaveAllowsAnotherWorld(t *testing.T) {
 	defer h.mu.Unlock()
 	if len(h.seats) != 1 || h.rooms["a"] != nil {
 		t.Fatal("acknowledged leave retained previous world")
+	}
+}
+
+func TestProtocolOneHandshakeRequiresReloadBeforeAdmission(t *testing.T) {
+	h := newTestHub(t)
+	srv := httptest.NewServer(NewHandler(h, "http://village.test", true))
+	defer srv.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?protocolVersion=1&worldId=a", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.CloseNow()
+	_, raw, err := c.Read(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var e Event
+	json.Unmarshal(raw, &e)
+	if e.Type != "command.error" || !strings.Contains(string(e.Payload), "Reload") {
+		t.Fatal(string(raw))
+	}
+	_, _, err = c.Read(ctx)
+	if websocket.CloseStatus(err) != websocket.StatusPolicyViolation {
+		t.Fatal(err)
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if len(h.seats) != 0 {
+		t.Fatal("incompatible client admitted")
 	}
 }

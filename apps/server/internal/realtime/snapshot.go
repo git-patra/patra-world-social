@@ -12,7 +12,7 @@ func ValidateSnapshot(raw []byte, worldID string) (PublicSnapshot, error) {
 	var s PublicSnapshot
 	bad := errors.New("invalid snapshot")
 	v, e := c.Object(raw)
-	if e != nil || !c.Keys(v, "worldId", "selfId", "sessionId", "epoch", "mapId", "mapChecksum", "rulesId", "rulesChecksum", "protocolVersion", "tick", "timeMs", "avatars") || v["worldId"] != worldID || v["protocolVersion"] != float64(1) || !c.Integer(v["epoch"], 1, 9007199254740991) || !c.Integer(v["tick"], 0, 9007199254740991) || !c.Integer(v["timeMs"], 0, 9007199254740991) {
+	if e != nil || !c.Keys(v, "worldId", "selfId", "sessionId", "epoch", "mapId", "mapChecksum", "rulesId", "rulesChecksum", "protocolVersion", "tick", "timeMs", "avatars") || v["worldId"] != worldID || v["protocolVersion"] != float64(2) || !c.Integer(v["epoch"], 1, 9007199254740991) || !c.Integer(v["tick"], 0, 9007199254740991) || !c.Integer(v["timeMs"], 0, 9007199254740991) {
 		return s, bad
 	}
 	for _, k := range []string{"worldId", "selfId", "sessionId", "mapId", "mapChecksum", "rulesId", "rulesChecksum"} {

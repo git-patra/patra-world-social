@@ -44,19 +44,22 @@ type request struct {
 
 // Runtime owns simulation state on one goroutine. No database/network work runs here.
 type Runtime struct {
-	clock    Clock
-	m        MapDefinition
-	requests chan request
-	stop     chan struct{}
-	done     chan struct{}
-	once     sync.Once
-	players  map[string]*player
-	last     time.Time
-	tick     uint64
+	incarnation    string
+	areaGeneration uint64
+	areas          map[string]*areaState
+	clock          Clock
+	m              MapDefinition
+	requests       chan request
+	stop           chan struct{}
+	done           chan struct{}
+	once           sync.Once
+	players        map[string]*player
+	last           time.Time
+	tick           uint64
 }
 
 func NewRuntime(m MapDefinition, c Clock) *Runtime {
-	r := &Runtime{clock: c, m: m, requests: make(chan request, 128), stop: make(chan struct{}), done: make(chan struct{}), players: map[string]*player{}, last: c.Now()}
+	r := &Runtime{incarnation: incarnation(), areas: map[string]*areaState{}, clock: c, m: m, requests: make(chan request, 128), stop: make(chan struct{}), done: make(chan struct{}), players: map[string]*player{}, last: c.Now()}
 	go r.run()
 	return r
 }
@@ -101,6 +104,7 @@ func (r *Runtime) call(ctx context.Context, fn func()) error {
 func (r *Runtime) Close() { r.once.Do(func() { close(r.stop) }); <-r.done }
 func (r *Runtime) advance() {
 	now := r.clock.Now()
+	r.advanceAreas()
 	for r.last.Add(50*time.Millisecond).Compare(now) <= 0 {
 		r.last = r.last.Add(50 * time.Millisecond)
 		r.tick++

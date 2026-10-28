@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "v": {
-      "const": 1
+      "const": 2
     },
     "commandId": {
       "type": "string",
@@ -51,7 +51,8 @@
         "voice.token",
         "voice.unmute",
         "voice.chat",
-        "voice.moderate"
+        "voice.moderate",
+        "activity.snapshot"
       ]
     },
     "payload": {
@@ -853,6 +854,25 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "activity.snapshot"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "maxProperties": 0
+          }
+        }
+      }
     }
-  ]
+  ],
+  "title": "Command"
 }

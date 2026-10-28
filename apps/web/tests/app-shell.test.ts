@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import vm from 'node:vm';
 import {createWorld} from '../src/world/controller';
+import {InputRouter} from '../src/activities/input-router';
 import {PointerHold,acceptsMovement} from '../src/world/input';
 import {createWorldArt} from '../src/world/village-art';
 import {projectVillage,unprojectVillage,villageLocation} from '../src/world/village';
@@ -16,7 +17,7 @@ import layout from '../../../contracts/kampung-senja-layout.v1.json';
 // mounts are isolated because these tests concern shell event ordering, not auth,
 // React rendering, browser layout, or external services.
 function shellFixture(pixelRatio=1){
- const original={window:globalThis.window,document:globalThis.document,HTMLElement:globalThis.HTMLElement,ResizeObserver:globalThis.ResizeObserver,requestAnimationFrame:globalThis.requestAnimationFrame,cancelAnimationFrame:globalThis.cancelAnimationFrame,setTimeout:globalThis.setTimeout,clearTimeout:globalThis.clearTimeout,setInterval:globalThis.setInterval,clearInterval:globalThis.clearInterval};
+ const original={window:globalThis.window,document:globalThis.document,Element:globalThis.Element,MutationObserver:globalThis.MutationObserver,HTMLElement:globalThis.HTMLElement,ResizeObserver:globalThis.ResizeObserver,requestAnimationFrame:globalThis.requestAnimationFrame,cancelAnimationFrame:globalThis.cancelAnimationFrame,setTimeout:globalThis.setTimeout,clearTimeout:globalThis.clearTimeout,setInterval:globalThis.setInterval,clearInterval:globalThis.clearInterval};
  const gradient={addColorStop(){}};
  const context=new Proxy({measureText:()=>({width:40}),createRadialGradient:()=>gradient,createLinearGradient:()=>gradient},{get:(o,k)=>k in o?o[k as keyof typeof o]:()=>{},set:()=>true});
  let now=100,nextID=1,world!:ReturnType<typeof createWorld>;
@@ -30,6 +31,8 @@ function shellFixture(pixelRatio=1){
   constructor(public id=''){}
   addEventListener(kind:string,fn:Function){add(this.listeners,kind,fn)}
   removeEventListener(kind:string,fn:Function){this.listeners.set(kind,(this.listeners.get(kind)??[]).filter(listener=>listener!==fn))}
+  append(){}
+  remove(){}
   setAttribute(){}
   getContext(){return context}
   getBoundingClientRect(){return{left:0,top:0,width:1000,height:700}}
@@ -52,13 +55,16 @@ function shellFixture(pixelRatio=1){
  for(const id of ['settings-button','history-button','podium-button','locations-button'])get(`#${id}`).parent=get('#menu-dialog');
  const quickPlay=get('#quick-play-duck');quickPlay.parent=get('#menu-dialog');quickPlay.dataset.project='duck';
  const pad=get('right-pad');pad.dataset.move='1,0';
- const document={activeElement:get('#world'),hidden:false,body:{dataset:{},classList:{toggle(){}}},querySelector:(selector:string)=>selector==='dialog[open]'?dialogs.find(d=>d.open):get(selector),querySelectorAll:(selector:string)=>selector==='dialog'?dialogs:selector==='[data-move]'?[pad]:[],createElement:()=>new Element(),addEventListener:(kind:string,fn:Function)=>add(documentEvents,kind,fn)};
- const window={devicePixelRatio:pixelRatio,addEventListener:(kind:string,fn:Function)=>add(windowEvents,kind,fn),dispatchEvent(){}};
+ const document={activeElement:get('#world'),hidden:false,body:get('body'),querySelector:(selector:string)=>selector==='dialog[open]'?dialogs.find(d=>d.open):get(selector),querySelectorAll:(selector:string)=>selector==='dialog'?dialogs:selector==='[data-move]'?[pad]:[],createElement:()=>new Element(),addEventListener:(kind:string,fn:Function)=>add(documentEvents,kind,fn),removeEventListener:(kind:string,fn:Function)=>documentEvents.set(kind,(documentEvents.get(kind)??[]).filter(f=>f!==fn))};
+ const window={devicePixelRatio:pixelRatio,addEventListener:(kind:string,fn:Function)=>add(windowEvents,kind,fn),removeEventListener:(kind:string,fn:Function)=>windowEvents.set(kind,(windowEvents.get(kind)??[]).filter(f=>f!==fn)),dispatchEvent(){}};
  const schedule=(run:()=>void,delay=0,repeat=0)=>{const id=nextID++;timers.set(id,{run,at:now+delay,repeat});return id};
  const clock={setTimeout:(run:()=>void,delay=0)=>schedule(run,delay),clearTimeout:(id:number)=>timers.delete(id),setInterval:(run:()=>void,delay=0)=>schedule(run,delay,delay),clearInterval:(id:number)=>timers.delete(id)};
  const requestAnimationFrame=(fn:FrameRequestCallback)=>{const id=nextID++;frames.set(id,fn);return id};
  Object.assign(globalThis,{window,document,HTMLElement:Element,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame,cancelAnimationFrame:(id:number)=>frames.delete(id),...clock});
- const environment:Record<string,unknown>={window,document,HTMLElement:Element,Event,CustomEvent,requestAnimationFrame,queueMicrotask,...clock,matchMedia:()=>({matches:false,addEventListener(){}}),MutationObserver:class{constructor(private callback:()=>void){}observe(element:Element){if(!observers.has(element))observers.set(element,new Set());observers.get(element)!.add(this.callback)}},IntersectionObserver:class{observe(){}},createWorld:(...args:Parameters<typeof createWorld>)=>(world=createWorld(...args)),PointerHold,acceptsMovement,villageLocation,stations,mountMinimap,openCenteredDialog,closeDialogThen,mountDialogViewport,setDialogFocusReturn,mountAudio:()=>()=>{},activePreferences:{subscribe(){},start(){},toggleMotion:async()=>{}}};
+ const environment:Record<string,unknown>={window,document,HTMLElement:Element,Event,CustomEvent,requestAnimationFrame,queueMicrotask,...clock,matchMedia:()=>({matches:false,addEventListener(){}}),MutationObserver:class{constructor(private callback:()=>void){}disconnect(){}observe(element:Element){if(!observers.has(element))observers.set(element,new Set());observers.get(element)!.add(this.callback)}},IntersectionObserver:class{observe(){}},createWorld:(...args:Parameters<typeof createWorld>)=>(world=createWorld(...args)),PointerHold,acceptsMovement,villageLocation,stations,mountMinimap,openCenteredDialog,closeDialogThen,mountDialogViewport,setDialogFocusReturn,mountAudio:()=>()=>{},activePreferences:{subscribe(){},start(){},toggleMotion:async()=>{}}};
+ Object.assign(globalThis,{Element,MutationObserver:environment.MutationObserver});
+ environment.activityInput=new InputRouter();
+ environment.mountActivities=()=>()=>{};environment.mountActivityHUD=()=>()=>{};
  for(const name of ['mountSettings','mountGuestLifecycle','mountGuestUICleanup','mountVoice','mountVoicePanel','mountPenalty','mountAuth','mountChampionBoard','mountHistory','mountOnline','mountSocial','mountLobbies','mountLobbyPanel','mountChat','mountWorlds'])environment[name]=()=>{};
  environment.mountSettings=()=>{get('#settings-button').onclick=()=>get('#settings-dialog').showModal()};
  environment.mountHistory=()=>{const trigger=get('#history-button'),panel=get('#history-dialog');trigger.onclick=()=>panel.showModal();panel.addEventListener('close',()=>trigger.focus())};
@@ -70,7 +76,11 @@ function shellFixture(pixelRatio=1){
   for(const [id,timer]of [...timers])if(timer.at<=now){if(timer.repeat)timer.at=now+timer.repeat;else timers.delete(id);timer.run()}
   const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn(now));
  }
- return{world,get,pad,tick,keydown:(key:string)=>emit(documentEvents,'keydown',{key,target:pad,preventDefault(){}}),keyup:(key:string)=>emit(windowEvents,'keyup',{key}),choose(id:string){const choice=new Element();choice.dataset.project=id;choice.parent=get('#places');choice.click(1)},restore(){world.destroy();Object.assign(globalThis,original)}};
+ return{world,get,pad,tick,
+  routerKey:(type:string,key:string)=>emit(windowEvents,type,{type,key,target:get('body'),preventDefault(){},stopImmediatePropagation(){}}),
+  padDown:(pointerId:number)=>emit(pad.listeners,'pointerdown',{pointerId,currentTarget:pad,preventDefault(){}}),
+  pointerEnd:(pointerId:number)=>emit(windowEvents,'pointerup',{pointerId}),
+  repeatInput:()=>(environment.activityInput as InputRouter).repeat(),visibility:(hidden:boolean)=>{document.hidden=hidden;emit(documentEvents,'visibilitychange',{})},frameCount:()=>frames.size,keydown:(key:string)=>emit(documentEvents,'keydown',{key,target:pad,preventDefault(){}}),keyup:(key:string)=>emit(windowEvents,'keyup',{key}),choose(id:string){const choice=new Element();choice.dataset.project=id;choice.parent=get('#places');choice.click(1)},restore(){world.destroy();Object.assign(globalThis,original)}};
 }
 
 test('actual Map selection retains its online destination after dialog close cleanup',async()=>{
@@ -169,5 +179,41 @@ for(const [entry,panel] of [['#settings-button','#settings-dialog'],['#history-b
   assert.ok(shell.get(panel).contains((globalThis.document as any).activeElement),'parent close must leave focus in the newly open child');
   shell.get(panel).close();await Promise.resolve();
   assert.equal((globalThis.document as any).activeElement,shell.get('#menu-button'),'child close must restore a visible opener outside the closed menu');
+ }finally{shell.restore()}
+});
+
+test('hidden world cancels its only frame and resumes without jumping',()=>{
+ const shell=shellFixture();try{
+  shell.tick();shell.world.move(1,0);shell.tick();const before=shell.world.getState().player;
+  shell.visibility(true);assert.equal(shell.frameCount(),0);
+  shell.tick(30000);assert.deepEqual(shell.world.getState().player,before);
+  shell.visibility(false);assert.equal(shell.frameCount(),1);shell.tick();assert.deepEqual(shell.world.getState().player,before);
+ }finally{shell.restore()}
+});
+
+test('neutral input heartbeat cannot cancel an online map route',async()=>{
+ const shell=shellFixture();try{
+  const commands:unknown[][]=[];shell.world.setOnline({input:(...input)=>commands.push(['input',...input]),destination:(...point)=>commands.push(['destination',...point])});
+  shell.get('#list-button').click();await Promise.resolve();shell.choose('race');await Promise.resolve();shell.tick();
+  const count=commands.length;shell.repeatInput();shell.repeatInput();assert.equal(commands.length,count);assert.deepEqual(commands.at(-1),['destination',45,45]);
+ }finally{shell.restore()}
+});
+
+test('activity_location_display_tracks_own_actor_without_changing_walking_authority',async()=>{
+ const {ActivityStore}=await import('../src/activities/store');const shell=shellFixture(),store=new ActivityStore();try{
+  const before=shell.world.getState().player;await store.startLocal('race',1000,42,'display-projection');shell.world.setActivityState(store.snapshot());await import('../src/world/scenes/race');await Promise.resolve();shell.tick();
+  assert.deepEqual(shell.world.getState().player,before);assert.notEqual(shell.get('#world').dataset.position,`${before.x.toFixed(2)},${before.y.toFixed(2)}`);assert.equal(shell.get('#current-location').textContent,layout.destinations.find(d=>d.id==='race')!.name);
+  await store.action('leave');shell.world.setActivityState(store.snapshot());assert.deepEqual(shell.world.getState().player,{x:45,y:49});
+ }finally{store.dispose();shell.restore()}
+});
+
+test('world_pad_release_preserves_held_keyboard_and_ignores_unrelated_pointerup',()=>{
+ const shell=shellFixture();try{
+  shell.tick();shell.routerKey('keydown','w');shell.padDown(7);shell.tick();const diagonal=shell.world.getState().player;
+  shell.pointerEnd(99);shell.tick();const stillDiagonal=shell.world.getState().player;
+  assert.ok(stillDiagonal.x>diagonal.x&&stillDiagonal.y<diagonal.y,'unrelated pointer does not end either owned input');
+  shell.pointerEnd(7);shell.tick();const keyboardOnly=shell.world.getState().player;
+  assert.equal(keyboardOnly.x,stillDiagonal.x);assert.ok(keyboardOnly.y<stillDiagonal.y,'ending the pad pointer preserves held W');
+  shell.routerKey('keyup','w');shell.tick();assert.deepEqual(shell.world.getState().player,keyboardOnly);
  }finally{shell.restore()}
 });

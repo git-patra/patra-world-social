@@ -4,7 +4,7 @@ import {api,type User} from '../../net/api';
 import {defaults,loadPreferences,type Preferences} from '../../guest/history';
 import {authState,AuthState} from '../../auth-state';
 import {activePreferences,ActivePreferences} from '../../preferences';
-import {GuestSession} from '../../guest/session';
+import {clearGuestSessions} from '../../guest/lifecycle';
 export function SettingsPage({user,generation=authState.snapshot().generation,state=authState,store=activePreferences}:{key?:string;user:User|null;generation?:number;state?:AuthState;store?:ActivePreferences}){
  const[p,setP]=useState<Preferences>({...defaults}),[message,setMessage]=useState(''),[password,setPassword]=useState(''),[nextPassword,setNextPassword]=useState(''),[confirmation,setConfirmation]=useState(''),[code,setCode]=useState(''),[busy,setBusy]=useState(false),[copyLocal,setCopyLocal]=useState(false);
  const live=useRef(true),requests=useRef(new Set<AbortController>());
@@ -24,7 +24,7 @@ export function SettingsPage({user,generation=authState.snapshot().generation,st
  <button disabled={busy||!password} onClick={()=>void run(async(valid,signal)=>{const r=await api.rotateRecovery(password,signal);if(!valid())return;setCode(r.recoveryCode);setMessage('Kode lama tidak berlaku. Simpan kode baru ini sekarang.')})}>Ganti kode pemulihan</button>{code&&<><label>Kode pemulihan sekali tampil<textarea readOnly value={code}/></label><button onClick={()=>setCode('')}>Sudah kusimpan</button></>}
  <p>Sebelum menghapus akun, buka Dunia saya untuk transfer kepemilikan ke anggota atau arsipkan setiap dunia milikmu. History lawan tetap tersedia dengan identitas anonim.</p><button onClick={()=>window.dispatchEvent(new Event('patra-worlds-request'))}>Kelola dunia milikku</button>
  <label>Ketik username untuk menghapus akun<input value={confirmation} onChange={e=>setConfirmation(e.target.value)} placeholder={user.username}/></label><button disabled={busy||confirmation!==user.username} onClick={()=>void run(async(valid,signal,g)=>{await api.deleteAccount(confirmation,signal);if(!valid())return;state.update(g,null);setMessage('Akun dihapus. Sesi dicabut dan history lawan dianonimkan.')})}>Hapus akun permanen</button></>}
- <details><summary>Hapus data lokal</summary><p>Ini menghapus 100 sesi perangkat, nama/avatar lokal, preferensi, dan menghentikan permainan lokal aktif.</p><button disabled={busy} onClick={()=>void run(async(valid,_signal,g)=>{GuestSession.clear();await store.resetDevice(g);if(!valid())return;if(!user)setP({...defaults});setMessage('Data perangkat dihapus.')})}>Konfirmasi hapus data perangkat</button></details><p role="status">{message}</p></section>
+ <details><summary>Hapus data lokal</summary><p>Ini menghapus 100 sesi perangkat, nama/avatar lokal, preferensi, dan menghentikan permainan lokal aktif.</p><button disabled={busy} onClick={()=>void run(async(valid,_signal,g)=>{clearGuestSessions();await store.resetDevice(g);if(!valid())return;if(!user)setP({...defaults});setMessage('Data perangkat dihapus.')})}>Konfirmasi hapus data perangkat</button></details><p role="status">{message}</p></section>
 }
 export function mountSettings(){let root:ReturnType<typeof createRoot>|null=null;const button=document.querySelector<HTMLButtonElement>('#settings-button')!,dialog=document.querySelector<HTMLDialogElement>('#settings-dialog')!,container=document.querySelector('#settings-content')!;
  const render=()=>{const {generation,user}=authState.snapshot();root?.render(<SettingsPage key={String(generation)} user={user} generation={generation}/>)};

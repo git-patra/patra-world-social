@@ -6,7 +6,7 @@ import (
 )
 
 func TestRaceOnlyAcceptsBoundedControls(t *testing.T) {
-	raw := `{"v":1,"commandId":"c","seq":1,"worldId":"w","type":"race.input","payload":{"matchId":"m","throttle":1,"brake":0,"steer":-1}}`
+	raw := `{"v":2,"commandId":"c","seq":1,"worldId":"w","type":"race.input","payload":{"matchId":"m","throttle":1,"brake":0,"steer":-1}}`
 	if _, err := ValidateCommand([]byte(raw)); err != nil {
 		t.Fatal(err)
 	}

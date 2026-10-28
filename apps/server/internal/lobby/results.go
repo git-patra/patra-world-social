@@ -93,6 +93,7 @@ func (s *Service) detach(id string) {
 		if l.MatchID != id {
 			continue
 		}
+		s.releaseSpatial(l)
 		for _, p := range l.Players {
 			if s.releaseClaim(p.UserID, l.ID) {
 				s.returns[[2]string{l.WorldID, p.UserID}] = s.arenaReturn(l.WorldID, p.UserID, l.ReturnX, l.ReturnY)

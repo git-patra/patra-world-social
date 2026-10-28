@@ -1,3 +1,5 @@
+import raceTrack from '../../../../contracts/race-track.v1.json';
+import activities from '../../../../contracts/activities.v1.json';
 // A deliberately self-contained canvas painting for the exploration prototype.
 // Positions use feet / ground contact as their depth-sorting anchor.
 const W = 2560, H = 1920;
@@ -309,14 +311,14 @@ export function createWorldArt() {
   });solid(1736,552,176,60);
   pumpkin(1585,716,1,true); pumpkin(2065,717,.9); lamp(1540,728);lamp(2108,728);
 
-  // Race circuit: rounded asphalt loop with a grass infield; the whole track is walkable.
-  rounded(c,1494,1174,628,404,160,'#c5b087');
-  rounded(c,1504,1184,608,384,152,'#59615c');
-  rounded(c,1568,1248,480,256,104,'#d8c39a');
-  rounded(c,1577,1257,462,238,96,'#879a6d');
-  c.strokeStyle='#e1cb9e';c.lineWidth=3;c.setLineDash([20,18]);c.beginPath();c.roundRect(1536,1216,544,320,130);c.stroke();c.setLineDash([]);
-  for(let y=1290;y<1462;y+=16) for(let x=1506;x<1567;x+=16) rect(c,x,y,15,15,((x-1506+y-1290)/16)%2?'#ddd1ac':'#3f504a');
-  label(c,'SENJA CIRCUIT',1808,1334,19,'#52684f');label(c,'READY, SET, WANDER.',1808,1363,11,'#5c714f');
+  // Paint the same rectangular road and infield used by authoritative race physics.
+  const raceTransform=activities.areas.find(a=>a.id==='race')!.sceneTransform;
+  const raceRect=(r:{x:number;y:number;width:number;height:number},color:string)=>rect(c,raceTransform.offsetX+r.x*raceTransform.scale,raceTransform.offsetY+r.y*raceTransform.scale,r.width*raceTransform.scale,r.height*raceTransform.scale,color);
+  raceRect(raceTrack.outer,'#59615c');raceRect(raceTrack.inner,'#879a6d');
+  c.strokeStyle='#e1cb9e';c.lineWidth=2;c.setLineDash([12,10]);c.beginPath();raceTrack.line.forEach((p,i)=>{const x=raceTransform.offsetX+p.x*raceTransform.scale,y=raceTransform.offsetY+p.y*raceTransform.scale;if(i)c.lineTo(x,y);else c.moveTo(x,y)});c.closePath();c.stroke();c.setLineDash([]);
+  const finish=raceTrack.gates.at(-1)!;
+  for(let y=finish.min;y<finish.max;y+=512)for(let x=finish.at-256;x<finish.at+768;x+=512)rect(c,raceTransform.offsetX+x*raceTransform.scale,raceTransform.offsetY+y*raceTransform.scale,8,8,((x+y)/512)%2?'#eee3c0':'#344039');
+  label(c,'SENJA CIRCUIT',1808,1334,19,'#52684f');label(c,'5 LAP · AUTUMN RING',1808,1363,11,'#5c714f');
   // Parked tiny cars sit in the infield, away from racing and walking lanes.
   ([[1726,1424,'#c67f51'],[1806,1424,'#e2bd71'],[1886,1424,'#737e8b']] as [number,number,string][]).forEach(([x,y,col])=>object(x,y,ctx=>{
     shadow(ctx,x,y,26,9);rect(ctx,x-26,y-21,52,22,'#3d5148');rect(ctx,x-26,y-25,52,20,col);

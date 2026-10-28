@@ -85,6 +85,23 @@ func (h *Hub) Online(userID string) bool {
 
 // Execute keeps durable/control acknowledgements separate from replaceable snapshots.
 func (h *Hub) Execute(ctx context.Context, j JoinContext, c Command) (any, error) {
+	if c.Type == "activity.snapshot" {
+		raw, err := json.Marshal(c)
+		if err != nil {
+			return nil, err
+		}
+		if _, err = ValidateCommand(raw); err != nil {
+			return nil, err
+		}
+		if c.WorldID != j.WorldID {
+			return nil, ErrUnauthorized
+		}
+		if err = h.Validate(ctx, j); err != nil {
+			return nil, err
+		}
+		a, err := h.ActivitySnapshots(ctx, j)
+		return map[string]any{"activities": a}, err
+	}
 	if c.Type != "chat.send" && !isGameCommand(c.Type) && !strings.HasPrefix(c.Type, "voice.") {
 		return nil, h.Submit(ctx, j, c)
 	}

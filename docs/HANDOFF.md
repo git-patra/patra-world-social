@@ -4,26 +4,26 @@ Updated 28 October 2026. User resumed with an approved Gather-like outdoor villa
 
 ## Project and non-negotiable scope
 
-- Repo `/Users/patra/Project/patra-world-social`, active branch `main`, tracking `origin/main`. Public repository: https://github.com/git-patra/patra-world-social. Public history starts from clean game snapshot `0adf204`; inherited development/CV history remains only on local `feat/social-world`.
+- Repo `/Users/patra/Project/patra-world-social`, active implementation branch `feat/world-activities`; `main` tracks `origin/main`. Public repository: https://github.com/git-patra/patra-world-social. Public history starts from clean game snapshot `0adf204`; inherited development/CV history remains only on local `feat/social-world`.
 - Source `/Users/patra/Project/patra-world` must remain unchanged, baseline `8d969212d91804e06225f5b1a75eed49e8c25307`; its pre-existing untracked `.idea/` is not ours.
 - Go backend; responsive web for desktop and mobile, no native app. Preserve autumn/Halloween world theme. Remove CV/portfolio content; active game tree cleanup already completed.
 - Private worlds through invitations; guests only solo; username/password accounts for multiplayer, friends, history. Race five laps/five slots with bots, penalty three-second choice, Duck Arcade/top three, warkop mic/chat.
 - Local implementation, commits and public personal GitHub publication on `main` are authorized by the latest user request. No public deployment, production changes, paid services or committed secrets.
 - User deferred authenticated browser workflows. Do not retry registration/password/recovery through another route. LiveKit staging not available; continue independent work after explicit resume. User specified web including mobile, not a claim that physical mobile verification has passed.
 
-WIP snapshot commit: `67371621b1d650fcd16533a179993905bd7da79c`. A subsequent documentation-only commit records this SHA; inspect `git log -2 --oneline` for the final tip.
+Historical T14 snapshot: `67371621b1d650fcd16533a179993905bd7da79c`. Active activities work starts at `3079f05`; Tasks0–2 are committed as `bb1869a`. Inspect Git and the activities plan for the current tip; do not restart the older T14 implementation.
 
 ## Latest village integration
 
 - Approved outdoor Kampung Senja, fullscreen canvas without the legacy sidebar, semi-English HUD, Map and activity menu. Existing game, account, social, history and voice mounts remain.
-- Shared `kampung-senja-v1` navigation and voice geometry are mirrored into Go; private-world movement stays server-authoritative.
+- Original village integration used `kampung-senja-v1` navigation and voice geometry are mirrored into Go; private-world movement stays server-authoritative.
 - Plan: [Kampung Senja integration](superpowers/plans/2026-10-28-kampung-senja-integration.md). Evidence/review: [integration verification](checkpoints/evidence/CP8/kampung-senja-integration.md), [fresh review](checkpoints/evidence/CP8/kampung-review.md).
 - Latest local frontend is `http://127.0.0.1:4176/`; API `127.0.0.1:8080`, dedicated PostgreSQL `127.0.0.1:55432`. Design-only prototype remains on4180 for reference.
-- The following T14 snapshot/acceptance history is retained; the new scoped review does not approve T14/T16 or external browser/LiveKit acceptance.
+- The following T14 snapshot history is retained. Activities Task0 completed the pending scoped R1/R2 review; external browser/LiveKit and T16 acceptance remain pending.
 
 ## Adjustment aktivitas — implementasi berjalan
 
-28 Oktober 2026, setelah publikasi GitHub: user meminta **plan dulu** untuk pingpong, capit boneka, free ride mobil/sepeda, area steril saat race/penalti, bola bebas dan penonton, Blaster top-down, fishing tanpa history, minimap interaktif, SFX, dan popup terpusat. User memilih shooting solo/co-op melawan bot. User kemudian mengizinkan implementasi seluruh enam tahap. Tahap awal UI/minimap/SFX dan prasyarat reconnect/startup telah diimplementasikan serta direview; lihat [evidence tahap 1](checkpoints/evidence/CP8/activities-stage1.md). Lintasan, lapangan dan game baru masih tahap berikutnya.
+28 Oktober 2026, setelah publikasi GitHub: user meminta **plan dulu** untuk pingpong, capit boneka, free ride mobil/sepeda, area steril saat race/penalti, bola bebas dan penonton, Blaster top-down, fishing tanpa history, minimap interaktif, SFX, dan popup terpusat. User memilih shooting solo/co-op melawan bot. User kemudian mengizinkan implementasi seluruh enam tahap. Tahap awal UI/minimap/SFX dan prasyarat reconnect/startup telah diimplementasikan serta direview; lihat [evidence tahap 1](checkpoints/evidence/CP8/activities-stage1.md). Task3 area authority dan Task4 scene race/penalti/input telah lolos review, termasuk perbaikan urutan snapshot dan multi-pointer. Task5–11 tetap berikutnya. Asset sekarang `kampung-senja-v2`, wire protocol2; metadata hasil historis protocol1 dipertahankan.
 
 - [Design proposal](superpowers/specs/2026-10-28-world-activities-design.md)
 - [Implementation plan](superpowers/plans/2026-10-28-world-activities-adjustment.md)
@@ -32,17 +32,17 @@ WIP snapshot commit: `67371621b1d650fcd16533a179993905bd7da79c`. A subsequent do
 
 ## Current implementation and acceptance
 
-Authoritative ledger: [PROGRESS.md](PROGRESS.md). Plan/spec are tracked under `docs/superpowers/`.
+Current activities evidence: [stage1](checkpoints/evidence/CP8/activities-stage1.md), [area authority](checkpoints/evidence/CP8/activities-task-3.md), [world scenes](checkpoints/evidence/CP8/activities-task-4.md), [browser checks](checkpoints/evidence/CP8/activities-world-scenes-browser.md). Authoritative ledger: [PROGRESS.md](PROGRESS.md). Plan/spec are tracked under `docs/superpowers/`.
 
-- T1/T2 done; **CP1 is the only PASS**. T3–T13 code reviewed and committed as partial progress, external acceptance still pending. T14 is implemented and tested but its latest repair needs independent re-review. T15 fullscreen village integration completed in the current change; remaining T15 acceptance and T16 stay open.
+- T1/T2 done; **CP1 is the only PASS**. T3–T13 code reviewed and committed as partial progress, external acceptance still pending. T14 latest repair passed scoped independent review in activities Task0; external acceptance remains pending. T15 fullscreen village integration completed in the current change; remaining T15 acceptance and T16 stay open.
 - Implemented: Go/PostgreSQL accounts and recovery, private worlds/invites, authoritative realtime movement, friends/chat/moderation, lobby/match ownership/history, penalty, race, Duck Arcade, Duck leaderboard, warkop admission/table chat and LiveKit integration.
 - T13 accepted code commit `b6e74fbf12ff0a2913e09888b81c1e3d767566b6`; prior ledger commit `658bd09271e31d6b8f86333fb7d407a0d4aaea21`.
-- T14 snapshot adds actual IndexedDB guest history (dedup, oldest 100 retention), local preferences/reset, account settings/password/recovery rotation/deletion, account deletion fencing and identity redaction. It includes migrations 011/012. This snapshot is WIP pending review, not an accepted C14 checkpoint.
+- T14 snapshot adds actual IndexedDB guest history (dedup, oldest 100 retention), local preferences/reset, account settings/password/recovery rotation/deletion, account deletion fencing and identity redaction. It includes migrations 011/012. The scoped repair review is complete; this is not an accepted C14 checkpoint while external gates remain open.
 - Guest browser evidence covers real completion of all three games, history/settings persistence after reload, no duplicate finished result, unfinished-game reload, and user-approved reset of the three synthetic results/name/preferences. Reset was completed and verified. Do not repeat permission for that completed action.
 - Current coordinator verification before pause: **4 JS + 93 TS tests passed**, typecheck, JS syntax lint and production build passed (254 ms). T14 initial full Go race/integration/vet/build and round1 affected checks are recorded in evidence; round2 changes only frontend and no new backend run is claimed.
 - Authenticated browser acceptance, real-browser 100-record boundary, Cloud voice/audio/token replay, and final beta/load/soak acceptance remain NOT_RUN. Node tests use actual GuestHistory transaction code with fake-indexeddb; they do not substitute browser acceptance.
 
-## Pending independent task: finish T14 review
+## Historical T14 review context — scoped repair review completed
 
 Read:
 
@@ -95,9 +95,9 @@ Last verified API8080 is **accepted T13**, not the T14 WIP source. Vite4176 serv
 ## Prompt for a new conversation
 
 ```text
-Lanjutkan Patra World Social di /Users/patra/Project/patra-world-social, branch feat/social-world, dari commit dan working tree yang ada; jangan mengulang clone atau overwrite.
+Lanjutkan Patra World Social di /Users/patra/Project/patra-world-social, branch feat/world-activities, dari commit dan working tree yang ada. Jangan ulangi implementasi/review yang sudah selesai.
 
-Baca docs/HANDOFF.md, docs/PROGRESS.md, spec/plan di docs/superpowers, dan bukti T14 di docs/checkpoints/evidence/CP7. Mulai dengan independent scoped re-review perbaikan T14 round2 berdasarkan docs/handoff/t14-round2-review.diff; perbaiki temuan jika ada, lalu lanjutkan T15 dan T16 sesuai briefs di docs/handoff. Gunakan subagent untuk implementasi/review dengan satu coordinator untuk integrasi dan commit.
+User mengizinkan seluruh enam tahap adjustment aktivitas. Baca plan docs/superpowers/plans/2026-10-28-world-activities-adjustment.md, ledger .superpowers/sdd/2026-10-28-world-activities-adjustment/progress.md, dan evidence CP8 activities-*.md; lanjutkan task berikutnya sesuai status nyata. Tasks0–2 committed bb1869a; scoped T14 review selesai. Gunakan subagent implementasi/review sesuai plan, satu coordinator integrasi/commit.
 
-Backend Go, produk web desktop/mobile, tema Patra World, private invite worlds, guest solo, tanpa CV. Uji browser akun tetap ditunda; LiveKit staging belum tersedia. Jangan menganggap mock/unit test sebagai acceptance browser/voice. Catat SHA nyata, hasil tes dan batas bukti. Commit lokal per tahap; jangan remote/push/deploy publik atau ubah repo sumber. CP1 saja yang sudah PASS; jangan mengklaim beta selesai sebelum seluruh acceptance wajib terpenuhi.
+Fullscreen kampung outdoor, semi-English, tanpa CV/sidebar. Pertahankan game/multiplayer/history. Uji browser akun tetap ditunda; LiveKit staging dan perangkat mobile fisik belum tersedia. Jangan menganggap unit/integration/proxy browser sebagai acceptance eksternal. Simpan plan dan hasil testing dalam commit lokal; public GitHub main publication telah diizinkan, tidak ada izin public deployment. CP1 tetap satu-satunya PASS sampai acceptance wajib lengkap.
 ```

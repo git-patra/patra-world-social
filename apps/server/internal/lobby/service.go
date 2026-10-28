@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"patra-world-social/server/internal/games/model"
+	"patra-world-social/server/internal/world"
 	"sync"
 	"time"
 )
@@ -62,7 +63,8 @@ type Lobby struct {
 	BotChosen       bool     `json:"botChosen"`
 }
 type entry struct {
-	rematch map[string]bool
+	areaReleaseQueued bool
+	rematch           map[string]bool
 	Lobby
 	start           *attempt
 	engine          Engine
@@ -73,6 +75,8 @@ type entry struct {
 	releaseAt       time.Time
 }
 type attempt struct {
+	lease         world.AreaLease
+	countdown     time.Duration
 	match         model.MatchStart
 	host, command string
 	done          chan struct{}
@@ -102,6 +106,7 @@ type Changes struct {
 	Returns []Return
 }
 type Service struct {
+	areas          AreaCoordinator
 	storageBlocked bool
 	store          Store
 	clock          Clock
@@ -121,6 +126,7 @@ type Service struct {
 	busyMu         sync.RWMutex
 	busy           map[string]string
 	spectators     map[string]bool
+	movementBusy   map[string]bool
 	generations    map[string]uint64
 	pendingMu      sync.Mutex
 	pending        map[[2]string][]notification
@@ -132,7 +138,7 @@ type Service struct {
 
 func New(store Store, clock Clock, version model.Version) *Service {
 	ctx, cancel := context.WithCancel(context.Background())
-	s := &Service{ctx: ctx, cancel: cancel, storage: make(chan func(), 64), store: store, clock: clock, version: version, requests: make(chan request, 128), stop: make(chan struct{}), done: make(chan struct{}), entries: map[[2]string]*entry{}, factories: map[string]Factory{}, preparers: map[string]Prepare{}, rulesMetadata: map[string]RulesMetadata{}, attempts: map[[2]string]*attempt{}, busy: map[string]string{}, spectators: map[string]bool{}, generations: map[string]uint64{}, pending: map[[2]string][]notification{}, wake: make(chan struct{}, 1), changed: map[string]bool{}, returns: map[[2]string]Return{}, Changed: make(chan struct{}, 1)}
+	s := &Service{ctx: ctx, cancel: cancel, storage: make(chan func(), 64), store: store, clock: clock, version: version, requests: make(chan request, 128), stop: make(chan struct{}), done: make(chan struct{}), entries: map[[2]string]*entry{}, factories: map[string]Factory{}, preparers: map[string]Prepare{}, rulesMetadata: map[string]RulesMetadata{}, attempts: map[[2]string]*attempt{}, busy: map[string]string{}, spectators: map[string]bool{}, movementBusy: map[string]bool{}, generations: map[string]uint64{}, pending: map[[2]string][]notification{}, wake: make(chan struct{}, 1), changed: map[string]bool{}, returns: map[[2]string]Return{}, Changed: make(chan struct{}, 1)}
 	s.workers.Add(1)
 	go func() {
 		defer s.workers.Done()
@@ -406,12 +412,28 @@ func (s *Service) VoiceExcluded(user string) bool {
 }
 func (s *Service) refreshSpectators() {
 	next := map[string]bool{}
+	movement := map[string]bool{}
 	for _, l := range s.entries {
+		if l.State == "lobby" || l.State == "starting" || l.State == "countdown" || l.State == "running" {
+			for _, p := range l.Players {
+				if !p.departed {
+					movement[p.UserID] = true
+				}
+			}
+		}
 		for _, u := range l.Spectators {
 			next[u] = true
 		}
 	}
 	s.busyMu.Lock()
 	s.spectators = next
+	s.movementBusy = movement
 	s.busyMu.Unlock()
+}
+
+// MovementBusy ends with simulation; Busy retains durable account/history claims.
+func (s *Service) MovementBusy(user string) bool {
+	s.busyMu.RLock()
+	defer s.busyMu.RUnlock()
+	return s.movementBusy[user]
 }

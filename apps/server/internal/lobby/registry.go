@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"patra-world-social/server/internal/games/model"
+	"patra-world-social/server/internal/world"
 	"time"
 )
 
@@ -69,6 +70,25 @@ type Arena struct {
 
 var arenas = []Arena{{"race", "race", 5, 30, 14, 3 * time.Second}, {"penalty", "penalty", 2, 50, 32, 0}, {"duck-1", "duck", 1, 30, 53, 3 * time.Second}, {"duck-2", "duck", 1, 30, 53, 3 * time.Second}, {"duck-3", "duck", 1, 30, 53, 3 * time.Second}, {"duck-4", "duck", 1, 30, 53, 3 * time.Second}}
 
+func init() {
+	for i := range arenas {
+		if a, ok := world.ActivityArea(arenas[i].ID); ok {
+			arenas[i].ReturnX = a.SafeReturn.X
+			arenas[i].ReturnY = a.SafeReturn.Y
+		} else {
+			m, e := world.LoadMap(world.MapAsset)
+			if e != nil {
+				panic(e)
+			}
+			for _, b := range m.Buildings {
+				if b.ID == "duck" {
+					arenas[i].ReturnX = b.Entrance.X
+					arenas[i].ReturnY = b.Entrance.Y
+				}
+			}
+		}
+	}
+}
 func arena(id string) (Arena, bool) {
 	for _, a := range arenas {
 		if a.ID == id {

@@ -174,6 +174,9 @@ func (s *Service) advance() {
 				s.mark(l.WorldID)
 			}
 		}
+		if l.State == "finalizing" || l.State == "results" || l.State == "abandoned" {
+			s.releaseSpatial(l)
+		}
 		if ev, ok := l.engine.(EventEngine); ok && ev.HasEvents() {
 			s.mark(l.WorldID)
 		}
@@ -323,6 +326,9 @@ func (s *Service) DrainChanges(ctx context.Context) (Changes, error) {
 	var c Changes
 	err := s.call(ctx, func() {
 		for _, l := range s.entries {
+			if l.State == "finalizing" || l.State == "results" || l.State == "abandoned" {
+				s.releaseSpatial(l)
+			}
 			if ev, ok := l.engine.(EventEngine); ok {
 				c.Events = append(c.Events, ev.DrainEvents()...)
 			}

@@ -34,20 +34,26 @@ func TestRaceWebSocketContinuousInputUsesMovementBudget(t *testing.T) {
 	}
 	server := httptest.NewServer(app.Handler)
 	defer server.Close()
-	c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(server.URL, "http")+"/api/v1/realtime?worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[0]}}})
+	c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(server.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[0]}}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer c.CloseNow()
-	if _, _, err = c.Read(ctx); err != nil {
+	_, initial, err := c.Read(ctx)
+	if err != nil {
 		t.Fatal(err)
 	}
+	var initialEvent realtime.Event
+	json.Unmarshal(initial, &initialEvent)
+	var admission realtime.PublicSnapshot
+	json.Unmarshal(initialEvent.Payload, &admission)
+	j := realtime.JoinContext{Token: tokens[0], WorldID: w.ID, SessionID: admission.SessionID, Epoch: admission.Epoch}
 	seq := uint64(0)
 	send := func(kind string, payload any) json.RawMessage {
 		t.Helper()
 		seq++
 		id := fmt.Sprint("race", seq)
-		raw, _ := json.Marshal(map[string]any{"v": 1, "commandId": id, "seq": seq, "worldId": w.ID, "type": kind, "payload": payload})
+		raw, _ := json.Marshal(map[string]any{"v": 2, "commandId": id, "seq": seq, "worldId": w.ID, "type": kind, "payload": payload})
 		if err := c.Write(ctx, websocket.MessageText, raw); err != nil {
 			t.Fatal(err)
 		}
@@ -82,7 +88,18 @@ func TestRaceWebSocketContinuousInputUsesMovementBudget(t *testing.T) {
 	app.Lobbies.SetStorageBlocked(false)
 	raw = send("match.start", map[string]any{"lobbyId": l.ID})
 	json.Unmarshal(raw, &l)
+	awaitClearedStart(t, ctx, app.Lobbies, app.Hub, clock, w.ID, l.ID)
+	all, _ := app.Lobbies.List(ctx, w.ID)
+	for _, v := range all {
+		if v.ID == l.ID {
+			l.MatchID = v.MatchID
+			l.StartsAt = v.StartsAt
+		}
+	}
 	clock.set(l.StartsAt)
+	if err = app.Hub.Validate(ctx, j); err != nil {
+		t.Fatal(err)
+	}
 	app.Lobbies.Sync(ctx)
 	for i := 0; i < 20; i++ {
 		send("race.input", map[string]any{"matchId": l.MatchID, "throttle": 1, "brake": 0, "steer": 0})

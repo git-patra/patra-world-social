@@ -109,7 +109,7 @@ func TestDeletedAccountActualWebsocketSerializationAndRollback(t *testing.T) {
 	srv := httptest.NewServer(app.Handler)
 	defer srv.Close()
 	dial := func(i int) *websocket.Conn {
-		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
+		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
 		if e != nil {
 			t.Fatal(e)
 		}

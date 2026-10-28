@@ -39,7 +39,7 @@ func TestLobbyProtocolUsesAdmittedIdentityAndPublicResync(t *testing.T) {
 	defer server.Close()
 	dial := func(i int) (*websocket.Conn, realtime.PublicSnapshot) {
 		t.Helper()
-		c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(server.URL, "http")+"/api/v1/realtime?worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
+		c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(server.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -58,7 +58,7 @@ func TestLobbyProtocolUsesAdmittedIdentityAndPublicResync(t *testing.T) {
 	peer, _ := dial(1)
 	execute := func(c *websocket.Conn, id, kind string, payload any) realtime.Event {
 		t.Helper()
-		raw, _ := json.Marshal(map[string]any{"v": 1, "commandId": id, "seq": 1, "worldId": w.ID, "type": kind, "payload": payload})
+		raw, _ := json.Marshal(map[string]any{"v": 2, "commandId": id, "seq": 1, "worldId": w.ID, "type": kind, "payload": payload})
 		if err := c.Write(ctx, websocket.MessageText, raw); err != nil {
 			t.Fatal(err)
 		}
@@ -106,7 +106,7 @@ func TestLobbyProtocolUsesAdmittedIdentityAndPublicResync(t *testing.T) {
 	if strings.Contains(string(listed.Payload), "seed") || !strings.Contains(string(listed.Payload), "duck-4") {
 		t.Fatal(string(listed.Payload))
 	}
-	if app.Hub.Submit(ctx, realtime.JoinContext{Token: tokens[0], WorldID: w.ID, SessionID: snap.SessionID, Epoch: snap.Epoch}, realtime.Command{V: 1, CommandID: "move", WorldID: w.ID, Seq: 2, Type: "player.input", Payload: json.RawMessage(`{"dx":1,"dy":0}`)}) == nil {
+	if app.Hub.Submit(ctx, realtime.JoinContext{Token: tokens[0], WorldID: w.ID, SessionID: snap.SessionID, Epoch: snap.Epoch}, realtime.Command{V: 2, CommandID: "move", WorldID: w.ID, Seq: 2, Type: "player.input", Payload: json.RawMessage(`{"dx":1,"dy":0}`)}) == nil {
 		t.Fatal("busy user moved")
 	}
 	if ev := execute(host, "leave", "lobby.leave", map[string]any{}); ev.Type != "command.ack" {
@@ -170,7 +170,7 @@ func arenaReturnFixture(t *testing.T) (context.Context, *lobby.Service, *realtim
 	j.Epoch = snap.Epoch
 	join := func(arena string) error {
 		payload, _ := json.Marshal(map[string]string{"arenaId": arena})
-		_, e := hub.Execute(ctx, j, realtime.Command{V: 1, CommandID: "join-" + arena, WorldID: room.ID, Type: "lobby.join", Payload: payload})
+		_, e := hub.Execute(ctx, j, realtime.Command{V: 2, CommandID: "join-" + arena, WorldID: room.ID, Type: "lobby.join", Payload: payload})
 		return e
 	}
 	if e = join("race"); e != nil {
@@ -228,7 +228,7 @@ func TestArenaReturnRemainsPendingAfterDeliveryError(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	if snap.Avatars[0].X != 30 || snap.Avatars[0].Y != 14 || snap.Avatars[0].Status != "available" {
+	if snap.Avatars[0].X != 45 || snap.Avatars[0].Y != 49 || snap.Avatars[0].Status != "available" {
 		t.Fatal(snap.Avatars)
 	}
 	done, e := g.DrainChanges(ctx)

@@ -46,7 +46,7 @@ func TestDuckActualTransportMeasuredProfilesAndAuthority(t *testing.T) {
 			p.Exec(ctx, `INSERT INTO world_members(world_id,user_id,role)VALUES($1,$2,'member')`, w.ID, users[1])
 			server := httptest.NewServer(app.Handler)
 			defer server.Close()
-			c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(server.URL, "http")+"/api/v1/realtime?worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[0]}}})
+			c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(server.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[0]}}})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -79,7 +79,7 @@ func TestDuckActualTransportMeasuredProfilesAndAuthority(t *testing.T) {
 				t.Helper()
 				counter++
 				b, _ := json.Marshal(payload)
-				cmd := realtime.Command{V: 1, CommandID: fmt.Sprint(counter), Seq: counter, WorldID: w.ID, Type: kind, Payload: b}
+				cmd := realtime.Command{V: 2, CommandID: fmt.Sprint(counter), Seq: counter, WorldID: w.ID, Type: kind, Payload: b}
 				b, _ = json.Marshal(cmd)
 				if e := c.Write(ctx, websocket.MessageText, b); e != nil {
 					t.Fatal(e)
@@ -127,7 +127,7 @@ func TestDuckActualTransportMeasuredProfilesAndAuthority(t *testing.T) {
 			targetID := 0
 			for n := int64(0); n < 40 && targetID == 0; n++ {
 				clock.set(m.StartsAt + n*700 + 100)
-				value, e := app.Hub.Execute(ctx, j, realtime.Command{V: 1, CommandID: "public-probe", WorldID: w.ID, Type: "duck.snapshot", Payload: json.RawMessage(fmt.Sprintf(`{"matchId":%q}`, m.MatchID))})
+				value, e := app.Hub.Execute(ctx, j, realtime.Command{V: 2, CommandID: "public-probe", WorldID: w.ID, Type: "duck.snapshot", Payload: json.RawMessage(fmt.Sprintf(`{"matchId":%q}`, m.MatchID))})
 				if e != nil {
 					t.Fatal(e)
 				}
@@ -269,12 +269,12 @@ func TestDuckActualTransportMeasuredProfilesAndAuthority(t *testing.T) {
 			other, _ := app.Hub.Join(ctx, realtime.JoinContext{Token: tokens[1], WorldID: w.ID})
 			oj := realtime.JoinContext{Token: tokens[1], WorldID: w.ID, SessionID: other.SessionID, Epoch: other.Epoch}
 			payload := json.RawMessage(fmt.Sprintf(`{"matchId":%q,"x":0.5,"y":0.5,"clientTimeMs":100}`, m.MatchID))
-			if _, err = app.Hub.Execute(ctx, oj, realtime.Command{V: 1, CommandID: "spectator", Seq: 90, WorldID: w.ID, Type: "duck.shoot", Payload: payload}); err == nil {
+			if _, err = app.Hub.Execute(ctx, oj, realtime.Command{V: 2, CommandID: "spectator", Seq: 90, WorldID: w.ID, Type: "duck.shoot", Payload: payload}); err == nil {
 				t.Fatal("spectator shot")
 			}
 			bad := j
 			bad.Epoch++
-			if _, err = app.Hub.Execute(ctx, bad, realtime.Command{V: 1, CommandID: "epoch", Seq: 91, WorldID: w.ID, Type: "duck.shoot", Payload: payload}); err == nil {
+			if _, err = app.Hub.Execute(ctx, bad, realtime.Command{V: 2, CommandID: "epoch", Seq: 91, WorldID: w.ID, Type: "duck.shoot", Payload: payload}); err == nil {
 				t.Fatal("stale generation accepted")
 			}
 			clock.set(m.StartsAt + 60000)

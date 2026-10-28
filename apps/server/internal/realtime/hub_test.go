@@ -92,7 +92,7 @@ func TestTakeoverFencesOldCommandsAndDisconnect(t *testing.T) {
 		t.Fatal(e)
 	}
 	j := JoinContext{Token: "u", WorldID: "a", SessionID: old.SessionID, Epoch: old.Epoch}
-	if e = h.Submit(ctx, j, Command{V: 1, CommandID: "x", Seq: 1, WorldID: "a", Type: "player.input", Payload: []byte(`{"dx":1,"dy":0}`)}); !errors.Is(e, ErrFenced) {
+	if e = h.Submit(ctx, j, Command{V: 2, CommandID: "x", Seq: 1, WorldID: "a", Type: "player.input", Payload: []byte(`{"dx":1,"dy":0}`)}); !errors.Is(e, ErrFenced) {
 		t.Fatal(e)
 	}
 	h.Disconnect(old.SessionID, "old socket")
@@ -179,7 +179,7 @@ func TestCrossWorldAndMalformedInputsNeverMutate(t *testing.T) {
 	ctx := context.Background()
 	s, _ := h.Join(ctx, JoinContext{Token: "u", WorldID: "a"})
 	j := JoinContext{Token: "u", WorldID: "a", SessionID: s.SessionID, Epoch: s.Epoch}
-	for _, cmd := range []Command{{V: 1, CommandID: "x", WorldID: "b", Type: "player.input", Seq: 1, Payload: []byte(`{"dx":1,"dy":0}`)}, {V: 1, CommandID: "x", WorldID: "a", Type: "player.input", Seq: 1, Payload: []byte(`{"dx":100,"dy":0}`)}, {V: 1, CommandID: "x", WorldID: "a", Type: "player.destination", Seq: 1, Payload: []byte(`{"x":64,"y":32}`)}} {
+	for _, cmd := range []Command{{V: 2, CommandID: "x", WorldID: "b", Type: "player.input", Seq: 1, Payload: []byte(`{"dx":1,"dy":0}`)}, {V: 2, CommandID: "x", WorldID: "a", Type: "player.input", Seq: 1, Payload: []byte(`{"dx":100,"dy":0}`)}, {V: 2, CommandID: "x", WorldID: "a", Type: "player.destination", Seq: 1, Payload: []byte(`{"x":64,"y":32}`)}} {
 		if e := h.Submit(ctx, j, cmd); e == nil {
 			t.Fatal("invalid movement accepted")
 		}

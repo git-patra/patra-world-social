@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Public server event envelope v1",
+  "title": "Public server event envelope v2",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -13,7 +13,7 @@
   ],
   "properties": {
     "v": {
-      "const": 1
+      "const": 2
     },
     "eventId": {
       "type": "string",
@@ -53,7 +53,9 @@
         "match.result_status",
         "penalty.snapshot",
         "duck.finished",
-        "leaderboard.changed"
+        "leaderboard.changed",
+        "activity.snapshot",
+        "activity.lifecycle"
       ]
     },
     "payload": {
@@ -135,6 +137,25 @@
                 "maxLength": 128
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "activity.snapshot",
+              "activity.lifecycle"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "activity.schema.json"
           }
         }
       }

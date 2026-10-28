@@ -75,7 +75,7 @@ func TestVoiceUsesActualAdmissionLifecycleAndJournal(t *testing.T) {
 		}
 	}
 	execute := func(j realtime.JoinContext, kind, payload string) (any, error) {
-		return app.Hub.Execute(ctx, j, realtime.Command{V: 1, CommandID: "voice-test", Seq: 1, WorldID: j.WorldID, Type: kind, Payload: json.RawMessage(payload)})
+		return app.Hub.Execute(ctx, j, realtime.Command{V: 2, CommandID: "voice-test", Seq: 1, WorldID: j.WorldID, Type: kind, Payload: json.RawMessage(payload)})
 	}
 	if _, err = execute(realtime.JoinContext{Token: tokens[2], WorldID: w.ID}, "voice.join", `{"table":0}`); err == nil {
 		t.Fatal("outsider joined")
@@ -224,7 +224,7 @@ func TestVoiceExcludesRunningMatchSpectatorsInBothOrders(t *testing.T) {
 	}
 	execute := func(i int, kind string, payload any) (any, error) {
 		raw, _ := json.Marshal(payload)
-		return app.Hub.Execute(ctx, joins[i], realtime.Command{V: 1, CommandID: kind, Seq: 1, WorldID: w.ID, Type: kind, Payload: raw})
+		return app.Hub.Execute(ctx, joins[i], realtime.Command{V: 2, CommandID: kind, Seq: 1, WorldID: w.ID, Type: kind, Payload: raw})
 	}
 	if _, err = execute(0, "lobby.join", map[string]any{"arenaId": "duck-1"}); err != nil {
 		t.Fatal(err)
@@ -248,6 +248,7 @@ func TestVoiceExcludesRunningMatchSpectatorsInBothOrders(t *testing.T) {
 	if _, err = execute(0, "match.start", map[string]any{"lobbyId": lobbyID}); err != nil {
 		t.Fatal(err)
 	}
+	awaitClearedStart(t, ctx, app.Lobbies, app.Hub, clock, w.ID, lobbyID)
 	all, err = app.Lobbies.List(ctx, w.ID)
 	if err != nil {
 		t.Fatal(err)

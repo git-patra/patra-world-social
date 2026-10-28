@@ -1,0 +1,230 @@
+{
+  "v": 1,
+  "mapId": "kampung-senja-v2",
+  "clearMs": 3000,
+  "resetMs": 2000,
+  "areas": [
+    {
+      "id": "race",
+      "kind": "race",
+      "bounds": {
+        "x": 37,
+        "y": 37,
+        "width": 16,
+        "height": 11
+      },
+      "entrance": {
+        "x": 45,
+        "y": 49
+      },
+      "safeReturn": {
+        "x": 45,
+        "y": 49
+      },
+      "spectatorStrips": [
+        {
+          "x": 36,
+          "y": 37,
+          "width": 1,
+          "height": 11
+        }
+      ],
+      "sceneTransform": {
+        "scale": 0.015625,
+        "offsetX": 1488,
+        "offsetY": 1152
+      },
+      "sceneBounds": {
+        "x": 1520,
+        "y": 1184,
+        "width": 576,
+        "height": 384
+      }
+    },
+    {
+      "id": "penalty",
+      "kind": "penalty",
+      "bounds": {
+        "x": 24,
+        "y": 40,
+        "width": 8,
+        "height": 11
+      },
+      "entrance": {
+        "x": 28,
+        "y": 52
+      },
+      "safeReturn": {
+        "x": 28,
+        "y": 52
+      },
+      "spectatorStrips": [
+        {
+          "x": 23,
+          "y": 40,
+          "width": 1,
+          "height": 11
+        }
+      ],
+      "sceneTransform": {
+        "scale": 1,
+        "offsetX": 960,
+        "offsetY": 1280
+      }
+    },
+    {
+      "id": "pingpong",
+      "kind": "pingpong",
+      "bounds": {
+        "x": 43,
+        "y": 21,
+        "width": 5,
+        "height": 3
+      },
+      "entrance": {
+        "x": 45,
+        "y": 25
+      },
+      "safeReturn": {
+        "x": 45,
+        "y": 25
+      },
+      "spectatorStrips": [
+        {
+          "x": 42,
+          "y": 21,
+          "width": 1,
+          "height": 3
+        }
+      ],
+      "sceneTransform": {
+        "scale": 1,
+        "offsetX": 1736,
+        "offsetY": 552
+      }
+    },
+    {
+      "id": "blaster",
+      "kind": "blaster",
+      "bounds": {
+        "x": 40,
+        "y": 28,
+        "width": 7,
+        "height": 5
+      },
+      "entrance": {
+        "x": 47,
+        "y": 33
+      },
+      "safeReturn": {
+        "x": 47,
+        "y": 33
+      },
+      "spectatorStrips": [
+        {
+          "x": 39,
+          "y": 30,
+          "width": 1,
+          "height": 3
+        }
+      ],
+      "sceneTransform": {
+        "scale": 40,
+        "offsetX": 20,
+        "offsetY": -300
+      }
+    }
+  ],
+  "vehicleSlots": [
+    {
+      "id": "bicycle-0",
+      "kind": "bicycle",
+      "position": {
+        "x": 39,
+        "y": 46
+      }
+    },
+    {
+      "id": "bicycle-1",
+      "kind": "bicycle",
+      "position": {
+        "x": 41,
+        "y": 46
+      }
+    },
+    {
+      "id": "car-2",
+      "kind": "car",
+      "position": {
+        "x": 43,
+        "y": 46
+      }
+    },
+    {
+      "id": "car-3",
+      "kind": "car",
+      "position": {
+        "x": 45,
+        "y": 46
+      }
+    }
+  ],
+  "fishingSpots": [
+    {
+      "id": "fishing-0",
+      "position": {
+        "x": 53,
+        "y": 30
+      }
+    },
+    {
+      "id": "fishing-1",
+      "position": {
+        "x": 53,
+        "y": 31
+      }
+    },
+    {
+      "id": "fishing-2",
+      "position": {
+        "x": 53,
+        "y": 32
+      }
+    },
+    {
+      "id": "fishing-3",
+      "position": {
+        "x": 53,
+        "y": 33
+      }
+    }
+  ],
+  "caps": {
+    "vehicles": 4,
+    "freeBalls": 1,
+    "fishingSpots": 4,
+    "blasterPlayers": 4,
+    "bots": 8,
+    "projectiles": 48,
+    "clawPlayers": 1,
+    "pingpongPlayers": 2,
+    "walkTilesPerSecond": 4.5,
+    "bicycleTilesPerSecond": 6,
+    "carTilesPerSecond": 8,
+    "inputHz": 20
+  },
+  "clawMachines": [
+    {
+      "id": "claw-1",
+      "position": {
+        "x": 41,
+        "y": 22
+      },
+      "entrance": {
+        "x": 41,
+        "y": 24
+      },
+      "capacity": 1
+    }
+  ]
+}

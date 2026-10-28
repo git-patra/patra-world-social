@@ -37,7 +37,7 @@ func (r *Runtime) activity(ctx context.Context, user string, playing bool, at *P
 			} else {
 				p.Status = "available"
 			}
-			if at != nil && !r.m.Blocked(*at) {
+			if at != nil && !r.blocked(*at) {
 				p.X = float64(at.X)
 				p.Y = float64(at.Y)
 			}

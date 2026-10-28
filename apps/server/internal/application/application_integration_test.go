@@ -109,7 +109,7 @@ func TestLoadSmoke(t *testing.T) {
 	}
 	dial := func(i int, world, extra string) (*websocket.Conn, realtime.Event) {
 		t.Helper()
-		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?worldId="+world+extra, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
+		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+world+extra, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -208,7 +208,7 @@ func TestLoadSmoke(t *testing.T) {
 					dx = -1
 				}
 				for _, c := range sockets[1:] {
-					raw, _ := json.Marshal(realtime.Command{V: 1, CommandID: fmt.Sprint(seq), Seq: uint64(seq), WorldID: w.ID, Type: "player.input", Payload: json.RawMessage(fmt.Sprintf(`{"dx":%d,"dy":0}`, dx))})
+					raw, _ := json.Marshal(realtime.Command{V: 2, CommandID: fmt.Sprint(seq), Seq: uint64(seq), WorldID: w.ID, Type: "player.input", Payload: json.RawMessage(fmt.Sprintf(`{"dx":%d,"dy":0}`, dx))})
 					if err := c.Write(ctx, websocket.MessageText, raw); err != nil {
 						return
 					}
@@ -293,7 +293,7 @@ func TestLoadSmoke(t *testing.T) {
 	if websocket.CloseStatus(e) != websocket.StatusPolicyViolation {
 		t.Fatalf("ban did not close %v", e)
 	}
-	denied, response, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[1]}}})
+	denied, response, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[1]}}})
 	if e == nil {
 		denied.CloseNow()
 		t.Fatal("banned user rejoined")

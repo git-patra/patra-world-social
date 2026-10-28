@@ -1,9 +1,12 @@
+import {mountActivities} from './activities/store';
+import {activityInput} from './activities/input-router';
+import {mountActivityHUD} from './activities/ActivityHUD';
 import {mountAudio} from './audio/events';
 import {mountMinimap} from './world/minimap';
 import {openCenteredDialog,closeDialogThen,mountDialogViewport,setDialogFocusReturn} from './ui/dialogs';
 import {villageLocation} from './world/village';
 import {mountSettings} from './features/settings/SettingsPage';
-import {mountGuestLifecycle,mountGuestUICleanup} from './guest/session';
+import {mountGuestLifecycle,mountGuestUICleanup} from './guest/lifecycle';
 import {activePreferences} from './preferences';
 import {mountVoice,mountVoicePanel} from './features/voice/VoicePanel';
 import {createWorld} from './world.js';
@@ -54,6 +57,13 @@ world=createWorld($('#world'),{
   if(walking)hideWelcome();
  }
 });
+const unmountActivities=mountActivities(world);
+const unmountActivityInput=activityInput.install();
+const unregisterWalk=activityInput.register('walk',input=>{if(input.x||input.y)world.move(input.x,input.y);else world.stopInput()});
+const activityHUD=document.createElement('div');document.body.append(activityHUD);
+const unmountActivityHUD=mountActivityHUD(activityHUD);
+window.addEventListener('patra-activity-details',event=>openProject(event.detail));
+window.addEventListener('patra-activity-play',()=>dialog.close());
 updateMotion();
 function showDialog(){
  world.setPaused(true);
@@ -112,31 +122,26 @@ $('.brand').onclick=e=>{e.preventDefault();zoom=1;world.recenter();};
 $('#motion-button').onclick=()=>{motion=!motion;updateMotion();};
 const media=matchMedia('(prefers-reduced-motion: reduce)');
 media.addEventListener('change',e=>{motion=!e.matches;updateMotion();});
-const directions={w:[0,-1],a:[-1,0],s:[0,1],d:[1,0],ArrowUp:[0,-1],ArrowLeft:[-1,0],ArrowDown:[0,1],ArrowRight:[1,0]};
 document.addEventListener('keydown',event=>{
  if(document.body.dataset.controls==='touch'||!worldVisible||document.querySelector('dialog[open]')||event.ctrlKey||event.metaKey||event.altKey||!acceptsMovement(event.target))return;
- const key=event.key.length===1?event.key.toLowerCase():event.key;
- if(directions[key]){event.preventDefault();heldKeys.add(key);applyDirection();hideWelcome();}
- else if(key==='e'){event.preventDefault();world.interact();}
+ const key=event.key.toLowerCase();
+ if(key==='e'&&activityInput.mode()==='walk'){event.preventDefault();world.interact();}
  else if(key==='m'){event.preventDefault();$('#list-button').click();}
 });
-const heldKeys=new Set();
-function applyDirection(){let dx=0,dy=0;for(const key of heldKeys){dx+=directions[key][0];dy+=directions[key][1]}if(dx||dy)world.move(Math.sign(dx),Math.sign(dy));else world.stopInput();}
-const keyboardTimer=setInterval(()=>{if(world.isOnline()&&heldKeys.size&&worldVisible&&!document.hidden&&acceptsMovement(document.activeElement)&&!document.querySelector('dialog[open]')){applyDirection();}},100);
-window.addEventListener('keyup',event=>{const key=event.key.length===1?event.key.toLowerCase():event.key;if(!directions[key])return;heldKeys.delete(key);applyDirection()});
-const pointerHold=new PointerHold((dx,dy)=>world.move(dx,dy),()=>world.stopInput());
-function stopHold(){pointerHold.release();}
-function releaseInputs(){stopHold();heldKeys.clear();world.stopInput();}
+const pointerHold=new PointerHold((dx,dy)=>activityInput.direction(dx,dy),()=>activityInput.direction(0,0));
+let movementPointer=null;
+function stopHold(event){if(event&&event.pointerId!==movementPointer)return;movementPointer=null;pointerHold.release();}
+function releaseInputs(){stopHold();activityInput.release();world.stopInput();}
 document.querySelectorAll('[data-move]').forEach(button=>{
  const direction=button.dataset.move.split(',').map(Number);
- button.addEventListener('pointerdown',event=>{event.preventDefault();pointerHold.start(...direction);hideWelcome();});
- button.addEventListener('click',event=>{if(event.detail===0){pointerHold.pulse(...direction);hideWelcome();}});
+ button.addEventListener('pointerdown',event=>{event.preventDefault();movementPointer=event.pointerId;pointerHold.start(...direction);event.currentTarget.setPointerCapture?.(event.pointerId);hideWelcome();});
+ button.addEventListener('click',event=>{if(event.detail===0){movementPointer=null;pointerHold.pulse(...direction);hideWelcome();}});
 });
-window.addEventListener('pointerup',stopHold);window.addEventListener('pointercancel',stopHold);window.addEventListener('blur',releaseInputs);
-window.addEventListener('pagehide',event=>{releaseInputs();if(!event.persisted){clearInterval(keyboardTimer);unmountMinimap();unmountDialogViewport();unmountAudio();disposeDemo();world.destroy();}});
+window.addEventListener('pointerup',stopHold);window.addEventListener('pointercancel',stopHold);window.addEventListener('lostpointercapture',stopHold);window.addEventListener('blur',releaseInputs);
+window.addEventListener('pagehide',event=>{releaseInputs();if(!event.persisted){unmountActivityHUD();unmountActivityInput();unregisterWalk();unmountActivities();activityHUD.remove();unmountMinimap();unmountDialogViewport();unmountAudio();disposeDemo();world.destroy();}});
 
 let worldVisible=true;
-function syncWorldPause(){world.setPaused(Boolean(document.querySelector('dialog[open]'))||!worldVisible||document.hidden);}
+function syncWorldPause(){activityInput.block('viewport',!worldVisible);world.setPaused(Boolean(document.querySelector('dialog[open]'))||!worldVisible||document.hidden);}
 const visibilityObserver=new IntersectionObserver(([entry])=>{worldVisible=entry.isIntersecting;syncWorldPause();},{threshold:0.1});
 visibilityObserver.observe($('#world'));
 document.addEventListener('focusin',event=>{if(!acceptsMovement(event.target))releaseInputs()});

@@ -9,12 +9,12 @@ Ledger aktif eksekusi. Tabel di bawah adalah status terkini; catatan kronologis 
 | `source_repo` | `/Users/patra/Project/patra-world` |
 | `source_commit` | `8d969212d91804e06225f5b1a75eed49e8c25307` |
 | `target_repo` | `/Users/patra/Project/patra-world-social` — public remote git-patra/patra-world-social |
-| `working_branch` | `main` tracking `origin/main`; inherited `feat/social-world` remains local |
+| `working_branch` | `feat/world-activities`; `main` tracks `origin/main`; inherited `feat/social-world` remains local |
 | `highest_contiguous_passed_checkpoint` | CP1 PASS — 1/8 |
 | `last_verified_task_commit` | d4f60a27bd41048c7ed16a103fbcf4875046ece5 — 2/16 task done |
-| `latest_code_commit` | See current Git tip for Kampung Senja integration; prior T14 snapshot6737162 retains its pending review |
-| `current_task` | Kampung Senja fullscreen integration verified/reviewed; T14 independent re-review remains pending |
-| `next_task` | T14 scoped review and remaining T15/T16 acceptance |
+| `latest_code_commit` | bb1869a activities foundation; see Git tip for subsequent stages |
+| `current_task` | Activities Tasks0–2 committed/reviewed; Tasks3/4 authority/scenes approved; next Task5 free ride |
+| `next_task` | Complete activities Tasks5–11 in order; external T15/T16 acceptance remains pending |
 | `blockers` | Uji browser akun ditunda pengguna (T3/CP2); LiveKit staging belum tersedia (CP7). Pekerjaan backend dan fitur lain tetap berjalan. |
 | `source_changes` | `.idea/` sudah untracked sebelum perencanaan; jangan dihapus atau dibawa ke repo baru |
 | `planning_files` | Snapshot awal di `/Users/patra/Project/docs/superpowers/`; salinan aktif dan ledger tersimpan dalam Git repo baru di `docs/` |
@@ -38,7 +38,7 @@ Ledger aktif eksekusi. Tabel di bawah adalah status terkini; catatan kronologis 
 | T11 | CP6 | C11 partial | implemented_pending_external_verification | 607141a58593f3abf473edb369148dcd59fed289 | docs/checkpoints/evidence/CP6/t11-verification.md; t11-rereview1.md |
 | T12 | CP6 | C12 partial | implemented_pending_external_verification | bb1b4e88c7079ad99442e91b98089a0fe286f006 | docs/checkpoints/evidence/CP6/t12-verification.md; t12-rereview1.md |
 | T13 | CP7 | C13 partial | implemented_pending_external_verification | b6e74fbf12ff0a2913e09888b81c1e3d767566b6 | docs/checkpoints/evidence/CP7/t13-verification.md; t13-rereview1.md |
-| T14 | CP7 | C14 WIP | implemented_pending_review_and_external_verification | 67371621b1d650fcd16533a179993905bd7da79c | docs/checkpoints/evidence/CP7/t14-verification.md; t14-rereview1.md |
+| T14 | CP7 | C14 WIP | scoped_repair_reviewed_external_verification_pending | 67371621b1d650fcd16533a179993905bd7da79c | docs/checkpoints/evidence/CP7/t14-verification.md; t14-rereview1.md |
 | T15 | CP8 | C15 partial | fullscreen_village_reviewed; remaining_acceptance_pending | See Git tip | docs/checkpoints/evidence/CP8/kampung-senja-integration.md |
 | T16 | CP8 | C16 | not_started | — | — |
 

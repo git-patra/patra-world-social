@@ -72,7 +72,7 @@ func TestSocialHTTPAndDurableChatTransport(t *testing.T) {
 	defer srv.Close()
 	dial := func(i int, world, extra string) (*websocket.Conn, realtime.PublicSnapshot) {
 		t.Helper()
-		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?worldId="+world+extra, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
+		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+world+extra, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -114,7 +114,7 @@ func TestSocialHTTPAndDurableChatTransport(t *testing.T) {
 		}
 	}
 	send := func(command string) {
-		payload := map[string]any{"v": 1, "commandId": command, "seq": 1, "worldId": w.ID, "type": "chat.send", "payload": map[string]string{"channelId": "world", "clientMessageId": "persistent-retry", "text": "<script>world only</script>"}}
+		payload := map[string]any{"v": 2, "commandId": command, "seq": 1, "worldId": w.ID, "type": "chat.send", "payload": map[string]string{"channelId": "world", "clientMessageId": "persistent-retry", "text": "<script>world only</script>"}}
 		raw, _ := json.Marshal(payload)
 		if e = owner.Write(ctx, websocket.MessageText, raw); e != nil {
 			t.Fatal(e)

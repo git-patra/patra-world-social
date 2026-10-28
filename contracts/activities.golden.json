@@ -1,0 +1,135 @@
+{
+  "valid": [
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "area",
+      "payload": {
+        "phase": "CLEARING",
+        "matchId": "match",
+        "startsAt": 0,
+        "clearAt": 4000,
+        "resetAt": 0
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "area",
+      "payload": {
+        "phase": "ACTIVE",
+        "matchId": "match",
+        "startsAt": 5000,
+        "clearAt": 4000,
+        "resetAt": 0
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 0,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "area",
+      "payload": {
+        "phase": "CLEARING",
+        "matchId": "match",
+        "startsAt": 0,
+        "clearAt": 4000,
+        "resetAt": 0
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "unknown",
+      "payload": {
+        "phase": "CLEARING",
+        "matchId": "match",
+        "startsAt": 0,
+        "clearAt": 4000,
+        "resetAt": 0
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "unknown",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "area",
+      "payload": {
+        "phase": "CLEARING",
+        "matchId": "match",
+        "startsAt": 0,
+        "clearAt": 4000,
+        "resetAt": 0
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "area",
+      "payload": {
+        "phase": "CLEARING",
+        "matchId": "match",
+        "startsAt": 0,
+        "clearAt": 4000,
+        "resetAt": 0,
+        "hidden": "secret"
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "area",
+      "payload": {
+        "phase": "OPEN",
+        "matchId": "match",
+        "startsAt": 0,
+        "clearAt": 4000,
+        "resetAt": 0
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "area",
+      "payload": {
+        "phase": "CLEARING",
+        "matchId": "match",
+        "startsAt": 0,
+        "clearAt": 4000,
+        "resetAt": 0
+      }
+    }
+  ]
+}

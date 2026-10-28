@@ -50,7 +50,7 @@ func TestPenaltyActualTransportHistoryAndMutualRematch(t *testing.T) {
 	defer server.Close()
 	dial := func(i int) (*websocket.Conn, realtime.JoinContext) {
 		t.Helper()
-		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(server.URL, "http")+"/api/v1/realtime?worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
+		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(server.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+w.ID, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
 		if e != nil {
 			t.Fatal(e)
 		}
@@ -72,7 +72,7 @@ func TestPenaltyActualTransportHistoryAndMutualRematch(t *testing.T) {
 	command := func(kind string, payload any) realtime.Command {
 		counter++
 		raw, _ := json.Marshal(payload)
-		return realtime.Command{V: 1, CommandID: fmt.Sprint("penalty-", counter), Seq: uint64(counter), WorldID: w.ID, Type: kind, Payload: raw}
+		return realtime.Command{V: 2, CommandID: fmt.Sprint("penalty-", counter), Seq: uint64(counter), WorldID: w.ID, Type: kind, Payload: raw}
 	}
 	send := func(c *websocket.Conn, cmd realtime.Command) (string, json.RawMessage) {
 		t.Helper()
@@ -127,6 +127,7 @@ func TestPenaltyActualTransportHistoryAndMutualRematch(t *testing.T) {
 	if startErr != nil {
 		t.Fatal(startErr)
 	}
+	awaitClearedStart(t, ctx, app.Lobbies, app.Hub, clock, w.ID, l.ID)
 	all, _ := app.Lobbies.List(ctx, w.ID)
 	for _, v := range all {
 		if v.ID == l.ID {
@@ -390,7 +391,7 @@ func TestPenaltyOnlineBotNaturalResultReturnAndAbandonedCleanup(t *testing.T) {
 			t.Fatal(err)
 		}
 		raw, _ := json.Marshal(payload)
-		return app.Hub.Execute(ctx, j, realtime.Command{V: 1, CommandID: fmt.Sprint("bot-", i), Seq: uint64(i), WorldID: w.ID, Type: kind, Payload: raw})
+		return app.Hub.Execute(ctx, j, realtime.Command{V: 2, CommandID: fmt.Sprint("bot-", i), Seq: uint64(i), WorldID: w.ID, Type: kind, Payload: raw})
 	}
 	l, err := app.Lobbies.JoinLobby(ctx, lobby.JoinContext{UserID: users[0], WorldID: w.ID, DisplayName: "Synthetic"}, "penalty")
 	if err != nil {
@@ -403,7 +404,7 @@ func TestPenaltyOnlineBotNaturalResultReturnAndAbandonedCleanup(t *testing.T) {
 	app.Lobbies.ChooseBot(ctx, users[0], l.ID, true)
 	var mID string
 	for n := 0; n < 40; n++ {
-		m, e := app.Lobbies.StartMatch(ctx, users[0], l.ID, "explicit-bot")
+		m, e := startClearedMatch(t, ctx, app.Lobbies, app.Hub, clock, users[0], l.ID, "explicit-bot")
 		if e == nil {
 			mID = m.MatchID
 			break
@@ -480,7 +481,7 @@ func TestPenaltyOnlineBotNaturalResultReturnAndAbandonedCleanup(t *testing.T) {
 	}
 	app.Lobbies.ChooseBot(ctx, users[0], l.ID, true)
 	app.Lobbies.SetReady(ctx, users[0], l.ID, true)
-	m, err := app.Lobbies.StartMatch(ctx, users[0], l.ID, "departing")
+	m, err := startClearedMatch(t, ctx, app.Lobbies, app.Hub, clock, users[0], l.ID, "departing")
 	if err != nil {
 		t.Fatal(err)
 	}

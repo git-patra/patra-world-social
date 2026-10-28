@@ -1,15 +1,12 @@
-import React,{useEffect,useRef,useState} from 'react';
+import React,{useSyncExternalStore} from 'react';
+import {activities} from '../../activities/store';
 import type {WorldSocket} from '../../net/socket';
 import {track,type Controls,type RaceSnapshot} from './local';
-import {guestRace} from './session';
 import './race.css';
 const colors=['#e7a74a','#8caf82','#bc8dcb','#73afc2','#dd7971'];
 const secs=(ms?:number)=>ms===undefined?'—':`${(ms/1000).toFixed(2)}s`;
 function TrackView({snapshot,selfId}:{snapshot:RaceSnapshot;selfId:string}){
- const svg=useRef<SVGSVGElement>(null),latest=useRef(snapshot),previous=useRef(snapshot),received=useRef(performance.now());
- useEffect(()=>{previous.current=latest.current;latest.current=snapshot;received.current=performance.now()},[snapshot]);
- useEffect(()=>{let id=0;function render(at:number){const t=document.body.classList.contains('reduced-motion')?1:Math.min(1,(at-received.current)/67),s=latest.current;for(const k of s.karts){const old=previous.current.karts.find(p=>p.actorId===k.actorId)??k,node=svg.current?.querySelector(`[data-slot="${k.startSlot}"]`);if(node){const delta=(k.heading-old.heading+540)%360-180;node.setAttribute('transform',`translate(${old.x+(k.x-old.x)*t} ${old.y+(k.y-old.y)*t}) rotate(${old.heading+delta*t})`)}}id=requestAnimationFrame(render)}id=requestAnimationFrame(render);return()=>cancelAnimationFrame(id)},[]);
- return <svg ref={svg} className="race-track" viewBox="0 0 40960 28672" role="img" aria-label="Lintasan Autumn Ring dan minimap posisi lima kart">
+ return <svg className="race-track" viewBox="0 0 40960 28672" role="img" aria-label="Lintasan Autumn Ring dan minimap posisi lima kart">
  <defs><pattern id="race-grass" width="1500" height="1500" patternUnits="userSpaceOnUse"><rect width="1500" height="1500" fill="#56634c"/><path d="M200 400l150 -170m700 800l100 -130" stroke="#6b7453" strokeWidth="55"/></pattern><pattern id="race-checker" width="900" height="900" patternUnits="userSpaceOnUse"><rect width="900" height="900" fill="#f0e3c7"/><path d="M0 0h450v450H0zM450 450h450v450H450z" fill="#3a3739"/></pattern></defs>
  <rect width="40960" height="28672" rx="1500" fill="url(#race-grass)"/>
  <rect x={track.outer.x} y={track.outer.y} width={track.outer.width} height={track.outer.height} rx="1300" fill="#423f40" stroke="#e6b97b" strokeWidth="200"/>
@@ -35,45 +32,6 @@ export function RaceView({snapshot,selfId,online,now,saved,disabled,controls,mes
  </section>
 }
 export function RaceGame({socket,lobby}:{socket?:WorldSocket|null;lobby?:{matchId?:string;state:string}}){
- const [snapshot,setSnapshot]=useState<RaceSnapshot|null>(null),[now,setNow]=useState(0),[message,setMessage]=useState(''),[controls,setControls]=useState<Controls>({throttle:0,brake:0,steer:0});const held=useRef<Controls>({throttle:0,brake:0,steer:0}),current=useRef<RaceSnapshot|null>(null),match=lobby?.matchId;
- const neutral=()=>{held.current={throttle:0,brake:0,steer:0};setControls({...held.current})};
- useEffect(()=>{setSnapshot(null);setMessage('');current.current=null;held.current={throttle:0,brake:0,steer:0};if(!socket){const s=guestRace.snapshot(performance.now());setSnapshot(s);current.current=s;return}if(!match)return;let live=true;const load=()=>{if(socket.status==='online')void socket.gameCommand('race.snapshot',{matchId:match}).then(s=>{if(live){setSnapshot(s as RaceSnapshot);current.current=s as RaceSnapshot}}).catch(e=>{if(live)setMessage(e.message)})};const event=(e:Event)=>{const d=(e as CustomEvent).detail;if(d?.socket!==socket)return;if(d.type==='world.snapshot')load();if((d.type==='race.snapshot'||d.type==='race.finished')&&d.payload.matchId===match){setSnapshot(d.payload);current.current=d.payload}};window.addEventListener('patra-world-event',event);load();return()=>{live=false;window.removeEventListener('patra-world-event',event)}},[socket,match]);
- useEffect(() => {
-  let alive = true;
-  let inFlight = false;
-  const update = () => {
-   const at = socket ? socket.serverNow() : performance.now();
-   setNow(at);
-   const snapshot = current.current;
-   const input = document.hidden ? {throttle: 0, brake: 0, steer: 0} : held.current;
-   if (!socket) {
-    guestRace.input(input, at);
-    const next = guestRace.snapshot(at);
-    setSnapshot(next);
-    current.current = next;
-   } else if (
-    snapshot?.phase === 'racing' &&
-    snapshot.karts.some(k => k.userId === socket.selfId && !k.finished && !k.dnf) &&
-    socket.status === 'online' && !inFlight
-   ) {
-    inFlight = true;
-    void socket.gameCommand('race.input', {matchId: snapshot.matchId, ...input})
-     .catch(() => {
-      if (alive) setMessage('Kontrol belum diterima. Menunggu sinkronisasi server.');
-     })
-     .finally(() => { inFlight = false; });
-   }
-  };
-  const timer = setInterval(update, 50);
-  return () => {
-   alive = false;
-   clearInterval(timer);
-   held.current = {throttle: 0, brake: 0, steer: 0};
-  };
- }, [socket]);
- useEffect(()=>{const pressed=new Set<string>(),keys=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'];function key(e:KeyboardEvent){if(document.body.dataset.controls==='touch')return;if(!current.current||current.current.phase==='finished'||!keys.includes(e.key)||e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;e.preventDefault();e.stopImmediatePropagation();if(e.type==='keydown')pressed.add(e.key);else pressed.delete(e.key);held.current={throttle:Number(pressed.has('w')||pressed.has('ArrowUp')),brake:Number(pressed.has('s')||pressed.has('ArrowDown')),steer:Number(pressed.has('d')||pressed.has('ArrowRight'))-Number(pressed.has('a')||pressed.has('ArrowLeft'))};setControls({...held.current})}const release=()=>{pressed.clear();neutral()};window.addEventListener('keydown',key,true);window.addEventListener('keyup',key,true);window.addEventListener('blur',release);document.addEventListener('visibilitychange',release);return()=>{window.removeEventListener('keydown',key,true);window.removeEventListener('keyup',key,true);window.removeEventListener('blur',release);document.removeEventListener('visibilitychange',release);held.current={throttle:0,brake:0,steer:0}}},[]);
- function start(){neutral();const s=guestRace.start(performance.now());current.current=s;setSnapshot(s);setMessage('')}
- async function back(){neutral();if(!socket){guestRace.clear();current.current=null;setSnapshot(null);return}if(snapshot)try{const r=await socket.gameCommand('match.return',{matchId:snapshot.matchId}) as {waiting?:boolean};setMessage(r.waiting?'Menunggu manusia lain kembali, atau batas hasil 10 detik.':'Kembali ke pintu Race Park.')}catch(e){setMessage((e as Error).message)}}
- if(!snapshot)return <section className="race-game" aria-label="Balap lima lap"><h3>Autumn Ring · 5 lap</h3>{socket?<p>{match?'Menyinkronkan balapan…':'Gabung Race Park, Ready, lalu Mulai. Slot kosong diisi BOT.'}</p>:<><p>Balapan lokal melawan empat BOT. Kontrol keyboard dan touch tersedia. Hasil lokal tidak masuk leaderboard resmi.</p><button type="button" onClick={start}>Mulai race solo · 5 lap</button></>}</section>;
- return <RaceView snapshot={snapshot} selfId={socket?.selfId??'guest'} online={Boolean(socket)} now={now} saved={lobby?.state==='results'} disabled={Boolean(socket&&socket.status!=='online')} controls={controls} message={message} onControl={(key,value)=>{held.current={...held.current,[key]:value};setControls({...held.current})}} onReturn={()=>void back()}/>;
+ const state=useSyncExternalStore(activities.subscribe,activities.snapshot,activities.snapshot),game=state.games.find(g=>g.kind==='race'&&(!lobby?.matchId||g.matchId===lobby.matchId)),snapshot=game?.snapshot as RaceSnapshot|undefined;
+ return <section className="race-game" aria-label="Balap lima lap"><h3>Autumn Ring · 5 lap</h3>{snapshot?<><p role="status">{snapshot.phase==='finished'?'Race selesai. Detail hasil tetap tersedia di History.':'Race berlangsung di lintasan dunia. Tutup menu untuk memakai kontrol HUD.'}</p><ol className="race-standings">{[...snapshot.karts].sort((a,b)=>a.position-b.position).map(k=><li key={k.actorId}>{k.position}. {k.displayName} · {k.finished?secs(k.elapsedMs):k.dnf?'DNF':`${k.laps}/5 lap`}</li>)}</ol>{state.active?.matchId===snapshot.matchId&&snapshot.phase==='finished'&&<button type="button" disabled={Boolean(socket&&lobby?.state!=='results')} onClick={()=>void activities.action('return')}>Kembali ke Race Park</button>}{!socket&&<button type="button" onClick={()=>{void activities.action('leave');window.dispatchEvent(new Event('patra-activity-play'))}}>Akhiri practice / kembali berjalan</button>}<button type="button" onClick={()=>window.dispatchEvent(new Event('patra-activity-play'))}>Lihat lintasan / kontrol</button></>:socket?<p>{lobby?.matchId?'Menyinkronkan balapan…':'Gabung Race Park, Ready, lalu Mulai. Slot kosong diisi BOT.'}</p>:<><p>Balapan lokal melawan empat BOT. Kontrol keyboard dan touch tersedia di dunia. Hasil practice tersimpan di perangkat.</p><button type="button" onClick={()=>void activities.startLocal('race').then(()=>window.dispatchEvent(new Event('patra-activity-play')))}>Mulai race solo · 5 lap</button></>}</section>;
 }

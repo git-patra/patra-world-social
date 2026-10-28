@@ -37,7 +37,7 @@ func (r *Runtime) Destination(ctx context.Context, id string, epoch, seq uint64,
 		}
 		start := Point{int(math.Round(p.X)), int(math.Round(p.Y))}
 		goal := Point{int(x), int(y)}
-		path := r.m.path(start, goal)
+		path := findPath(start, goal, r.blocked)
 		if path == nil {
 			invalid = true
 			return
@@ -52,7 +52,11 @@ func (r *Runtime) Destination(ctx context.Context, id string, epoch, seq uint64,
 	}
 	return err
 }
-func (m MapDefinition) path(start, goal Point) []Point {
+func (m MapDefinition) path(start, goal Point) []Point { return findPath(start, goal, m.Blocked) }
+func findPath(start, goal Point, blocked func(Point) bool) []Point {
+	if blocked(goal) {
+		return nil
+	}
 	q := []Point{start}
 	prev := map[Point]Point{start: start}
 	for cursor := 0; cursor < len(q); cursor++ {
@@ -70,7 +74,7 @@ func (m MapDefinition) path(start, goal Point) []Point {
 		}
 		for _, d := range []Point{{1, 0}, {0, 1}, {-1, 0}, {0, -1}} {
 			n := Point{p.X + d.X, p.Y + d.Y}
-			if _, seen := prev[n]; !seen && !m.Blocked(n) {
+			if _, seen := prev[n]; !seen && !blocked(n) {
 				prev[n] = p
 				q = append(q, n)
 			}
@@ -83,6 +87,12 @@ func (r *Runtime) move(p *player, at time.Time) {
 	step := .225
 	if len(p.path) > 0 {
 		target := p.path[0]
+		if r.blocked(target) {
+			p.path = nil
+			p.dx = 0
+			p.dy = 0
+			return
+		}
 		dx = float64(target.X) - p.X
 		dy = float64(target.Y) - p.Y
 		dist := math.Hypot(dx, dy)
@@ -107,7 +117,7 @@ func (r *Runtime) move(p *player, at time.Time) {
 	nx, ny := p.X+dx*step, p.Y+dy*step
 	// Rounded tile cells match the client map. Axis checks prevent diagonal corner cutting.
 	blocked := func(x, y float64) bool {
-		return !valid(x, 0, 63) || !valid(y, 0, 63) || r.m.Blocked(Point{int(math.Round(x)), int(math.Round(y))})
+		return !valid(x, 0, 63) || !valid(y, 0, 63) || r.blocked(Point{int(math.Round(x)), int(math.Round(y))})
 	}
 	if !blocked(nx, ny) && !blocked(nx, p.Y) && !blocked(p.X, ny) {
 		p.X = nx

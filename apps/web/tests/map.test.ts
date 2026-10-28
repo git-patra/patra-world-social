@@ -18,15 +18,15 @@ test('motion preference does not change movement duration or position',()=>{
  for(let tick=0;tick<40;tick++){a=advanceMovement(a,target,.05);b=advanceMovement(b,target,.05);assert.deepEqual(a,b)} assert.deepEqual(a,target);
 });
 test('protocol validates envelope and penalty zones',()=>{
- const c={v:1,commandId:'c1',seq:1,worldId:'local',type:'penalty.choose',payload:{zone:3,matchId:'m',turnId:'m:1'}};
+ const c={v:2,commandId:'c1',seq:1,worldId:'local',type:'penalty.choose',payload:{zone:3,matchId:'m',turnId:'m:1'}};
  assert.equal(validateCommand(c).type,'penalty.choose');
- for(const edit of [{v:2},{seq:NaN},{worldId:undefined},{payload:{zone:4}},{type:'unknown'}])assert.throws(()=>validateCommand({...c,...edit}));
+ for(const edit of [{v:1},{seq:NaN},{worldId:undefined},{payload:{zone:4}},{type:'unknown'}])assert.throws(()=>validateCommand({...c,...edit}));
 });
 
 import {createWorld} from '../src/world.js';
 test('approved open village replaces the old building island with reachable social spaces',()=>{
  const map=loadMap(data),blocked=collisionTiles(map);
- assert.equal(map.id,'kampung-senja-v1');
+ assert.equal(map.id,'kampung-senja-v2');
  for(const [name,x,y] of [['plaza',32,32],['warkop',16,24],['duck',45,24],['race',45,45],['penalty',28,46],['garden',14,44],['river',52,32]] as const){
   assert.ok(!blocked.has(`${x},${y}`),`${name} destination is open`);
   assert.ok(name==='plaza'||findPath(map.spawn,{x,y},blocked).length>0,`${name} reachable`);
@@ -86,7 +86,7 @@ import {clampZoom} from '../src/world/camera';
 import {SnapshotBuffer,validateSnapshot} from '../src/net/reconcile';
 import ruleAsset from '../../../contracts/rules.v1.json';
 test('nonfinite zoom cannot corrupt camera',()=>{assert.equal(clampZoom(NaN),.85);assert.equal(clampZoom(Infinity),.85)});
-const snapshot=(timeMs:number,x:number)=>({worldId:'a',selfId:'u',sessionId:'opaque',epoch:1,mapId:data.id,mapChecksum:data.checksum,rulesId:ruleAsset.id,rulesChecksum:ruleAsset.checksum,protocolVersion:1,tick:timeMs/50,timeMs,avatars:[{id:'u',name:'User',status:'available' as const,x,y:32,seq:1}]});
+const snapshot=(timeMs:number,x:number)=>({worldId:'a',selfId:'u',sessionId:'opaque',epoch:1,mapId:data.id,mapChecksum:data.checksum,rulesId:ruleAsset.id,rulesChecksum:ruleAsset.checksum,protocolVersion:2,tick:timeMs/50,timeMs,avatars:[{id:'u',name:'User',status:'available' as const,x,y:32,seq:1}]});
 test('online interpolation is bounded and full resync resets old epochs',()=>{
  const b=new SnapshotBuffer();b.push(validateSnapshot(snapshot(1000,32),'a'));b.push(validateSnapshot(snapshot(1100,32.45),'a'));
  assert.equal(b.at(1050).avatars[0].x,32.225);assert.equal(b.at(9999).avatars[0].x,32.45);
@@ -98,7 +98,7 @@ test('socket only sends when online and reconnect uses rotated seat without auto
  const all:any[]=[];
  class FakeSocket {readyState=0;bufferedAmount=0;sent:string[]=[];onmessage:any;onclose:any;onopen:any;constructor(public url:string){all.push(this)}send(s:string){this.sent.push(s)}close(){this.readyState=3}}
  const old=globalThis.WebSocket;globalThis.WebSocket=FakeSocket as any;
- try{const states:string[]=[];const socket=new WorldSocket('a',()=>{},s=>states.push(s),'http://village.test');socket.connect();socket.input(1,0);assert.equal(all[0].sent.length,0);all[0].readyState=1;all[0].onmessage({data:JSON.stringify({v:1,eventId:'e',serverTick:20,serverTimeMs:1000,type:'world.snapshot',payload:snapshot(1000,32)})});socket.input(1,0);assert.equal(all[0].sent.length,1);assert.equal(JSON.parse(all[0].sent[0]).worldId,'a');socket.connect();assert.match(all[1].url,/sessionId=opaque/);assert.doesNotMatch(all[1].url,/takeover=true/);socket.close();assert.equal(states.at(-1),'leave_unconfirmed')}finally{globalThis.WebSocket=old}
+ try{const states:string[]=[];const socket=new WorldSocket('a',()=>{},s=>states.push(s),'http://village.test');socket.connect();socket.input(1,0);assert.equal(all[0].sent.length,0);all[0].readyState=1;all[0].onmessage({data:JSON.stringify({v:2,eventId:'e',serverTick:20,serverTimeMs:1000,type:'world.snapshot',payload:snapshot(1000,32)})});socket.input(1,0);assert.equal(all[0].sent.length,1);assert.equal(JSON.parse(all[0].sent[0]).worldId,'a');socket.connect();assert.match(all[1].url,/sessionId=opaque/);assert.doesNotMatch(all[1].url,/takeover=true/);socket.close();assert.equal(states.at(-1),'leave_unconfirmed')}finally{globalThis.WebSocket=old}
 });
 import snapshots from '../../../contracts/snapshots.golden.json';
 test('shared snapshot fixtures reject forged versions, unknown fields, missing self and duplicate avatars',()=>{for(const s of snapshots.valid)assert.doesNotThrow(()=>validateSnapshot(s,'a'));for(const s of snapshots.invalid)assert.throws(()=>validateSnapshot(s,'a'))});
@@ -111,10 +111,10 @@ test('canvas pointer release preserves destination; only a directional hold send
 test('explicit socket leave waits for matching acknowledgement before replacement join',async()=>{
  const all:any[]=[];class FakeSocket{readyState=1;bufferedAmount=0;sent:string[]=[];onmessage:any;onclose:any;closes=0;constructor(public url:string){all.push(this)}send(s:string){this.sent.push(s)}close(){this.closes++;this.readyState=3}}
  const old=globalThis.WebSocket;globalThis.WebSocket=FakeSocket as any;
- try{const first=new WorldSocket('a',()=>{},()=>{},'http://village.test');first.connect();all[0].onmessage({data:JSON.stringify({v:1,eventId:'snapshot',serverTick:20,serverTimeMs:1000,type:'world.snapshot',payload:snapshot(1000,32)})});
+ try{const first=new WorldSocket('a',()=>{},()=>{},'http://village.test');first.connect();all[0].onmessage({data:JSON.stringify({v:2,eventId:'snapshot',serverTick:20,serverTimeMs:1000,type:'world.snapshot',payload:snapshot(1000,32)})});
  let finished=false;const leaving=first.close();Promise.resolve(leaving).then(()=>finished=true);await Promise.resolve();assert.equal(finished,false,'leave must remain pending until server ack');assert.equal(all[0].closes,0);
  const cmd=JSON.parse(all[0].sent.at(-1));assert.equal(cmd.type,'world.leave');
- all[0].onmessage({data:JSON.stringify({v:1,eventId:'ack',serverTick:20,serverTimeMs:1000,type:'command.ack',payload:{commandId:cmd.commandId,seq:cmd.seq}})});
+ all[0].onmessage({data:JSON.stringify({v:2,eventId:'ack',serverTick:20,serverTimeMs:1000,type:'command.ack',payload:{commandId:cmd.commandId,seq:cmd.seq}})});
  assert.equal(await leaving,true);assert.equal(all[0].closes,1);const next=new WorldSocket('b',()=>{},()=>{},'http://village.test');next.connect();assert.match(all[1].url,/worldId=b/);await next.close();
  }finally{globalThis.WebSocket=old}
 });
@@ -125,8 +125,8 @@ test('world picker serializes the real controller switch behind leave acknowledg
  const buttons=Array.from({length:3},()=>({hidden:true,onclick:null}));const label={textContent:''};const panel={setAttribute(){},querySelector:()=>label,querySelectorAll:()=>buttons,innerHTML:'',className:''};
  const events=new EventTarget();Object.assign(globalThis,{window:events,document:{createElement:()=>panel,querySelector:(s:string)=>s==='#world'?{parentElement:{append(){}}}:label},location:{origin:'http://village.test'},WebSocket:FakeSocket,requestAnimationFrame:()=>1,cancelAnimationFrame(){}});
  const settle=async()=>{for(let i=0;i<6;i++)await Promise.resolve()};
- try{mountOnline({setConnectionStatus(){},setOnline(){},setOnlineSnapshot(){}} as any);events.dispatchEvent(new CustomEvent('patra-auth-change',{detail:{id:'u'}}));events.dispatchEvent(new CustomEvent('patra-world-join',{detail:{id:'a',name:'A'}}));await settle();assert.equal(connections.length,1);
- const event=(type:string,payload:any)=>({data:JSON.stringify({v:1,eventId:'e',serverTick:20,serverTimeMs:1000,type,payload})});connections[0].onmessage(event('world.snapshot',snapshot(1000,32)));
+ try{mountOnline({setConnectionStatus(){},setOnline(){},setOnlineSnapshot(){},setOnlineSampler(){}} as any);events.dispatchEvent(new CustomEvent('patra-auth-change',{detail:{id:'u'}}));events.dispatchEvent(new CustomEvent('patra-world-join',{detail:{id:'a',name:'A'}}));await settle();assert.equal(connections.length,1);
+ const event=(type:string,payload:any)=>({data:JSON.stringify({v:2,eventId:'e',serverTick:20,serverTimeMs:1000,type,payload})});connections[0].onmessage(event('world.snapshot',snapshot(1000,32)));
  events.dispatchEvent(new CustomEvent('patra-world-join',{detail:{id:'b',name:'B'}}));await settle();assert.equal(connections.length,1,'controller must not connect replacement before release');const leave=JSON.parse(connections[0].sent.at(-1));
  connections[0].onmessage(event('command.ack',{commandId:leave.commandId,seq:leave.seq}));await settle();assert.equal(connections.length,2);assert.match(connections[1].url,/worldId=b/);events.dispatchEvent(new Event('pagehide'));await settle();
  }finally{Object.assign(globalThis,previous)}
@@ -137,9 +137,9 @@ for(const reason of ['leave','logout'] as const)test(`disconnected ${reason} res
  const buttons=Array.from({length:3},()=>({hidden:true,onclick:null}));const label={textContent:''};const panel={setAttribute(){},querySelector:()=>label,querySelectorAll:()=>buttons,innerHTML:'',className:''};
  const events=new EventTarget();Object.assign(globalThis,{window:events,document:{createElement:()=>panel,querySelector:(s:string)=>s==='#world'?{parentElement:{append(){}}}:label},location:{origin:'http://village.test'},WebSocket:FakeSocket,requestAnimationFrame:()=>1,cancelAnimationFrame(){}});
  const settle=async()=>{for(let i=0;i<8;i++)await Promise.resolve()};let adapter:any=null,soloMoves=0,soloRoute=false;
- const world={setConnectionStatus(){},setOnline(value:any){adapter=value;soloRoute=false},setOnlineSnapshot(){},move(){if(!adapter){soloMoves++;soloRoute=true}}};
+ const world={setConnectionStatus(){},setOnline(value:any){adapter=value;soloRoute=false},setOnlineSnapshot(){},setOnlineSampler(){},move(){if(!adapter){soloMoves++;soloRoute=true}}};
  try{mountOnline(world as any);events.dispatchEvent(new CustomEvent('patra-auth-change',{detail:{id:'u'}}));events.dispatchEvent(new CustomEvent('patra-world-join',{detail:{id:'a',name:'A'}}));await settle();
- connections[0].onmessage({data:JSON.stringify({v:1,eventId:'s',serverTick:20,serverTimeMs:1000,type:'world.snapshot',payload:snapshot(1000,32)})});assert.ok(adapter);
+ connections[0].onmessage({data:JSON.stringify({v:2,eventId:'s',serverTick:20,serverTimeMs:1000,type:'world.snapshot',payload:snapshot(1000,32)})});assert.ok(adapter);
  connections[0].readyState=3;connections[0].onclose({code:1006});
  if(reason==='leave')buttons[1].onclick();else events.dispatchEvent(new CustomEvent('patra-auth-change',{detail:null}));await settle();
  assert.equal(adapter,null,'local solo must detach without a release ack');world.move();assert.equal(soloMoves,1,'local movement restored');assert.match(label.textContent,/Solo lokal.*belum dikonfirmasi/);
@@ -147,7 +147,7 @@ for(const reason of ['leave','logout'] as const)test(`disconnected ${reason} res
  if(reason==='logout'){buttons[2].onclick();await settle();assert.equal(connections.length,1,'guest retry cannot revive an authenticated socket')}
  else {
   buttons[2].onclick();await settle();assert.equal(connections.length,2);assert.match(connections[1].url,/sessionId=opaque/);assert.equal(adapter,null,'recovery must remain local solo');
-  const event=(type:string,payload:any)=>({data:JSON.stringify({v:1,eventId:'recovery',serverTick:22,serverTimeMs:1100,type,payload})});
+  const event=(type:string,payload:any)=>({data:JSON.stringify({v:2,eventId:'recovery',serverTick:22,serverTimeMs:1100,type,payload})});
   connections[1].onmessage(event('world.snapshot',{...snapshot(1100,33),epoch:2,sessionId:'rotated'}));await settle();assert.equal(adapter,null);const release=JSON.parse(connections[1].sent.at(-1));assert.equal(release.type,'world.leave');
   connections[1].onmessage(event('command.ack',{commandId:release.commandId,seq:release.seq}));await settle();assert.equal(label.textContent,'Solo lokal · tidak tersambung');assert.equal(soloRoute,true,'cleanup recovery must preserve the active solo route');
   events.dispatchEvent(new CustomEvent('patra-world-join',{detail:{id:'b',name:'B'}}));await settle();assert.equal(connections.length,3,'confirmed recovery permits later authenticated join');assert.match(connections[2].url,/worldId=b/);
@@ -162,8 +162,8 @@ test('logout fences a queued world switch even when its old leave is later ackno
  const buttons=Array.from({length:3},()=>({hidden:true,onclick:null}));const label={textContent:''};const panel={setAttribute(){},querySelector:()=>label,querySelectorAll:()=>buttons,innerHTML:'',className:''};
  const events=new EventTarget();Object.assign(globalThis,{window:events,document:{createElement:()=>panel,querySelector:(s:string)=>s==='#world'?{parentElement:{append(){}}}:label},location:{origin:'http://village.test'},WebSocket:FakeSocket,requestAnimationFrame:()=>1,cancelAnimationFrame(){}});
  const settle=async()=>{for(let i=0;i<8;i++)await Promise.resolve()};let adapter:any=null;
- try{mountOnline({setConnectionStatus(){},setOnline(value:any){adapter=value},setOnlineSnapshot(){}} as any);events.dispatchEvent(new CustomEvent('patra-auth-change',{detail:{id:'u'}}));events.dispatchEvent(new CustomEvent('patra-world-join',{detail:{id:'a',name:'A'}}));await settle();
- const event=(type:string,payload:any)=>({data:JSON.stringify({v:1,eventId:'e',serverTick:20,serverTimeMs:1000,type,payload})});connections[0].onmessage(event('world.snapshot',snapshot(1000,32)));
+ try{mountOnline({setConnectionStatus(){},setOnline(value:any){adapter=value},setOnlineSnapshot(){},setOnlineSampler(){}} as any);events.dispatchEvent(new CustomEvent('patra-auth-change',{detail:{id:'u'}}));events.dispatchEvent(new CustomEvent('patra-world-join',{detail:{id:'a',name:'A'}}));await settle();
+ const event=(type:string,payload:any)=>({data:JSON.stringify({v:2,eventId:'e',serverTick:20,serverTimeMs:1000,type,payload})});connections[0].onmessage(event('world.snapshot',snapshot(1000,32)));
  events.dispatchEvent(new CustomEvent('patra-world-join',{detail:{id:'b',name:'B'}}));await settle();const leave=JSON.parse(connections[0].sent.at(-1));events.dispatchEvent(new CustomEvent('patra-auth-change',{detail:null}));assert.equal(adapter,null,'logout detaches immediately, before pending ack');
  connections[0].onmessage(event('command.ack',{commandId:leave.commandId,seq:leave.seq}));await settle();assert.equal(connections.length,1,'old queued join cannot run after logout');assert.equal(adapter,null);assert.equal(label.textContent,'Solo lokal · tidak tersambung');
  buttons[2].onclick();await settle();assert.equal(connections.length,1);
@@ -183,7 +183,7 @@ test('chat send succeeds only after matching stored-message ack and failure pres
  const all:any[]=[];class FakeSocket{readyState=1;bufferedAmount=0;sent:string[]=[];onmessage:any;onclose:any;constructor(public url:string){all.push(this)}send(s:string){this.sent.push(s)}close(){this.readyState=3}}
  const old=globalThis.WebSocket;globalThis.WebSocket=FakeSocket as any;
  try{const socket=new WorldSocket('a',()=>{},()=>{},'http://village.test');const events:string[]=[];socket.onEvent=type=>events.push(type);socket.connect();
- const event=(type:string,payload:any)=>({data:JSON.stringify({v:1,eventId:'chat',serverTick:20,serverTimeMs:1000,type,payload})});
+ const event=(type:string,payload:any)=>({data:JSON.stringify({v:2,eventId:'chat',serverTick:20,serverTimeMs:1000,type,payload})});
  all[0].onmessage(event('world.snapshot',snapshot(1000,32)));const pending=socket.sendChat('durable-1','hello');let resolved=false;pending.then(()=>resolved=true);await Promise.resolve();assert.equal(resolved,false);
  const first=JSON.parse(all[0].sent.at(-1));assert.deepEqual(first.payload,{channelId:'world',clientMessageId:'durable-1',text:'hello'});
  all[0].onmessage(event('command.ack',{commandId:'unrelated',result:message('1')}));await Promise.resolve();assert.equal(resolved,false);
@@ -265,11 +265,11 @@ test('production lobby view truthfully disables Start without a concrete engine'
  const offline=renderToStaticMarkup(React.createElement(LobbyView,{lobbies:[],arenaId:'race',selfId:'',online:false,pending:false,message:'',act:()=>{}}));assert.match(offline,/Sambungkan ke dunia privat/);
 });
 test('lobby wire commands reject identity spoofing and socket dispatches resync events',async()=>{
- assert.equal(validateCommand({v:1,commandId:'list',seq:1,worldId:'a',type:'lobby.list',payload:{}}).type,'lobby.list');
- assert.throws(()=>validateCommand({v:1,commandId:'spoof',seq:1,worldId:'a',type:'lobby.join',payload:{arenaId:'race',userId:'other'}}));
+ assert.equal(validateCommand({v:2,commandId:'list',seq:1,worldId:'a',type:'lobby.list',payload:{}}).type,'lobby.list');
+ assert.throws(()=>validateCommand({v:2,commandId:'spoof',seq:1,worldId:'a',type:'lobby.join',payload:{arenaId:'race',userId:'other'}}));
  const all:any[]=[];class FakeSocket{readyState=1;bufferedAmount=0;sent:string[]=[];onmessage:any;onclose:any;constructor(public url:string){all.push(this)}send(s:string){this.sent.push(s)}close(){this.readyState=3}}
  const old=globalThis.WebSocket;globalThis.WebSocket=FakeSocket as any;
- try{const socket=new WorldSocket('a',()=>{},()=>{},'http://village.test'),events:string[]=[];socket.onEvent=t=>events.push(t);socket.connect();const event=(type:string,payload:any)=>({data:JSON.stringify({v:1,eventId:'e',serverTick:0,serverTimeMs:1000,type,payload})});all[0].onmessage(event('world.snapshot',snapshot(1000,32)));
+ try{const socket=new WorldSocket('a',()=>{},()=>{},'http://village.test'),events:string[]=[];socket.onEvent=t=>events.push(t);socket.connect();const event=(type:string,payload:any)=>({data:JSON.stringify({v:2,eventId:'e',serverTick:0,serverTimeMs:1000,type,payload})});all[0].onmessage(event('world.snapshot',snapshot(1000,32)));
  const pending=socket.gameCommand('lobby.list',{});const command=JSON.parse(all[0].sent.at(-1));all[0].onmessage(event('command.ack',{commandId:command.commandId,result:{worldId:'a',lobbies:[]}}));assert.deepEqual(await pending,{worldId:'a',lobbies:[]});
  all[0].onmessage(event('lobby.updated',{worldId:'a',lobbies:[]}));assert.deepEqual(events,['world.snapshot','lobby.updated']);
  const closed=socket.close();const leave=JSON.parse(all[0].sent.at(-1));all[0].onmessage(event('command.ack',{commandId:leave.commandId}));await closed;
@@ -287,7 +287,7 @@ test('history does not invent a score or duration for an unknown-start aborted m
 test('actual socket dispatch forwards race and duck snapshots while fencing replaced sockets and worlds',()=>{
  const all:any[]=[];class FakeSocket{readyState=1;bufferedAmount=0;onmessage:any;onclose:any;constructor(public url:string){all.push(this)}send(){}close(){this.readyState=3}}
  const old=globalThis.WebSocket;globalThis.WebSocket=FakeSocket as any;
- try{const socket=new WorldSocket('a',()=>{},()=>{},'http://village.test'),events:string[]=[];socket.onEvent=t=>events.push(t);socket.connect();const event=(type:string,worldId='a')=>({data:JSON.stringify({v:1,eventId:'e',serverTick:0,serverTimeMs:1000,type,payload:{worldId,matchId:'m'}})});
+ try{const socket=new WorldSocket('a',()=>{},()=>{},'http://village.test'),events:string[]=[];socket.onEvent=t=>events.push(t);socket.connect();const event=(type:string,worldId='a')=>({data:JSON.stringify({v:2,eventId:'e',serverTick:0,serverTimeMs:1000,type,payload:{worldId,matchId:'m'}})});
  for(const kind of ['race.snapshot','race.finished','duck.snapshot','duck.finished'])all[0].onmessage(event(kind));assert.deepEqual(events,['race.snapshot','race.finished','duck.snapshot','duck.finished']);all[0].onmessage(event('duck.snapshot','other'));assert.equal(events.length,4);socket.connect();all[0].onmessage(event('duck.snapshot'));assert.equal(events.length,4);all[1].onmessage(event('duck.snapshot'));assert.equal(events.length,5);
  }finally{globalThis.WebSocket=old}
 });

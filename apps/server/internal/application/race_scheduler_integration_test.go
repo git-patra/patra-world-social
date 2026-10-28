@@ -46,7 +46,7 @@ func TestRaceWiredSchedulerPublishes15HzAndHostDepartureDoesNotStopPeer(t *testi
 			t.Fatal(err)
 		}
 	}
-	start, err := g.StartMatch(ctx, users[0], l.ID, "clock")
+	start, err := startClearedMatch(t, ctx, g, h, clock, users[0], l.ID, "clock")
 	if err != nil {
 		t.Fatal(err)
 	}

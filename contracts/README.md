@@ -111,3 +111,41 @@ After durable results, race returns require every remaining human's consent or
 10 seconds. There is no race rematch/automatic queue. The guarded existing arena
 return places humans at Race Park's safe entrance. The local guest simulator has
 keyboard/touch controls and survives modal closure; it never uploads official scores.
+
+## World activity foundation (wire protocol 2)
+
+The current handshake requires `protocolVersion=2` in the realtime URL. Envelopes
+and public world snapshots use protocol 2; old clients receive an incompatibility
+message requiring reload before seat admission. Historical result metadata with
+protocol 1 remains readable and is never rewritten. Map schema remains version 1,
+with asset identity `kampung-senja-v2`; regenerate map, voice references and the
+embedded activity mirror with `node scripts/generate-kampung-senja.mjs`.
+
+`activities.v1.json` owns tile masks, entrances, safe returns, spectator strips,
+vehicle/fishing/claw slots and scene transforms. Race's uniform transform maps
+race subunits to art pixels with scale `1/64`, offset `(1488,1152)`, placing its
+outer rectangle at `(1520,1184,576,384)`. Blaster reserves the obstacle-free tile
+pad `(40,28,7,5)`; it is separate from the pingpong table footprint.
+
+`activity.snapshot` and ordered `activity.lifecycle` carry the strict area union
+in `activity.schema.json`. Initial attachment sends all four area snapshots;
+replaceable full states refresh at 5 Hz directly from the owner. The exact empty
+`activity.snapshot` command returns `{activities:[...]}` for explicit resync.
+No casual/gameplay activity intents are accepted until their engine contracts
+are implemented. Lifecycle messages share the bounded ordered control queue;
+a slow consumer reconnects and receives complete state.
+
+A lease includes world, runtime incarnation, area, generation and match identity.
+The world owner atomically closes its mask and neutralizes existing movement;
+CLEARING lasts three seconds before its clear ACK. Only then does the independent
+lobby worker persist, obtain ACTIVE acknowledgement and call Engine.Start.
+Transport start acknowledges acceptance immediately with `starting`; the ordered
+lobby update/match.started confirms activation. Unknown START persistence keeps
+the lease; a definite failure releases it. Runtime owners with live leases are
+retained after the final seat leaves, so new admission cannot lose active masks.
+Every destination/path node and movement step checks dynamic masks.
+
+Gameplay completion releases spatial occupancy independently of result SQL;
+RESETTING lasts at most two seconds before OPEN. Movement ownership ends with
+simulation, while durable busy/history claims still prevent another match until
+finalization. Rematch obtains a new lease; stale releases cannot affect it.

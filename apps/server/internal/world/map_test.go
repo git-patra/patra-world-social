@@ -58,7 +58,7 @@ func TestMapIntegrityRejectsTamperedPayload(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	raw = bytes.Replace(raw, []byte(`"id": "kampung-senja-v1"`), []byte(`"id": "untrusted-village"`), 1)
+	raw = bytes.Replace(raw, []byte(`"id": "kampung-senja-v2"`), []byte(`"id": "untrusted-village"`), 1)
 	if _, e = LoadMap(raw); e == nil {
 		t.Fatal("tampered map accepted")
 	}

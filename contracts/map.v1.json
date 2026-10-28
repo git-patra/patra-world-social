@@ -1,6 +1,6 @@
 {
   "v": 1,
-  "id": "kampung-senja-v1",
+  "id": "kampung-senja-v2",
   "width": 64,
   "height": 64,
   "spawn": {
@@ -7806,5 +7806,5 @@
       "y": 63
     }
   ],
-  "checksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768"
+  "checksum": "45b0049b439b14b1f896dda92f788fc5a0df9807bf591e08abff3b95797f29b9"
 }

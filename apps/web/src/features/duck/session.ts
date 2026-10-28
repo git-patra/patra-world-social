@@ -1,3 +1,4 @@
+import {registerGuestSession} from '../../guest/lifecycle';
 import {audio} from '../../audio/service';
 import {gameAudio} from '../../audio/events';
 import {LocalDuck,type Aim} from './local';
@@ -11,3 +12,5 @@ export class GuestDuckSession{
  clear(){audio.stopMode('duck');if(this.timer!==null)clearInterval(this.timer);this.timer=null;this.engine=null;this.completion=null}
 }
 export const guestDuck=new GuestDuckSession();
+
+registerGuestSession(guestDuck);

@@ -1,10 +1,10 @@
-import React, {useEffect,useState} from 'react';
+import React, {lazy,Suspense,useEffect,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {WorldSocket} from '../../net/socket';
 import './lobby.css';
-import {PenaltyDuel} from '../penalty/Duel';
-import {RaceGame} from '../race/Race';
-import {DuckGame} from '../duck/Duck';
+const PenaltyDuel=lazy(()=>import('../penalty/Duel').then(m=>({default:m.PenaltyDuel})));
+const RaceGame=lazy(()=>import('../race/Race').then(m=>({default:m.RaceGame})));
+const DuckGame=lazy(()=>import('../duck/Duck').then(m=>({default:m.DuckGame})));
 
 interface Player {actorId:string;userId:string;displayName:string;ready:boolean;connected:boolean;botAssisted?:boolean}
 interface Lobby {id:string;arenaId:string;worldId:string;hostId:string;state:string;gameType:string;capacity:number;engineAvailable:boolean;botChosen:boolean;players:Player[];spectators:string[];matchId?:string;startsAt?:number}
@@ -44,12 +44,12 @@ function LobbyPanel({arenaId}:{arenaId:string}){
  useEffect(()=>{let live=true;setOnline(socket?.status==='online');setLobbies([]);
   function accept(payload:Record<string,unknown>){if(live&&socket&&payload.worldId===socket.worldId&&Array.isArray(payload.lobbies)){setLobbies(payload.lobbies as Lobby[])}}
   const load=()=>{if(socket?.status==='online')void socket.gameCommand('lobby.list',{}).then(v=>accept(v as Record<string,unknown>)).catch(e=>{if(live)setMessage(e.message)})};
-  const event=(e:Event)=>{const d=(e as CustomEvent).detail;if(d?.socket!==socket)return;if(d.type==='lobby.updated')accept(d.payload);if(d.type==='match.result_status'){const labels:Record<string,string>={finalizing:'Hasil belum tersimpan',unconfirmed:'Hasil belum dapat dikonfirmasi',completed:'Hasil tersimpan. Buka History untuk detail.',aborted_storage:'Tidak ada hasil tersimpan setelah rekonsiliasi.',unavailable:'Hasil belum tersedia dari mesin permainan.'};setMessage(labels[d.payload.status]??'')};if(d.type==='world.snapshot')load()};
+  const event=(e:Event)=>{const d=(e as CustomEvent).detail;if(d?.socket!==socket)return;if(d.type==='lobby.updated')accept(d.payload);if(d.type==='match.result_status'){const labels:Record<string,string>={finalizing:'Hasil belum tersimpan',unconfirmed:'Hasil belum dapat dikonfirmasi',completed:'Hasil tersimpan. Buka History untuk detail.',aborted_storage:'Tidak ada hasil tersimpan setelah rekonsiliasi.',unavailable:'Hasil belum tersedia dari mesin permainan.'};setMessage(labels[d.payload.status]??'')}};
   let wasOnline=socket?.status==='online';
   const status=(e:Event)=>{const d=(e as CustomEvent).detail;if(d?.socket!==socket)return;const nextOnline=d.state==='online';setOnline(nextOnline);if(nextOnline&&!wasOnline)load();wasOnline=nextOnline};
   window.addEventListener('patra-world-event',event);window.addEventListener('patra-world-status',status);load();return()=>{live=false;window.removeEventListener('patra-world-event',event);window.removeEventListener('patra-world-status',status)};
  },[socket]);
  const act=async(type:string,payload:Record<string,unknown>)=>{if(!socket||pending||socket.status!=='online')return;const active=socket;setPending(true);setMessage('');try{await active.gameCommand(type,payload);if(attached===active){const v=await active.gameCommand('lobby.list',{}) as {lobbies:Lobby[]};if(attached===active)setLobbies(v.lobbies)}}catch(e){if(attached===active)setMessage((e as Error).message)}finally{if(attached===active)setPending(false)}};
- return <><LobbyView lobbies={lobbies} arenaId={arenaId} selfId={socket?.selfId??''} online={online} pending={pending} message={message} act={act}/>{arenaId==='race'&&<RaceGame socket={socket} lobby={lobbies.find(l=>l.arenaId==='race')}/>} {arenaId==='duck'&&(!socket?<DuckGame/>:lobbies.filter(l=>l.gameType==='duck'&&l.matchId&&(l.players.some(p=>p.userId===socket.selfId)||l.spectators.includes(socket.selfId))).map(l=><div key={l.matchId}><DuckGame socket={socket} lobby={l}/></div>))} {arenaId==='penalty'&&<PenaltyDuel socket={socket} lobby={lobbies.find(l=>l.arenaId==='penalty')}/>}</>;
+ return <Suspense fallback={<p>Memuat aktivitas…</p>}><LobbyView lobbies={lobbies} arenaId={arenaId} selfId={socket?.selfId??''} online={online} pending={pending} message={message} act={act}/>{arenaId==='race'&&<RaceGame socket={socket} lobby={lobbies.find(l=>l.arenaId==='race')}/>} {arenaId==='duck'&&(!socket?<DuckGame/>:lobbies.filter(l=>l.gameType==='duck'&&l.matchId&&(l.players.some(p=>p.userId===socket.selfId)||l.spectators.includes(socket.selfId))).map(l=><div key={l.matchId}><DuckGame socket={socket} lobby={l}/></div>))} {arenaId==='penalty'&&<PenaltyDuel socket={socket} lobby={lobbies.find(l=>l.arenaId==='penalty')}/>}</Suspense>;
 }
 export function mountLobbyPanel(container:Element,arenaId:string){const root=createRoot(container);root.render(<LobbyPanel arenaId={arenaId}/>);return()=>root.unmount()}

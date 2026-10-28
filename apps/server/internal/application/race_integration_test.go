@@ -58,7 +58,7 @@ func TestRaceApplicationGridPhysicsDurabilityAndTimedReturn(t *testing.T) {
 			return nil, err
 		}
 		raw, _ := json.Marshal(payload)
-		return app.Hub.Execute(ctx, j, realtime.Command{V: 1, CommandID: fmt.Sprint(counter), Seq: counter, WorldID: j.WorldID, Type: kind, Payload: raw})
+		return app.Hub.Execute(ctx, j, realtime.Command{V: 2, CommandID: fmt.Sprint(counter), Seq: counter, WorldID: j.WorldID, Type: kind, Payload: raw})
 	}
 	v, err := execute(seats[0], "lobby.join", map[string]any{"arenaId": "race"})
 	if err != nil {
@@ -67,14 +67,14 @@ func TestRaceApplicationGridPhysicsDurabilityAndTimedReturn(t *testing.T) {
 	l := v.(lobby.Lobby)
 	execute(seats[0], "lobby.ready", map[string]any{"lobbyId": l.ID, "ready": true})
 	app.Lobbies.SetStorageBlocked(false)
-	m, err := app.Lobbies.StartMatch(ctx, users[0], l.ID, "race-start")
+	m, err := startClearedMatch(t, ctx, app.Lobbies, app.Hub, clock, users[0], l.ID, "race-start")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if _, e := app.Lobbies.StartMatch(ctx, users[0], l.ID, "duplicate-new-command"); e == nil {
 		t.Fatal("race started twice")
 	}
-	repeat, e := app.Lobbies.StartMatch(ctx, users[0], l.ID, "race-start")
+	repeat, e := startClearedMatch(t, ctx, app.Lobbies, app.Hub, clock, users[0], l.ID, "race-start")
 	if e != nil || !reflect.DeepEqual(repeat, m) {
 		t.Fatal("retry reshuffled frozen start", e)
 	}
@@ -247,7 +247,7 @@ func TestRaceApplicationFiveHumanDeadlinePrecedesGraceExpiry(t *testing.T) {
 		app.Lobbies.SetReady(ctx, user, l.ID, true)
 	}
 	app.Lobbies.SetStorageBlocked(false)
-	m, e := app.Lobbies.StartMatch(ctx, users[0], l.ID, "limit")
+	m, e := startClearedMatch(t, ctx, app.Lobbies, app.Hub, clock, users[0], l.ID, "limit")
 	if e != nil {
 		t.Fatal(e)
 	}

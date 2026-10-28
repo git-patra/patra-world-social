@@ -29,3 +29,5 @@ CUA Chromium, guest-only, no credential workflows. Initial live-preview checks w
 Automated command totals and local commit recorded after final coordinator verification. No public deployment; CP1 remains the only official checkpoint PASS.
 
 Final coordinator `npm test`: 4 JS + 126 TS tests passed; typecheck, lint, build and whitespace checks passed. Entry JS 435.29 kB / 139.40 kB gzip; no new runtime dependency. Full Go integration/race evidence and focused post-fix application checks are in [startup verification](activities-startup-verification.md) and [presence verification](activities-presence-verification.md). Fresh review and scoped fix re-review accept all three findings; see [review](activities-stage1-review.md).
+
+Additional stable-build browser checks: Menu centered at all five viewport sizes above (maximum center error0.008px). Clicking the full-map race ground target closed Map and produced position33.05,32.00 from32,32 with walking=true; no teleport to45,45.

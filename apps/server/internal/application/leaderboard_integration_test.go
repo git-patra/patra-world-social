@@ -85,7 +85,7 @@ func TestLeaderboardHTTPCommittedWorldTransportAndRecovery(t *testing.T) {
 	}
 	dial := func(i int, w string) *websocket.Conn {
 		t.Helper()
-		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?worldId="+w, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
+		c, _, e := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/realtime?protocolVersion=2&worldId="+w, &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://127.0.0.1:4176"}, "Cookie": {"patra_session=" + tokens[i]}}})
 		if e != nil {
 			t.Fatal(e)
 		}
