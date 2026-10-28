@@ -62,6 +62,7 @@
     "src/activities/**/*.ts",
     "src/activities/**/*.tsx",
     "tests/activities.test.ts",
+    "tests/vehicles.test.ts",
     "tests/activity-contract.test.ts",
     "src/guest/lifecycle.ts"
   ]

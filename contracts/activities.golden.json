@@ -31,6 +31,55 @@
         "clearAt": 4000,
         "resetAt": 0
       }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "vehicles",
+      "payload": {
+        "vehicles": [
+          {
+            "id": "bicycle-0",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 39,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "bicycle-1",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 41,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-2",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 43,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-3",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 45,
+            "y": 46,
+            "heading": 0
+          }
+        ]
+      }
     }
   ],
   "invalid": [
@@ -129,6 +178,292 @@
         "startsAt": 0,
         "clearAt": 4000,
         "resetAt": 0
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "vehicles",
+      "payload": {
+        "vehicles": [
+          {
+            "id": "bicycle-0",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 39,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "bicycle-1",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 41,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-2",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 43,
+            "y": 46,
+            "heading": 0
+          }
+        ]
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "vehicles",
+      "payload": {
+        "vehicles": [
+          {
+            "id": "bicycle-0",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 39,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "bicycle-0",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 39,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-2",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 43,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-3",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 45,
+            "y": 46,
+            "heading": 0
+          }
+        ]
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "vehicles",
+      "payload": {
+        "vehicles": [
+          {
+            "id": "bicycle-0",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 39,
+            "y": 46,
+            "heading": 0,
+            "score": 9
+          },
+          {
+            "id": "bicycle-1",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 41,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-2",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 43,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-3",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 45,
+            "y": 46,
+            "heading": 0
+          }
+        ]
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "vehicles",
+      "payload": {
+        "vehicles": [
+          {
+            "id": "bicycle-0",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 43,
+            "y": 41,
+            "heading": 0
+          },
+          {
+            "id": "bicycle-1",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 41,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-2",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 43,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-3",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 45,
+            "y": 46,
+            "heading": 0
+          }
+        ]
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "vehicles",
+      "payload": {
+        "vehicles": [
+          {
+            "id": "bicycle-0",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 39,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "bicycle-1",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 41,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-2",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 43,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-3",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 45,
+            "y": 46,
+            "heading": 0
+          }
+        ]
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "vehicles",
+      "payload": {
+        "vehicles": [
+          {
+            "id": "bicycle-0",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 39,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "bicycle-1",
+            "kind": "bicycle",
+            "generation": 1,
+            "riderId": "",
+            "x": 41,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-2",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 43,
+            "y": 46,
+            "heading": 0
+          },
+          {
+            "id": "car-3",
+            "kind": "car",
+            "generation": 1,
+            "riderId": "",
+            "x": 45,
+            "y": 46,
+            "heading": 0
+          }
+        ]
       }
     }
   ]

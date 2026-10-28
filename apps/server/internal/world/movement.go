@@ -15,7 +15,7 @@ func (r *Runtime) Input(ctx context.Context, id string, epoch, seq uint64, dx, d
 	}
 	return r.call(ctx, func() {
 		p := r.players[id]
-		if p == nil || p.Status == "playing" || p.epoch != epoch || seq <= p.Seq {
+		if p == nil || p.Status == "playing" || r.riding(id) != nil || p.epoch != epoch || seq <= p.Seq {
 			return
 		}
 		p.Seq = seq
@@ -32,7 +32,7 @@ func (r *Runtime) Destination(ctx context.Context, id string, epoch, seq uint64,
 	var invalid bool
 	err := r.call(ctx, func() {
 		p := r.players[id]
-		if p == nil || p.Status == "playing" || p.epoch != epoch || seq <= p.Seq {
+		if p == nil || p.Status == "playing" || r.riding(id) != nil || p.epoch != epoch || seq <= p.Seq {
 			return
 		}
 		start := Point{int(math.Round(p.X)), int(math.Round(p.Y))}
@@ -83,6 +83,9 @@ func findPath(start, goal Point, blocked func(Point) bool) []Point {
 	return nil
 }
 func (r *Runtime) move(p *player, at time.Time) {
+	if r.riding(p.ID) != nil {
+		return
+	}
 	dx, dy := p.dx, p.dy
 	step := .225
 	if len(p.path) > 0 {

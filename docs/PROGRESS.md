@@ -13,8 +13,8 @@ Ledger aktif eksekusi. Tabel di bawah adalah status terkini; catatan kronologis 
 | `highest_contiguous_passed_checkpoint` | CP1 PASS — 1/8 |
 | `last_verified_task_commit` | d4f60a27bd41048c7ed16a103fbcf4875046ece5 — 2/16 task done |
 | `latest_code_commit` | bb1869a activities foundation; see Git tip for subsequent stages |
-| `current_task` | Activities Tasks0–2 committed/reviewed; Tasks3/4 authority/scenes approved; next Task5 free ride |
-| `next_task` | Complete activities Tasks5–11 in order; external T15/T16 acceptance remains pending |
+| `current_task` | Activities Tasks0–2 committed/reviewed; Tasks3–5 authority/scenes/free ride approved; next Task6 football |
+| `next_task` | Complete activities Tasks6–11 in order; external T15/T16 acceptance remains pending |
 | `blockers` | Uji browser akun ditunda pengguna (T3/CP2); LiveKit staging belum tersedia (CP7). Pekerjaan backend dan fitur lain tetap berjalan. |
 | `source_changes` | `.idea/` sudah untracked sebelum perencanaan; jangan dihapus atau dibawa ke repo baru |
 | `planning_files` | Snapshot awal di `/Users/patra/Project/docs/superpowers/`; salinan aktif dan ledger tersimpan dalam Git repo baru di `docs/` |

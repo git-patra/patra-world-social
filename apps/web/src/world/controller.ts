@@ -1,6 +1,6 @@
 import {activityContract} from '../activities/contracts';
 import {ActivityScene} from '../activities/scene';
-import type {ActivityState} from '../activities/store';
+import {activities,type ActivityState} from '../activities/store';
 import mapData from '../../../../contracts/map.v1.json';
 import {mapPoint,type CanvasRect,type ClosedMapZone} from './minimap';
 import {loadMap,collisionTiles,type Point} from './map';
@@ -73,7 +73,7 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
   if(minimapCanvas){const c=minimapCanvas.getContext('2d')!;c.clearRect(0,0,minimapCanvas.width,minimapCanvas.height);c.drawImage(mini,0,0,minimapCanvas.width,minimapCanvas.height);drawClosedZones(c,minimapCanvas.width,minimapCanvas.height);c.fillStyle='#ffe4aa';c.beginPath();c.arc(p.x/art.width*minimapCanvas.width,p.y/art.height*minimapCanvas.height,4,0,Math.PI*2);c.fill()}
   dirty=false;
  }
- function notifyPosition(){
+ function notifyPosition(){activities.setPosition(displayPlayer??player);
   const display=activityOwner&&displayPlayer?displayPlayer:player;
   const signature=`${display.x.toFixed(2)},${display.y.toFixed(2)},${walking}`;
   if(signature!==lastMove){lastMove=signature;onMove({...display,walking})}
@@ -103,7 +103,7 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
  }
  function travelTo(id:string){const place=positions.find(s=>s.id===id);if(place)destination(place)}
  function move(dx:number,dy:number){if(paused||activityOwner||!Number.isFinite(dx)||!Number.isFinite(dy))return;direction={x:Math.sign(dx),y:Math.sign(dy)};route=[];target=null;if(online)online.input(direction.x,direction.y);dirty=true}
- function interact(){if(paused||!near)return;stopDirection();route=[];target=null;if(stations.some(s=>s.id===near))onSelect(near)}
+ function interact(){if(paused)return;if(activities.interactRide(displayPlayer??player)){stopDirection();route=[];target=null;return}if(!near)return;stopDirection();route=[];target=null;if(stations.some(s=>s.id===near))onSelect(near)}
  const pointer=(e:PointerEvent)=>{const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
  function pointerDown(e:PointerEvent){if(e.button!==undefined&&e.button!==0)return;pointerStart={...pointer(e),id:e.pointerId};canvas.setPointerCapture?.(e.pointerId)}
  function pointerUp(e:PointerEvent){const p=pointer(e),start=pointerStart;pointerStart=null;if(!start||start.id!==e.pointerId||Math.hypot(p.x-start.x,p.y-start.y)>10)return;const tile=unprojectVillage({x:(p.x-camera.x)/zoom,y:(p.y-camera.y)/zoom});destination({x:Math.round(tile.x),y:Math.round(tile.y)});canvas.focus?.({preventScroll:true})}
@@ -123,7 +123,7 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
  return {
   travelTo,travelToLocation:travelTo,move,interact,
   setOnlineSampler(sampler:(()=>void)|undefined){onlineSampler=sampler},
-  setActivityState(state:ActivityState){const active=state.inputMode!=='walk';if(active&&!activityOwner){stopDirection();route=[];target=null}if(!active&&activityOwner&&!online){const area=activityContract.areas.find(a=>a.kind===lastActivityKind);if(area){player={...area.safeReturn};notifyPosition()}}activityOwner=active;lastActivityKind=state.active?.kind??'';activityScene.set(state);dirty=true},
+  setActivityState(state:ActivityState){const active=state.inputMode!=='walk';if(active&&!activityOwner){stopDirection();route=[];target=null}if(!active&&activityOwner&&!online){const area=activityContract.areas.find(a=>a.kind===lastActivityKind);if(area){player={...area.safeReturn};displayPlayer=null;activityOwner=active;notifyPosition()}}activityOwner=active;lastActivityKind=state.inputMode==='ride'?'race':state.active?.kind??'';activityScene.set(state);dirty=true},
   setClosedZones(zones:ClosedMapZone[]){closedZones=structuredClone(zones);dirty=true},
   setDestinationResolver(resolver:DestinationResolver|undefined){resolveDestination=resolver},
   mapDestination(clientPoint:Point,rect:CanvasRect){const p=mapPoint(clientPoint,rect,{x:0,y:0,width:art.width,height:art.height});if(!p)return null;const tile=unprojectVillage(p);return resolvePoint({x:Math.round(tile.x),y:Math.round(tile.y)})},

@@ -141,13 +141,38 @@ func TestRaceApplicationGridPhysicsDurabilityAndTimedReturn(t *testing.T) {
 	if s.Frame != 30 || s.DroppedSteps != 0 {
 		t.Fatal("application scheduler did not step30Hz", s.Frame, s.DroppedSteps)
 	}
+	observedFirstFinisher := false
 	for at := m.StartsAt + 1050; at <= m.StartsAt+300000; at += 50 {
 		clock.set(at)
 		app.Lobbies.Sync(ctx)
 		s = snapshot()
+		if !observedFirstFinisher && s.Phase != "finished" {
+			for _, kart := range s.Karts {
+				if kart.Finished {
+					observedFirstFinisher = true
+					areas, err := app.Hub.WorldActivities(ctx, w.ID)
+					if err != nil {
+						t.Fatal(err)
+					}
+					active := false
+					for _, a := range areas {
+						if a.Kind == "area" && a.AreaID == "race" {
+							active = a.Payload.Phase == "ACTIVE" && a.Payload.MatchID == m.MatchID
+						}
+					}
+					if !active {
+						t.Fatal("first finisher reopened track while other racers remain")
+					}
+					break
+				}
+			}
+		}
 		if s.Phase == "finished" {
 			break
 		}
+	}
+	if !observedFirstFinisher {
+		t.Fatal("race fixture did not exercise a partial finish")
 	}
 	if s.Phase != "finished" || s.Result == nil {
 		t.Fatal("not naturally completed")

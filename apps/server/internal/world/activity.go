@@ -33,6 +33,7 @@ func (r *Runtime) activity(ctx context.Context, user string, playing bool, at *P
 			p.dy = 0
 			p.path = nil
 			if playing {
+				r.dismount(user)
 				p.Status = "playing"
 			} else {
 				p.Status = "available"

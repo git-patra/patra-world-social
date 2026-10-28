@@ -1,4 +1,4 @@
-import {mountActivities} from './activities/store';
+import {activities,mountActivities} from './activities/store';
 import {activityInput} from './activities/input-router';
 import {mountActivityHUD} from './activities/ActivityHUD';
 import {mountAudio} from './audio/events';
@@ -40,17 +40,22 @@ function updateMotion(){
  world?.setMotion(motion);
 }
 function notify(message){$('#travel-status').textContent=message;}
+function updateInteraction(){
+ const state=activities.snapshot(),station=stations.find(s=>s.id===nearby);
+ const riding=state.inputMode==='ride',vehicle=state.nearbyRide;
+ $('#interact-button').disabled=!(riding||vehicle||station);
+ $('#interact-button span').textContent=riding?'Turun · E':vehicle?`Naik ${vehicle.kind==='bicycle'?'Sepeda':'Mobil'} · E`:station?`Explore ${station.name}`:'Dekati aktivitas';
+ if(riding)$('#current-location').textContent=stations.find(s=>s.id==='race').name;
+}
+
 world=createWorld($('#world'),{
  stations,minimapCanvas:$('#minimap'),
  onNear(id){
-  nearby=id;const station=stations.find(s=>s.id===id);
-
-  $('#interact-button').disabled=!station;
-  $('#interact-button span').textContent=station?`Explore ${station.name}`:'Dekati aktivitas';
+  nearby=id;updateInteraction();
  },
  onSelect(id){openProject(id);},
  onMove({x,y,walking}){
-  const location=villageLocation({x,y});$('#current-location').textContent=location.name;if(location.id!=='paths')visited.add(location.id);$('#visited-count').textContent=`${visited.size} / 7 sudut`;
+  const location=activities.snapshot().inputMode==='ride'?stations.find(s=>s.id==='race'):villageLocation({x,y});$('#current-location').textContent=location.name;if(location.id!=='paths')visited.add(location.id);$('#visited-count').textContent=`${visited.size} / 7 sudut`;
   $('#coordinates').textContent=`${String(Math.round(x)).padStart(2,'0')} : ${String(Math.round(y)).padStart(2,'0')}`;
   $('#world').dataset.walking=String(walking);
   $('#world').dataset.position=`${x.toFixed(2)},${y.toFixed(2)}`;
@@ -58,6 +63,7 @@ world=createWorld($('#world'),{
  }
 });
 const unmountActivities=mountActivities(world);
+const unmountRideDock=activities.subscribe(updateInteraction);
 const unmountActivityInput=activityInput.install();
 const unregisterWalk=activityInput.register('walk',input=>{if(input.x||input.y)world.move(input.x,input.y);else world.stopInput()});
 const activityHUD=document.createElement('div');document.body.append(activityHUD);
@@ -125,7 +131,7 @@ media.addEventListener('change',e=>{motion=!e.matches;updateMotion();});
 document.addEventListener('keydown',event=>{
  if(document.body.dataset.controls==='touch'||!worldVisible||document.querySelector('dialog[open]')||event.ctrlKey||event.metaKey||event.altKey||!acceptsMovement(event.target))return;
  const key=event.key.toLowerCase();
- if(key==='e'&&activityInput.mode()==='walk'){event.preventDefault();world.interact();}
+ if(key==='e'&&['walk','ride'].includes(activityInput.mode())){event.preventDefault();world.interact();}
  else if(key==='m'){event.preventDefault();$('#list-button').click();}
 });
 const pointerHold=new PointerHold((dx,dy)=>activityInput.direction(dx,dy),()=>activityInput.direction(0,0));
@@ -138,7 +144,7 @@ document.querySelectorAll('[data-move]').forEach(button=>{
  button.addEventListener('click',event=>{if(event.detail===0){movementPointer=null;pointerHold.pulse(...direction);hideWelcome();}});
 });
 window.addEventListener('pointerup',stopHold);window.addEventListener('pointercancel',stopHold);window.addEventListener('lostpointercapture',stopHold);window.addEventListener('blur',releaseInputs);
-window.addEventListener('pagehide',event=>{releaseInputs();if(!event.persisted){unmountActivityHUD();unmountActivityInput();unregisterWalk();unmountActivities();activityHUD.remove();unmountMinimap();unmountDialogViewport();unmountAudio();disposeDemo();world.destroy();}});
+window.addEventListener('pagehide',event=>{releaseInputs();if(!event.persisted){unmountRideDock();unmountActivityHUD();unmountActivityInput();unregisterWalk();unmountActivities();activityHUD.remove();unmountMinimap();unmountDialogViewport();unmountAudio();disposeDemo();world.destroy();}});
 
 let worldVisible=true;
 function syncWorldPause(){activityInput.block('viewport',!worldVisible);world.setPaused(Boolean(document.querySelector('dialog[open]'))||!worldVisible||document.hidden);}

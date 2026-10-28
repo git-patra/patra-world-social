@@ -2,8 +2,8 @@
 package race
 
 import (
-	_ "embed"
 	"encoding/json"
+	"patra-world-social/server/internal/trackgeom"
 	"patra-world-social/server/internal/world"
 )
 
@@ -11,12 +11,7 @@ type Point struct {
 	X int `json:"x"`
 	Y int `json:"y"`
 }
-type Rect struct {
-	X      int `json:"x"`
-	Y      int `json:"y"`
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
+type Rect = trackgeom.Rect
 type Gate struct {
 	Axis      string `json:"axis"`
 	At        int    `json:"at"`
@@ -53,8 +48,7 @@ type Rules struct {
 	ResultsMs       int64  `json:"resultsMs"`
 }
 
-//go:embed track.v1.json
-var trackAsset []byte
+var trackAsset = trackgeom.Asset
 
 func DefaultTrack() Track {
 	var t Track
@@ -73,8 +67,7 @@ func DefaultRules() Rules {
 	return r.Race
 }
 func (t Track) Driveable(x, y, r int) bool {
-	o, i := t.Outer, t.Inner
-	return x >= o.X+r && y >= o.Y+r && x <= o.X+o.Width-r && y <= o.Y+o.Height-r && !(x > i.X-r && x < i.X+i.Width+r && y > i.Y-r && y < i.Y+i.Height+r)
+	return trackgeom.Driveable(t.Outer, t.Inner, float64(x), float64(y), float64(r))
 }
 func crossed(g Gate, a, b Point) bool {
 	old, next, lo, hi := a.X, b.X, a.Y, b.Y

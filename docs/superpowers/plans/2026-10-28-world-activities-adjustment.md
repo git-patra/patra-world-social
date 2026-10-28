@@ -10,7 +10,7 @@
 
 **Spec:** [World activities design](../specs/2026-10-28-world-activities-design.md).
 
-**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–4 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
+**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–5 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
 
 ## Ringkasan tahap dan cakupan
 
@@ -124,10 +124,10 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 
 **Files:** create `apps/server/internal/world/vehicles.go`, `apps/web/src/activities/vehicles.ts`, `world/scenes/vehicles.ts`; modify race scene, village-art, contracts/activities, `games/race/track.go` hanya bila helper pure perlu diekstrak; tests `vehicles_test.go`, new `activities.test.ts`, race transport/scheduler tests.
 
-- [ ] RED `single_rider_per_vehicle`, `vehicle_cannot_leave_track_or_tunnel`, `race_clears_riders_before_countdown`, `reconnect_cannot_mount_closed_track`, `first_finisher_does_not_reopen_track`.
-- [ ] Implementasi pool 2 sepeda + 2 mobil, satu rider per object generation, kecepatan 6/8 tile/s, swept collision/containment, E untuk turun ke anchor aman. Netralkan input saat lease hilang; tanpa damage/collision antaravatar; kendaraan idle masuk sleep.
-- [ ] Gambar lintasan dari kontrak race dengan uniform world transform. Render kart dan standings di world/HUD, pertahankan 5 lap / 5 slot / BOT / history / race 30 Hz. Jalur casual memakai containment track yang sama, bukan arena match palsu.
-- [ ] Buktikan start/finish/abort/rematch, latensi turun dari kendaraan, keyboard/touch, rider keluar world, safe returns dan perimeter penonton. Jalankan affected Go/frontend/browser checks, cek budget awal, review dan commit.
+- [x] RED `single_rider_per_vehicle`, `vehicle_cannot_leave_track_or_tunnel`, `race_clears_riders_before_countdown`, `reconnect_cannot_mount_closed_track`, `first_finisher_does_not_reopen_track`.
+- [x] Implementasi pool 2 sepeda + 2 mobil, satu rider per object generation, kecepatan 6/8 tile/s, swept collision/containment, E untuk turun ke anchor aman. Netralkan input saat lease hilang; tanpa damage/collision antaravatar; kendaraan idle masuk sleep.
+- [x] Gambar lintasan dari kontrak race dengan uniform world transform. Render kart dan standings di world/HUD, pertahankan 5 lap / 5 slot / BOT / history / race 30 Hz. Jalur casual memakai containment track yang sama, bukan arena match palsu.
+- [x] Buktikan start/finish/abort/rematch, latensi turun dari kendaraan, keyboard/touch, rider keluar world, safe returns dan perimeter penonton. Jalankan affected Go/frontend/browser checks, cek budget awal, review dan commit.
 
 ### Task 6: Bola bebas, penalti di lapangan, penonton
 

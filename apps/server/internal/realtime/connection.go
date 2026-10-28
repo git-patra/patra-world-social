@@ -127,7 +127,7 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 					movement = 0
 					control = 0
 				}
-				if cmd.Type == "player.input" || cmd.Type == "player.destination" || cmd.Type == "race.input" {
+				if cmd.Type == "player.input" || cmd.Type == "player.destination" || cmd.Type == "race.input" || rideDriveCommand(cmd) {
 					movement++
 					if movement > 60 {
 						reason = "movement rate exceeded"
@@ -267,4 +267,14 @@ func (h *Hub) writeEvent(ctx context.Context, c *websocket.Conn, kind string, ti
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	return c.Write(ctx, websocket.MessageText, raw)
+}
+
+func rideDriveCommand(cmd Command) bool {
+	if cmd.Type != "activity.ride" {
+		return false
+	}
+	var p struct {
+		Action string `json:"action"`
+	}
+	return json.Unmarshal(cmd.Payload, &p) == nil && p.Action == "drive"
 }

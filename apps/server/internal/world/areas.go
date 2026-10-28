@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"math"
 	"sort"
@@ -20,12 +21,24 @@ type AreaLease struct {
 	Generation  uint64 `json:"generation"`
 }
 type AreaPayload struct {
-	Phase    string `json:"phase"`
-	MatchID  string `json:"matchId"`
-	StartsAt int64  `json:"startsAt"`
-	ClearAt  int64  `json:"clearAt"`
-	ResetAt  int64  `json:"resetAt"`
+	Vehicles *[4]Vehicle `json:"-"`
+	Phase    string      `json:"phase"`
+	MatchID  string      `json:"matchId"`
+	StartsAt int64       `json:"startsAt"`
+	ClearAt  int64       `json:"clearAt"`
+	ResetAt  int64       `json:"resetAt"`
 }
+
+func (p AreaPayload) MarshalJSON() ([]byte, error) {
+	if p.Vehicles != nil {
+		return json.Marshal(struct {
+			Vehicles *[4]Vehicle `json:"vehicles"`
+		}{p.Vehicles})
+	}
+	type plain AreaPayload
+	return json.Marshal(plain(p))
+}
+
 type ActivitySnapshot struct {
 	WorldID      string      `json:"worldId"`
 	AreaID       string      `json:"areaId"`
@@ -69,6 +82,9 @@ func (r *Runtime) ReserveArea(ctx context.Context, worldID, areaID, matchID stri
 		r.areaGeneration++
 		out = AreaLease{worldID, r.incarnation, areaID, matchID, r.areaGeneration}
 		r.areas[areaID] = &areaState{out, AreaPayload{Phase: "CLEARING", MatchID: matchID, ClearAt: r.clock.Now().UnixMilli() + 3000}}
+		if areaID == "race" {
+			r.resetVehicles()
+		}
 		// Clear existing paths, held input and objects atomically with mask closure.
 		for _, p := range r.players {
 			p.dx = 0
@@ -175,6 +191,8 @@ func (r *Runtime) HasAreaLeases(ctx context.Context) (bool, error) {
 func (r *Runtime) ActivitySnapshots(ctx context.Context, worldID string) ([]ActivitySnapshot, error) {
 	out := []ActivitySnapshot{}
 	err := r.call(ctx, func() {
+		vehicles := r.vehicleSnapshot()
+		out = append(out, ActivitySnapshot{worldID, "race", r.incarnation, r.vehicleRevision, r.clock.Now().UnixMilli(), r.tick, "vehicles", AreaPayload{Vehicles: &vehicles}})
 		for _, a := range ActivityAreas() {
 			s := r.areas[a.ID]
 			p := AreaPayload{Phase: "OPEN"}

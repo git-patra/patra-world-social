@@ -67,9 +67,9 @@ func (h *Hub) areaLifecycleLocked(ctx context.Context, w string) {
 		return
 	}
 	for _, v := range states {
-		key := w + ":" + v.AreaID
+		key := w + ":" + v.AreaID + ":" + v.Kind
 		previous, seen := h.areaStates[key]
-		if seen && previous.Incarnation == v.Incarnation && previous.Generation == v.Generation && previous.Payload == v.Payload {
+		if seen && previous.Incarnation == v.Incarnation && previous.Generation == v.Generation && (v.Kind == "vehicles" || previous.Payload == v.Payload) {
 			continue
 		}
 		h.areaStates[key] = v

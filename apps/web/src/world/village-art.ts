@@ -319,12 +319,6 @@ export function createWorldArt() {
   const finish=raceTrack.gates.at(-1)!;
   for(let y=finish.min;y<finish.max;y+=512)for(let x=finish.at-256;x<finish.at+768;x+=512)rect(c,raceTransform.offsetX+x*raceTransform.scale,raceTransform.offsetY+y*raceTransform.scale,8,8,((x+y)/512)%2?'#eee3c0':'#344039');
   label(c,'SENJA CIRCUIT',1808,1334,19,'#52684f');label(c,'5 LAP · AUTUMN RING',1808,1363,11,'#5c714f');
-  // Parked tiny cars sit in the infield, away from racing and walking lanes.
-  ([[1726,1424,'#c67f51'],[1806,1424,'#e2bd71'],[1886,1424,'#737e8b']] as [number,number,string][]).forEach(([x,y,col])=>object(x,y,ctx=>{
-    shadow(ctx,x,y,26,9);rect(ctx,x-26,y-21,52,22,'#3d5148');rect(ctx,x-26,y-25,52,20,col);
-    rect(ctx,x-14,y-35,28,18,col);rect(ctx,x-10,y-32,20,10,'#b4c6b0');rect(ctx,x-21,y-5,10,9,'#344b42');rect(ctx,x+12,y-5,10,9,'#344b42');
-    rect(ctx,x-27,y-20,5,7,'#f4d6a1');rect(ctx,x+23,y-20,5,7,'#d7aa74');
-  }));
   lamp(1514,1160);lamp(2100,1160);lamp(1514,1604);lamp(2100,1604);
 
   // Mini football pitch: soft striped turf, a tiny goal, room to run in from either end.

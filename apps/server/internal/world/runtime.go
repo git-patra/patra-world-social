@@ -44,22 +44,25 @@ type request struct {
 
 // Runtime owns simulation state on one goroutine. No database/network work runs here.
 type Runtime struct {
-	incarnation    string
-	areaGeneration uint64
-	areas          map[string]*areaState
-	clock          Clock
-	m              MapDefinition
-	requests       chan request
-	stop           chan struct{}
-	done           chan struct{}
-	once           sync.Once
-	players        map[string]*player
-	last           time.Time
-	tick           uint64
+	vehicles        [4]Vehicle
+	vehicleRevision uint64
+	incarnation     string
+	areaGeneration  uint64
+	areas           map[string]*areaState
+	clock           Clock
+	m               MapDefinition
+	requests        chan request
+	stop            chan struct{}
+	done            chan struct{}
+	once            sync.Once
+	players         map[string]*player
+	last            time.Time
+	tick            uint64
 }
 
 func NewRuntime(m MapDefinition, c Clock) *Runtime {
 	r := &Runtime{incarnation: incarnation(), areas: map[string]*areaState{}, clock: c, m: m, requests: make(chan request, 128), stop: make(chan struct{}), done: make(chan struct{}), players: map[string]*player{}, last: c.Now()}
+	r.initVehicles()
 	go r.run()
 	return r
 }
@@ -105,9 +108,14 @@ func (r *Runtime) Close() { r.once.Do(func() { close(r.stop) }); <-r.done }
 func (r *Runtime) advance() {
 	now := r.clock.Now()
 	r.advanceAreas()
+	vehicleSteps := 0
 	for r.last.Add(50*time.Millisecond).Compare(now) <= 0 {
 		r.last = r.last.Add(50 * time.Millisecond)
 		r.tick++
+		if vehicleSteps < 4 {
+			r.moveVehicles(r.last)
+			vehicleSteps++
+		}
 		for _, p := range r.players {
 			r.move(p, r.last)
 		} // Skip long stalls after intents expire, never grant elapsed-time speed.
@@ -118,6 +126,7 @@ func (r *Runtime) advance() {
 }
 func (r *Runtime) Join(ctx context.Context, id, name string, epoch uint64) error {
 	return r.call(ctx, func() {
+		r.dismount(id)
 		p := r.players[id]
 		if p == nil {
 			p = &player{Avatar: Avatar{ID: id, Name: name, X: float64(r.m.Spawn.X), Y: float64(r.m.Spawn.Y), Status: "available"}}
@@ -132,10 +141,11 @@ func (r *Runtime) Join(ctx context.Context, id, name string, epoch uint64) error
 	})
 }
 func (r *Runtime) Remove(ctx context.Context, id string) error {
-	return r.call(ctx, func() { delete(r.players, id) })
+	return r.call(ctx, func() { r.dismount(id); delete(r.players, id) })
 }
 func (r *Runtime) Idle(ctx context.Context, id string) error {
 	return r.call(ctx, func() {
+		r.dismount(id)
 		if p := r.players[id]; p != nil {
 			p.dx = 0
 			p.dy = 0

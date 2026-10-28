@@ -368,6 +368,28 @@ func (h *Hub) Submit(ctx context.Context, j JoinContext, c Command) error {
 	}
 	r := h.rooms[s.world]
 	switch c.Type {
+	case "activity.ride":
+		if h.GameBusy != nil && h.GameBusy(s.user) {
+			return ErrUnsupported
+		}
+		owner, ok := r.(interface {
+			ApplyCasualIntent(context.Context, string, uint64, uint64, world.CasualIntent) error
+		})
+		if !ok {
+			return ErrUnsupported
+		}
+		var intent world.CasualIntent
+		if err := json.Unmarshal(c.Payload, &intent); err != nil {
+			return err
+		}
+		err := owner.ApplyCasualIntent(ctx, s.user, s.epoch, c.Seq, intent)
+		if err == nil {
+			if intent.Action == "mount" && h.VoiceRevoke != nil {
+				h.VoiceRevoke(s.world, s.user, "ride entry")
+			}
+			h.areaLifecycleLocked(ctx, s.world)
+		}
+		return err
 	case "player.input":
 		if h.GameBusy != nil && h.GameBusy(s.user) {
 			return ErrUnsupported

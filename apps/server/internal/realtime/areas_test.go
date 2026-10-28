@@ -52,7 +52,7 @@ func TestRecreatedRuntimeRestoresActiveLeasesByRetainingOwner(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, s := range states {
-		if s.AreaID == "race" && (s.Incarnation != lease.Incarnation || s.Generation != lease.Generation || s.Payload.Phase != "ACTIVE") {
+		if s.Kind == "area" && s.AreaID == "race" && (s.Incarnation != lease.Incarnation || s.Generation != lease.Generation || s.Payload.Phase != "ACTIVE") {
 			t.Fatal("admission lost lease", s)
 		}
 	}

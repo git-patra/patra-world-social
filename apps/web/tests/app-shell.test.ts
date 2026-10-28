@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import vm from 'node:vm';
 import {createWorld} from '../src/world/controller';
+import {activities} from '../src/activities/store';
 import {InputRouter} from '../src/activities/input-router';
 import {PointerHold,acceptsMovement} from '../src/world/input';
 import {createWorldArt} from '../src/world/village-art';
@@ -17,6 +18,8 @@ import layout from '../../../contracts/kampung-senja-layout.v1.json';
 // mounts are isolated because these tests concern shell event ordering, not auth,
 // React rendering, browser layout, or external services.
 function shellFixture(pixelRatio=1){
+ activities.clearLocal();
+ const activitySubscriptions:(()=>void)[]=[];
  const original={window:globalThis.window,document:globalThis.document,Element:globalThis.Element,MutationObserver:globalThis.MutationObserver,HTMLElement:globalThis.HTMLElement,ResizeObserver:globalThis.ResizeObserver,requestAnimationFrame:globalThis.requestAnimationFrame,cancelAnimationFrame:globalThis.cancelAnimationFrame,setTimeout:globalThis.setTimeout,clearTimeout:globalThis.clearTimeout,setInterval:globalThis.setInterval,clearInterval:globalThis.clearInterval};
  const gradient={addColorStop(){}};
  const context=new Proxy({measureText:()=>({width:40}),createRadialGradient:()=>gradient,createLinearGradient:()=>gradient},{get:(o,k)=>k in o?o[k as keyof typeof o]:()=>{},set:()=>true});
@@ -63,6 +66,7 @@ function shellFixture(pixelRatio=1){
  Object.assign(globalThis,{window,document,HTMLElement:Element,ResizeObserver:class{observe(){}disconnect(){}},requestAnimationFrame,cancelAnimationFrame:(id:number)=>frames.delete(id),...clock});
  const environment:Record<string,unknown>={window,document,HTMLElement:Element,Event,CustomEvent,requestAnimationFrame,queueMicrotask,...clock,matchMedia:()=>({matches:false,addEventListener(){}}),MutationObserver:class{constructor(private callback:()=>void){}disconnect(){}observe(element:Element){if(!observers.has(element))observers.set(element,new Set());observers.get(element)!.add(this.callback)}},IntersectionObserver:class{observe(){}},createWorld:(...args:Parameters<typeof createWorld>)=>(world=createWorld(...args)),PointerHold,acceptsMovement,villageLocation,stations,mountMinimap,openCenteredDialog,closeDialogThen,mountDialogViewport,setDialogFocusReturn,mountAudio:()=>()=>{},activePreferences:{subscribe(){},start(){},toggleMotion:async()=>{}}};
  Object.assign(globalThis,{Element,MutationObserver:environment.MutationObserver});
+ environment.activities={snapshot:activities.snapshot,subscribe:(listener:()=>void)=>{const close=activities.subscribe(listener);activitySubscriptions.push(close);return close}};
  environment.activityInput=new InputRouter();
  environment.mountActivities=()=>()=>{};environment.mountActivityHUD=()=>()=>{};
  for(const name of ['mountSettings','mountGuestLifecycle','mountGuestUICleanup','mountVoice','mountVoicePanel','mountPenalty','mountAuth','mountChampionBoard','mountHistory','mountOnline','mountSocial','mountLobbies','mountLobbyPanel','mountChat','mountWorlds'])environment[name]=()=>{};
@@ -80,7 +84,7 @@ function shellFixture(pixelRatio=1){
   routerKey:(type:string,key:string)=>emit(windowEvents,type,{type,key,target:get('body'),preventDefault(){},stopImmediatePropagation(){}}),
   padDown:(pointerId:number)=>emit(pad.listeners,'pointerdown',{pointerId,currentTarget:pad,preventDefault(){}}),
   pointerEnd:(pointerId:number)=>emit(windowEvents,'pointerup',{pointerId}),
-  repeatInput:()=>(environment.activityInput as InputRouter).repeat(),visibility:(hidden:boolean)=>{document.hidden=hidden;emit(documentEvents,'visibilitychange',{})},frameCount:()=>frames.size,keydown:(key:string)=>emit(documentEvents,'keydown',{key,target:pad,preventDefault(){}}),keyup:(key:string)=>emit(windowEvents,'keyup',{key}),choose(id:string){const choice=new Element();choice.dataset.project=id;choice.parent=get('#places');choice.click(1)},restore(){world.destroy();Object.assign(globalThis,original)}};
+  repeatInput:()=>(environment.activityInput as InputRouter).repeat(),visibility:(hidden:boolean)=>{document.hidden=hidden;emit(documentEvents,'visibilitychange',{})},frameCount:()=>frames.size,keydown:(key:string)=>emit(documentEvents,'keydown',{key,target:pad,preventDefault(){}}),keyup:(key:string)=>emit(windowEvents,'keyup',{key}),choose(id:string){const choice=new Element();choice.dataset.project=id;choice.parent=get('#places');choice.click(1)},restore(){for(const close of activitySubscriptions)close();activities.clearLocal();world.destroy();Object.assign(globalThis,original)}};
 }
 
 test('actual Map selection retains its online destination after dialog close cleanup',async()=>{
