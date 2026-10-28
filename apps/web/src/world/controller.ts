@@ -1,4 +1,5 @@
 import mapData from '../../../../contracts/map.v1.json';
+import {mapPoint,type CanvasRect,type ClosedMapZone} from './minimap';
 import {loadMap,collisionTiles,type Point} from './map';
 import {findPath,isPlayable,tileKey} from '../world-math.js';
 import {advanceMovement} from './input';
@@ -11,7 +12,8 @@ import {VILLAGE_DESTINATIONS,projectVillage,unprojectVillage,villageLocation} fr
 const MAP=loadMap(mapData),occupied=collisionTiles(MAP);
 const clamp=(v:number,a:number,b:number)=>Math.max(a,Math.min(b,v));
 type Adapter={input:(dx:number,dy:number)=>void;destination:(x:number,y:number)=>void};
-type Options={stations:{id:string;name?:string}[];onNear?:(id:string|null)=>void;onSelect?:(id:string)=>void;onMove?:(position:Point&{walking:boolean})=>void};
+type DestinationResolver=(point:Point)=>Point|null;
+type Options={minimapCanvas?:HTMLCanvasElement;resolveDestination?:DestinationResolver;stations:{id:string;name?:string}[];onNear?:(id:string|null)=>void;onSelect?:(id:string)=>void;onMove?:(position:Point&{walking:boolean})=>void};
 
 /** Screen axes and authoritative grid axes match. Rounded cells mirror Go's movement boundary. */
 export function freeMovement(position:Point,direction:Point,dt:number):Point{
@@ -29,7 +31,7 @@ export function visibleVillageProp(point:Point,camera:Point,zoom:number,viewport
  return x>-padding&&x<viewport.width+padding&&y>-padding&&y<viewport.height+padding;
 }
 
-export function createWorld(canvas:HTMLCanvasElement,{stations,onNear=()=>{},onSelect=()=>{},onMove=()=>{}}:Options){
+export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,resolveDestination,onNear=()=>{},onSelect=()=>{},onMove=()=>{}}:Options){
  const ctx=canvas.getContext('2d')!,art=createWorldArt();
  const mini=document.createElement('canvas');mini.width=256;mini.height=192;
  const mc=mini.getContext('2d')!;mc.drawImage(art.background,0,0,256,192);mc.save();mc.scale(.1,.1);[...art.foregroundObjects].sort((a,b)=>a.y-b.y).forEach(o=>o.draw(mc,0));mc.restore();
@@ -38,6 +40,7 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,onNear=()=>{},onS
  let localName='Guest',localAvatar='pumpkin',paused=false,motion=true,dead=false,dirty=true,near:string|null=null,facing='down';
  let width=0,height=0,dpr=1,zoom=1,lastTime=0,elapsed=0,raf=0,lastMove='',walking=false;
  let camera={x:0,y:0},pointerStart:{x:number;y:number;id:number}|null=null;
+ let closedZones:ClosedMapZone[]=[];
  const previous=new Map<string,Point>();
  const positions=VILLAGE_DESTINATIONS;
  function resize(){const bounds=canvas.getBoundingClientRect();width=bounds.width;height=bounds.height;dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.imageSmoothingEnabled=false;dirty=true;draw()}
@@ -57,9 +60,8 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,onNear=()=>{},onS
   objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
   ctx.restore();const labels:{x:number;y:number;w:number}[]=[];
   for(const a of avatars){const p=projectVillage(a);const x=camera.x+p.x*zoom;let y=camera.y+(p.y-53)*zoom;const text=`${a.name}${a.status==='available'?'':` · ${a.status}`}`;ctx.font='600 11px "DM Sans",sans-serif';const w=ctx.measureText(text).width+16;while(labels.some(l=>Math.abs(l.x-x)<(w+l.w)/2+4&&Math.abs(l.y-y)<24))y-=24;labels.push({x,y,w});label(text,x,y,a.id==='local'||a.id===selfID)}
-  const compact=width<700,mw=compact?104:160,mh=mw*.75,mx=width-mw-18,my=height-(compact?205:155)-mh;
-  ctx.fillStyle='#213b32ee';ctx.beginPath();ctx.roundRect(mx-7,my-23,mw+14,mh+34,10);ctx.fill();ctx.drawImage(mini,mx,my,mw,mh);ctx.font='8px "DM Sans",sans-serif';ctx.fillStyle='#e5e8d1';ctx.textAlign='left';ctx.fillText('KAMPUNG SENJA',mx,my-9);
-  ctx.fillStyle='#ffe4aa';ctx.beginPath();ctx.arc(mx+p.x/art.width*mw,my+p.y/art.height*mh,3,0,Math.PI*2);ctx.fill();dirty=false;
+  if(minimapCanvas){const c=minimapCanvas.getContext('2d')!;c.clearRect(0,0,minimapCanvas.width,minimapCanvas.height);c.drawImage(mini,0,0,minimapCanvas.width,minimapCanvas.height);drawClosedZones(c,minimapCanvas.width,minimapCanvas.height);c.fillStyle='#ffe4aa';c.beginPath();c.arc(p.x/art.width*minimapCanvas.width,p.y/art.height*minimapCanvas.height,4,0,Math.PI*2);c.fill()}
+  dirty=false;
  }
  function notifyPosition(){
   const signature=`${player.x.toFixed(2)},${player.y.toFixed(2)},${walking}`;
@@ -69,12 +71,24 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,onNear=()=>{},onS
   if(closest!==near){near=closest;onNear(near)}
  }
  function stopDirection(){direction={x:0,y:0};online?.input(0,0);walking=false}
+ function validDestination(point:Point|null|undefined):point is Point{return Boolean(point&&Number.isInteger(point.x)&&Number.isInteger(point.y)&&isPlayable(point.x,point.y)&&!occupied.has(tileKey(point.x,point.y)))}
+ function resolvePoint(point:Point):Point|null{
+  if(!validDestination(point))return null;
+  const zone=closedZones.find(z=>point.x>=z.bounds.x&&point.x<z.bounds.x+z.bounds.width&&point.y>=z.bounds.y&&point.y<z.bounds.y+z.bounds.height);
+  const resolved=resolveDestination?resolveDestination(zone?{...zone.entrance}:{...point}):zone?zone.entrance:point;
+  if(!validDestination(resolved)||closedZones.some(z=>resolved.x>=z.bounds.x&&resolved.x<z.bounds.x+z.bounds.width&&resolved.y>=z.bounds.y&&resolved.y<z.bounds.y+z.bounds.height))return null;
+  return{x:resolved.x,y:resolved.y};
+ }
  function destination(point:Point){
-  if(paused||!isPlayable(point.x,point.y)||occupied.has(tileKey(point.x,point.y)))return;
-  direction={x:0,y:0};target={...point};
-  if(online){online.destination(point.x,point.y);return}
-  const start={x:Math.round(player.x),y:Math.round(player.y)},path=findPath(start,point,occupied);
+  if(paused)return;
+  const resolved=resolvePoint(point);if(!resolved)return;
+  direction={x:0,y:0};target={...resolved};
+  if(online){online.destination(resolved.x,resolved.y);return}
+  const start={x:Math.round(player.x),y:Math.round(player.y)},path=findPath(start,resolved,occupied);
   route=path.length?[start,...path]:[];if(!route.length)target=null;dirty=true;
+ }
+ function drawClosedZones(c:CanvasRenderingContext2D,w:number,h:number){
+  for(const zone of closedZones){const p=projectVillage(zone.bounds);c.fillStyle='#bf663e88';c.fillRect(p.x/art.width*w,p.y/art.height*h,zone.bounds.width*40/art.width*w,zone.bounds.height*40/art.height*h);c.fillStyle='#fff0cd';c.font='600 11px sans-serif';c.textAlign='left';c.fillText(zone.label??'In use',p.x/art.width*w,p.y/art.height*h+12)}
  }
  function travelTo(id:string){const place=positions.find(s=>s.id===id);if(place)destination(place)}
  function move(dx:number,dy:number){if(paused||!Number.isFinite(dx)||!Number.isFinite(dy))return;direction={x:Math.sign(dx),y:Math.sign(dy)};route=[];target=null;if(online)online.input(direction.x,direction.y);dirty=true}
@@ -95,7 +109,11 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,onNear=()=>{},onS
  resize();notifyPosition();raf=requestAnimationFrame(frame);
  return {
   travelTo,travelToLocation:travelTo,move,interact,
-  drawMap(targetCanvas:HTMLCanvasElement){const c=targetCanvas.getContext('2d')!;c.clearRect(0,0,targetCanvas.width,targetCanvas.height);c.save();c.scale(targetCanvas.width/art.width,targetCanvas.height/art.height);c.drawImage(art.background,0,0);[...art.foregroundObjects].sort((a,b)=>a.y-b.y).forEach(o=>o.draw(c,0));c.restore();for(const d of positions){if(d.id==='arcade')continue;const p=projectVillage(d),x=p.x/art.width*targetCanvas.width,y=p.y/art.height*targetCanvas.height;c.font='600 12px sans-serif';const w=c.measureText(d.name).width+12;c.fillStyle='#213b32ed';c.fillRect(x-w/2,y-22,w,20);c.fillStyle='#fff0cd';c.textAlign='center';c.fillText(d.name,x,y-8)}},
+  setClosedZones(zones:ClosedMapZone[]){closedZones=structuredClone(zones);dirty=true},
+  setDestinationResolver(resolver:DestinationResolver|undefined){resolveDestination=resolver},
+  mapDestination(clientPoint:Point,rect:CanvasRect){const p=mapPoint(clientPoint,rect,{x:0,y:0,width:art.width,height:art.height});if(!p)return null;const tile=unprojectVillage(p);return resolvePoint({x:Math.round(tile.x),y:Math.round(tile.y)})},
+  walkToPoint:destination,
+  drawMap(targetCanvas:HTMLCanvasElement){const c=targetCanvas.getContext('2d')!;c.clearRect(0,0,targetCanvas.width,targetCanvas.height);c.save();c.scale(targetCanvas.width/art.width,targetCanvas.height/art.height);c.drawImage(art.background,0,0);[...art.foregroundObjects].sort((a,b)=>a.y-b.y).forEach(o=>o.draw(c,0));c.restore();drawClosedZones(c,targetCanvas.width,targetCanvas.height);for(const d of positions){if(d.id==='arcade')continue;const p=projectVillage(d),x=p.x/art.width*targetCanvas.width,y=p.y/art.height*targetCanvas.height;c.font='600 12px sans-serif';const w=c.measureText(d.name).width+12;c.fillStyle='#213b32ed';c.fillRect(x-w/2,y-22,w,20);c.fillStyle='#fff0cd';c.textAlign='center';c.fillText(d.name,x,y-8)}},
   stopInput(){stopDirection();dirty=true},
   setConnectionStatus(status:string){connectionStatus=status;dirty=true},
   isOnline(){return online!==null},

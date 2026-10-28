@@ -19,11 +19,16 @@ func (s *PGStore) Persist(ctx context.Context, m model.MatchStart, host, command
 		return e
 	}
 	defer tx.Rollback(ctx)
+	// Startup takes this schema-scoped fence exclusively before enumeration, so
+	// even an initial row that is not yet visible must settle before recovery.
+	if _, e = tx.Exec(ctx, `SELECT pg_advisory_xact_lock_shared(hashtextextended(current_schema() || '.matches.startup',21))`); e != nil {
+		return e
+	}
 	if _, e = tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,7))`, m.MatchID); e != nil {
 		return e
 	}
-	// Match lock 7 -> sorted account locks 12. Deletion takes account locks only,
-	// never a match lock, so a late insert cannot restore erased projections.
+	// Startup fence -> match lock 7 -> sorted account locks 12. Deletion takes
+	// account locks only, never a startup/match lock, so there is no reverse order.
 	users := []string{}
 	for _, a := range m.Actors {
 		if a.ActorType == "human" {

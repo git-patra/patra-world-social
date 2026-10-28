@@ -1,3 +1,6 @@
+import {mountAudio} from './audio/events';
+import {mountMinimap} from './world/minimap';
+import {openCenteredDialog,closeDialogThen,mountDialogViewport,setDialogFocusReturn} from './ui/dialogs';
 import {villageLocation} from './world/village';
 import {mountSettings} from './features/settings/SettingsPage';
 import {mountGuestLifecycle,mountGuestUICleanup} from './guest/session';
@@ -15,10 +18,12 @@ import {mountSocial} from './social-ui.ts';
 import {mountLobbies,mountLobbyPanel} from './features/lobby/LobbyPanel';
 import {mountChat} from './chat-ui.ts';
 import {mountWorlds} from './worlds-ui.ts';
+const unmountDialogViewport=mountDialogViewport();
+const unmountAudio=mountAudio();
 const $=(selector)=>document.querySelector(selector);
 const dialog=$('#project-dialog'),content=$('#dialog-content');
 const visited=new Set(['plaza']);
-let nearby=null,world,lastTrigger=null,cleanupDemo=null;
+let nearby=null,world,cleanupDemo=null;
 function disposeDemo(){cleanupDemo?.();cleanupDemo=null;}
 let motion=!matchMedia('(prefers-reduced-motion: reduce)').matches;
 const placeMarkup=(station,i)=>`<button class="place-row" data-project="${station.id}" style="--place-color:${station.color}"><span class="place-number">${String(i+1).padStart(2,'0')}</span><span class="place-icon">${station.icon}</span><span class="place-copy"><strong>${station.label}</strong><small>${station.short}</small></span><span class="place-arrow">↗</span></button>`;
@@ -33,7 +38,7 @@ function updateMotion(){
 }
 function notify(message){$('#travel-status').textContent=message;}
 world=createWorld($('#world'),{
- stations,
+ stations,minimapCanvas:$('#minimap'),
  onNear(id){
   nearby=id;const station=stations.find(s=>s.id===id);
 
@@ -51,9 +56,8 @@ world=createWorld($('#world'),{
 });
 updateMotion();
 function showDialog(){
- lastTrigger=document.activeElement;
  world.setPaused(true);
- dialog.showModal();
+ openCenteredDialog(dialog);
  $('#close-dialog').focus();
 }
 function openProject(id){
@@ -68,7 +72,7 @@ function openProject(id){
  if(!dialog.open)showDialog();
  else {dialog.scrollTop=0;$('#close-dialog').focus();}
  $('#back-to-world').onclick=()=>dialog.close();
- $('#walk-to-place').onclick=()=>{dialog.close();requestAnimationFrame(()=>{$('#home').scrollIntoView({behavior:'instant'});world.setPaused(false);world.travelTo(id);notify(`Walking to ${station.name}.`);});};
+ $('#walk-to-place').onclick=()=>closeDialogThen(dialog,()=>{syncWorldPause();world.travelTo(id);notify(`Walking to ${station.name}.`);});
  if(id==='warkop')cleanupDemo=mountVoicePanel($('#voice-root'));
  if(['race','penalty','duck'].includes(id))cleanupDemo=mountLobbyPanel($('#lobby-root'),id);
  if(id==='arcade')cleanupDemo=mountPenalty($('#penalty-root'));
@@ -76,19 +80,31 @@ function openProject(id){
 document.addEventListener('click',event=>{const button=event.target.closest('[data-project]');if(!button)return;
  if(button.closest('#places')){
   const station=stations.find(s=>s.id===button.dataset.project);
-  $('#map-dialog').close();hideWelcome();requestAnimationFrame(()=>{syncWorldPause();notify(`Walking to ${station.name}. Tekan E untuk membuka aktivitas setelah tiba.`);world.travelTo(station.id);});
+  hideWelcome();closeDialogThen($('#map-dialog'),()=>{syncWorldPause();notify(`Walking to ${station.name}. Tekan E untuk membuka aktivitas setelah tiba.`);world.travelTo(station.id);});
  }else openProject(button.dataset.project);});
-$('#list-button').onclick=()=>{world.stopInput();world.drawMap($('#village-map'));$('#map-dialog').showModal();};
+function openMap(trigger){world.stopInput();world.drawMap($('#village-map'));openCenteredDialog($('#map-dialog'),trigger);}
+$('#list-button').onclick=()=>openMap($('#list-button'));
+const unmountMinimap=mountMinimap($('#minimap-button'),{openMap:()=>openMap($('#minimap-button'))});
+$('#village-map').addEventListener('click',event=>{
+ const point=world.mapDestination({x:event.clientX,y:event.clientY},$('#village-map').getBoundingClientRect());
+ if(!point)return;
+ hideWelcome();closeDialogThen($('#map-dialog'),()=>{syncWorldPause();world.walkToPoint(point);notify('Walking there. Tekan E untuk berinteraksi setelah tiba.');});
+});
 $('#close-map').onclick=()=>$('#map-dialog').close();
-$('#menu-button').onclick=()=>$('#menu-dialog').showModal();
+$('#menu-button').onclick=()=>openCenteredDialog($('#menu-dialog'),$('#menu-button'));
 $('#close-menu').onclick=()=>$('#menu-dialog').close();
-$('#menu-dialog').addEventListener('click',e=>{if(e.target.closest('button'))$('#menu-dialog').close()});
+$('#menu-dialog').addEventListener('click',e=>{
+ if(!e.target.closest('button'))return;
+ $('#menu-dialog').close();
+ // Feature handlers and delegated quick play finish opening their child first.
+ queueMicrotask(()=>{const child=[...document.querySelectorAll('dialog')].find(d=>d!==$('#menu-dialog')&&d.open);if(child)setDialogFocusReturn(child,$('#menu-button'));});
+});
 let zoom=1;
 $('#zoom-in').onclick=()=>{zoom=Math.min(1.5,zoom+.15);world.setZoom(zoom)};
 $('#zoom-out').onclick=()=>{zoom=Math.max(.65,zoom-.15);world.setZoom(zoom)};
 $('#close-dialog').onclick=()=>dialog.close();
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
-dialog.addEventListener('close',()=>{disposeDemo();syncWorldPause();lastTrigger?.focus?.({preventScroll:true});});
+dialog.addEventListener('close',()=>{disposeDemo();syncWorldPause();});
 $('#dismiss-note').onclick=hideWelcome;
 $('#interact-button').onclick=()=>world.interact();
 $('#reset-button').onclick=()=>{zoom=1;world.recenter();notify('Kamera dipusatkan ke karaktermu.');};
@@ -117,7 +133,7 @@ document.querySelectorAll('[data-move]').forEach(button=>{
  button.addEventListener('click',event=>{if(event.detail===0){pointerHold.pulse(...direction);hideWelcome();}});
 });
 window.addEventListener('pointerup',stopHold);window.addEventListener('pointercancel',stopHold);window.addEventListener('blur',releaseInputs);
-window.addEventListener('pagehide',event=>{releaseInputs();if(!event.persisted){clearInterval(keyboardTimer);disposeDemo();world.destroy();}});
+window.addEventListener('pagehide',event=>{releaseInputs();if(!event.persisted){clearInterval(keyboardTimer);unmountMinimap();unmountDialogViewport();unmountAudio();disposeDemo();world.destroy();}});
 
 let worldVisible=true;
 function syncWorldPause(){world.setPaused(Boolean(document.querySelector('dialog[open]'))||!worldVisible||document.hidden);}

@@ -1,8 +1,10 @@
+import {gameAudio} from '../../audio/events';
+import {authState} from '../../auth-state';
 import type {Aim,DuckSnapshot,PublicTarget} from './local';
 
 export type Calibration={offsetMs:number;rttMs:number;rewindMs:number;measuredAt:number;expiresAt:number};
 export type ClockReply={measured:boolean;calibration:Calibration};
-type Resolution={targetId:number;points:number};
+type Resolution={targetId:number;points:number;shots?:number};
 type Command=(type:string,payload:Record<string,unknown>)=>Promise<unknown>;
 export const predictionHorizonMs=500;
 
@@ -48,9 +50,10 @@ export class OnlineDuckController{
   return{snapshot:s,at,calibrated,stale,message:stale?'Snapshot terlambat · target disembunyikan sampai sinkron.':!calibrated?'Kalibrasi koneksi terbatas · tampilan waktu perkiraan.':c!.rttMs>300?'Koneksi lambat · kompensasi maksimal 150 ms.':'Koneksi terukur · kompensasi maksimal 150 ms.'};
  }
  async shoot(aim:Aim){
-  const generation=this.generation;
+  const generation=this.generation,account=authState.snapshot().generation,sentAt=this.localNow();
   const result=await this.command('duck.shoot',{matchId:this.matchId,...aim,clientTimeMs:this.localNow()}) as Resolution;
   if(generation===this.generation&&result.targetId>0){this.dead.add(result.targetId);if(this.snapshot)this.snapshot={...this.snapshot,targets:this.snapshot.targets.filter(t=>t.id!==result.targetId)}};
+  if(generation===this.generation&&authState.is(account)&&result.shots)gameAudio.duck({...result,shots:result.shots,matchId:this.matchId,worldId:this.worldId},account,this.localNow()-sentAt>1000);
   return result;
  }
 }

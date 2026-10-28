@@ -6,17 +6,22 @@ import (
 	"time"
 )
 
+// Notify preserves alternating transitions while bounding a stalled owner's queue.
+// Repeated identical states add no information; overflow leaves the match safely.
 func (s *Service) Notify(kind, world, user string) {
+	if kind != "disconnect" && kind != "resume" && kind != "leave" {
+		return
+	}
 	s.pendingMu.Lock()
 	key := [2]string{world, user}
-	old := s.pending[key]
-	if old.kind != "leave" {
-		at := s.clock.Now()
-		disconnectedAt := old.disconnectedAt
-		if kind == "disconnect" && (disconnectedAt.IsZero() || old.kind == "resume" && old.at.Sub(disconnectedAt) < 15*time.Second) {
-			disconnectedAt = at
+	queue := s.pending[key]
+	if len(queue) == 0 || (queue[len(queue)-1].kind != "leave" && queue[len(queue)-1].kind != kind) {
+		n := notification{kind: kind, world: world, user: user, at: s.clock.Now()}
+		if len(queue) >= 32 {
+			n.kind = "leave"
+			queue = queue[:31]
 		}
-		s.pending[key] = notification{kind: kind, world: world, user: user, at: at, disconnectedAt: disconnectedAt}
+		s.pending[key] = append(queue, n)
 	}
 	s.pendingMu.Unlock()
 	select {
@@ -27,20 +32,25 @@ func (s *Service) Notify(kind, world, user string) {
 func (s *Service) drainPresence() {
 	s.pendingMu.Lock()
 	pending := s.pending
-	s.pending = map[[2]string]notification{}
+	s.pending = map[[2]string][]notification{}
 	s.pendingMu.Unlock()
-	ordered := make([]notification, 0, len(pending))
-	for _, n := range pending {
-		ordered = append(ordered, n)
-		s.recordDisconnect(n)
+	ordered := []notification{}
+	for _, queue := range pending {
+		ordered = append(ordered, queue...)
 	}
-	sort.Slice(ordered, func(i, j int) bool {
+	sort.SliceStable(ordered, func(i, j int) bool {
 		if ordered[i].at.Equal(ordered[j].at) {
 			return ordered[i].user < ordered[j].user
 		}
 		return ordered[i].at.Before(ordered[j].at)
 	})
+	// Engines need the earliest disconnect of every player before catch-up may
+	// evaluate grace. Later cycles are applied in order after an intervening resume.
 	for _, n := range ordered {
+		s.recordDisconnect(n)
+	}
+	for _, n := range ordered {
+		s.recordDisconnect(n)
 		s.presence(n)
 	}
 }
@@ -106,7 +116,9 @@ func (s *Service) departAt(l *entry, i int, at time.Time, kind string) {
 
 	if l.engine != nil && (l.State == "countdown" || l.State == "running") {
 		enginePresence(l.engine, p.UserID, kind, at)
-		if l.engine.Tick(s.clock.Now()) {
+		// Later queued cycles are not installed yet; catch up only to this
+		// departure, then let advance consume the clock after the whole batch.
+		if l.engine.Tick(at) {
 			l.State = "finalizing"
 			l.finalizingAt = s.clock.Now()
 		}

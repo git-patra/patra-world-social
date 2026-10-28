@@ -1,9 +1,10 @@
+import {openCenteredDialog} from './ui/dialogs';
 import { api, type ChatMessage, type User } from './net/api';
 import type { WorldSocket } from './net/socket';
 import { mergeMessages, validMessage } from './chat-model';
 import './social.css';
 export function mountChat() {
-    const panel = document.querySelector<HTMLElement>('#chat-panel')!;
+    const panel = document.querySelector<HTMLDialogElement>('#chat-panel')!;
     const button = document.querySelector<HTMLButtonElement>('#chat-button')!;
     const badge = document.querySelector('#chat-badge')!;
     const status = document.querySelector('#chat-status')!;
@@ -104,14 +105,14 @@ export function mountChat() {
                 notice(errorText(e)); });
         }
     }
-    button.onclick = () => { panel.hidden = !panel.hidden; if (!panel.hidden) {
+    button.onclick = () => { if (panel.open) { panel.close(); return; } openCenteredDialog(panel,button);
         unread = 0;
         render();
         if (socket && messages.length === 0)
             void history(true);
         input.focus();
-    } };
-    document.querySelector<HTMLButtonElement>('#close-chat')!.onclick = () => { panel.hidden = true; };
+    };
+    document.querySelector<HTMLButtonElement>('#close-chat')!.onclick = () => { panel.close(); };
     older.onclick = () => void history(false);
     latest.onclick = () => void history(true);
     form.onsubmit = async (e) => {
@@ -172,7 +173,7 @@ export function mountChat() {
             const fresh = !seenIDs.has(payload.id);
             seenIDs.add(payload.id);
             messages = mergeMessages(messages, [payload], deletedIDs);
-            if (fresh && panel.hidden && payload.userId !== user?.id)
+            if (fresh && !panel.open && payload.userId !== user?.id)
                 unread++;
             render();
         }

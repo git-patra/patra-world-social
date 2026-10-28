@@ -52,6 +52,12 @@
     "tests/account*.ts",
     "src/auth-state.ts",
     "src/preferences.ts",
-    "tests/settings.test.ts"
+    "tests/settings.test.ts",
+    "src/audio/**/*.ts",
+    "src/ui/**/*.ts",
+    "tests/audio.test.ts",
+    "tests/activities-performance.fixture.ts",
+    "tests/world-ui.e2e.spec.ts",
+    "tests/app-shell.test.ts"
   ]
 }

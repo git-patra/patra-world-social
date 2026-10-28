@@ -61,6 +61,20 @@ func TestDuckActualTransportMeasuredProfilesAndAuthority(t *testing.T) {
 			json.Unmarshal(first.Payload, &seat)
 			j := realtime.JoinContext{Token: tokens[0], WorldID: w.ID, SessionID: seat.SessionID, Epoch: seat.Epoch}
 			counter := uint64(0)
+			var resolutions []duck.ShotResolved
+			recordResolution := func(ev realtime.Event) {
+				if ev.Type != "duck.shot_resolved" {
+					return
+				}
+				var resolved duck.ShotResolved
+				if err := json.Unmarshal(ev.Payload, &resolved); err != nil {
+					t.Fatal(err)
+				}
+				if resolved.WorldID != w.ID {
+					t.Fatal("wrong event world", resolved)
+				}
+				resolutions = append(resolutions, resolved)
+			}
 			send := func(kind string, payload any) (string, json.RawMessage) {
 				t.Helper()
 				counter++
@@ -79,6 +93,7 @@ func TestDuckActualTransportMeasuredProfilesAndAuthority(t *testing.T) {
 					if e != nil {
 						t.Fatal(e)
 					}
+					recordResolution(ev)
 					var ack struct {
 						CommandID string          `json:"commandId"`
 						Result    json.RawMessage `json:"result"`
@@ -217,6 +232,23 @@ func TestDuckActualTransportMeasuredProfilesAndAuthority(t *testing.T) {
 			if kind != "command.ack" || miss.Points != 0 || miss.TargetID != 0 || miss.Shots != 2 {
 				t.Fatal("outside displayed hitbox scored", kind, miss)
 			}
+
+			// The publisher can follow the ACK. Read the real websocket event,
+			// then compare its identity with that same authoritative ACK.
+			for len(resolutions) < 2 {
+				_, b, e := c.Read(ctx)
+				if e != nil {
+					t.Fatal(e)
+				}
+				ev, e := realtime.ValidateEvent(b)
+				if e != nil {
+					t.Fatal(e)
+				}
+				recordResolution(ev)
+			}
+			if len(resolutions) != 2 || resolutions[0].ShotResult != shot || resolutions[1].ShotResult != miss || resolutions[0].ServerTimeMs != received || resolutions[1].ServerTimeMs != received+250 {
+				t.Fatal("accepted hit/miss transport events", resolutions, shot, miss)
+			}
 			clock.set(received + 600)
 			kind, _ = send("duck.shoot", map[string]any{"matchId": m.MatchID, "x": 0.5, "y": 0.5, "clientTimeMs": float64(received + 999999)})
 			if kind != "command.error" {
@@ -225,6 +257,14 @@ func TestDuckActualTransportMeasuredProfilesAndAuthority(t *testing.T) {
 			kind, _ = send("duck.clock_reply", map[string]any{"matchId": m.MatchID, "nonce": ch.Nonce, "clientTimeMs": 100})
 			if kind != "command.error" {
 				t.Fatal("nonce replay accepted")
+			}
+
+			// Flush another publisher interval after rejected commands: neither
+			// a rejection nor the next snapshot may create another resolution.
+			time.Sleep(100 * time.Millisecond)
+			send("duck.snapshot", map[string]any{"matchId": m.MatchID})
+			if len(resolutions) != 2 {
+				t.Fatal("rejected command emitted shot", resolutions)
 			}
 			other, _ := app.Hub.Join(ctx, realtime.JoinContext{Token: tokens[1], WorldID: w.ID})
 			oj := realtime.JoinContext{Token: tokens[1], WorldID: w.ID, SessionID: other.SessionID, Epoch: other.Epoch}

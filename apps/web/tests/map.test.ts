@@ -300,3 +300,17 @@ test('large Warkop canopy stays visible at mobile viewport edges at every zoom',
   assert.equal(visibleVillageProp({x:2400,y:416},camera,zoom,{width:390,height:844}),false);
  }
 });
+
+
+import {mapPoint} from '../src/world/minimap';
+test('map points use rendered content edges independently of world zoom and DPR',()=>{
+ for(const zoom of [.65,1,1.5])for(const dpr of [1,2]){
+  const rect={left:17,top:23,width:400*zoom,height:400*zoom},bounds={x:0,y:0,width:2560,height:1920};
+  const scale=rect.width/bounds.width,top=rect.top+50*zoom;
+  assert.deepEqual(mapPoint({x:rect.left+rect.width/2,y:rect.top+rect.height/2},rect,bounds),{x:1280,y:960},`zoom ${zoom}, DPR ${dpr}`);
+  assert.deepEqual(mapPoint({x:rect.left,y:top},rect,bounds),{x:0,y:0});
+  assert.deepEqual(mapPoint({x:rect.left+rect.width,y:top+1920*scale},rect,bounds),{x:2560,y:1920});
+  assert.equal(mapPoint({x:rect.left,y:top-1},rect,bounds),null);
+ }
+ assert.equal(mapPoint({x:NaN,y:5},{left:0,top:0,width:400,height:300},{x:0,y:0,width:2560,height:1920}),null);
+});

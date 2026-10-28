@@ -97,3 +97,45 @@ func TestRealOwnerDelayedPresenceAndDurableMetadata(t *testing.T) {
 		})
 	}
 }
+
+func TestAcceptedShotEventsSurviveSnapshotTickAndRejectsEmitNothing(t *testing.T) {
+	clock := &testClock{}
+	engine, err := Factory(clock)(model.MatchStart{MatchID: "m", WorldID: "w", Seed: 1, Actors: []model.Actor{{ActorID: "a", UserID: "u", ActorType: "human"}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := engine.(*Adapter)
+	a.Start(4000)
+	a.engine.targets = []target{{ID: 100, Kind: "normal", Born: 4500, X: 500, Y: 500, VX: 0}}
+	hit, err := a.Shoot("u", 1, 1, Aim{.5, .5}, 1, time.UnixMilli(5000))
+	if err != nil || hit.Points != 100 {
+		t.Fatal(hit, err)
+	}
+	if _, err = a.Shoot("u", 1, 2, Aim{}, 2, time.UnixMilli(5100)); err == nil {
+		t.Fatal("cooldown accepted")
+	}
+	miss, err := a.Shoot("u", 1, 3, Aim{0, .95}, 3, time.UnixMilli(5250))
+	if err != nil || miss.Points != 0 {
+		t.Fatal(miss, err)
+	}
+	a.Tick(time.UnixMilli(5300))
+	events := a.DrainEvents()
+	resolved := 0
+	for _, event := range events {
+		if event.Type == "duck.shot_resolved" {
+			resolved++
+		}
+	}
+	if resolved != 2 {
+		t.Fatalf("accepted hit/miss each need one event; got %d in %+v", resolved, events)
+	}
+	if len(a.DrainEvents()) != 0 {
+		t.Fatal("events replayed")
+	}
+	if _, err = a.Shoot("other", 1, 4, Aim{}, 4, time.UnixMilli(5600)); err == nil {
+		t.Fatal("spectator accepted")
+	}
+	if a.HasEvents() {
+		t.Fatal("rejection published sound")
+	}
+}

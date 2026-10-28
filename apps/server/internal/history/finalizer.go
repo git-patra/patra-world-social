@@ -168,9 +168,20 @@ func (s *Service) Reconcile(ctx context.Context, id string) (string, error) {
 // RecoverPending runs once before admitting gameplay on this process. Runtime
 // reconciliation must use Reconcile instead: it has different absent-job policy.
 func (s *Service) RecoverPending(ctx context.Context) error {
+	tx, e := s.Pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
+	if e != nil {
+		return e
+	}
+	defer tx.Rollback(ctx)
+	// Persist takes the shared schema-scoped fence before its match/account
+	// locks. Take it exclusively before enumeration to include invisible initial
+	// starts, and retain it through recovery so no new starts can slip between.
+	if _, e = tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended(current_schema() || '.matches.startup',21))`); e != nil {
+		return e
+	}
 	// Enumeration selects candidates only. No absent-job or terminal-claim decision
 	// may use this snapshot: a pre-restart enqueue may still be committing.
-	rows, e := s.Pool.Query(ctx, `SELECT id::text FROM matches m WHERE status IN ('running','finalizing') OR EXISTS(SELECT 1 FROM active_match_users a WHERE a.match_id=m.id) ORDER BY id`)
+	rows, e := tx.Query(ctx, `SELECT id::text FROM matches m WHERE status IN ('running','finalizing') OR EXISTS(SELECT 1 FROM active_match_users a WHERE a.match_id=m.id) ORDER BY id`)
 	if e != nil {
 		return e
 	}
@@ -189,40 +200,35 @@ func (s *Service) RecoverPending(ctx context.Context) error {
 		return e
 	}
 	for _, id := range ids {
-		if e = s.recoverStartupMatch(ctx, id); e != nil {
+		if e = s.recoverStartupMatch(ctx, tx, id); e != nil {
 			return e
 		}
 	}
-	return nil
+	return tx.Commit(ctx)
 }
-func (s *Service) recoverStartupMatch(ctx context.Context, id string) error {
-	tx, e := s.Pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.ReadCommitted})
-	if e != nil {
+func (s *Service) recoverStartupMatch(ctx context.Context, tx pgx.Tx, id string) error {
+	if e := lockMatch(ctx, tx, id); e != nil {
 		return e
 	}
-	defer tx.Rollback(ctx)
-	if e = lockMatch(ctx, tx, id); e != nil {
-		return e
-	}
-	// A separate READ COMMITTED statement after acquiring the shared fence sees
+	// A separate READ COMMITTED statement after acquiring the match fence sees
 	// the settling enqueue's committed job, even if enumeration saw it absent.
 	var status string
 	var durable bool
-	if e = tx.QueryRow(ctx, `SELECT status,EXISTS(SELECT 1 FROM result_jobs j WHERE j.match_id=m.id) FROM matches m WHERE id=$1 FOR UPDATE`, id).Scan(&status, &durable); e != nil {
+	if e := tx.QueryRow(ctx, `SELECT status,EXISTS(SELECT 1 FROM result_jobs j WHERE j.match_id=m.id) FROM matches m WHERE id=$1 FOR UPDATE`, id).Scan(&status, &durable); e != nil {
 		return e
 	}
 	if (status == "running" || status == "finalizing") && !durable {
 		status = "aborted_server"
-		if _, e = tx.Exec(ctx, `UPDATE matches SET status='aborted_server',finished_at=now() WHERE id=$1`, id); e != nil {
+		if _, e := tx.Exec(ctx, `UPDATE matches SET status='aborted_server',finished_at=now() WHERE id=$1`, id); e != nil {
 			return e
 		}
 	}
 	// No old runtime survives startup, but durable pending jobs keep their claims
 	// until the worker has actually finalized and reconciled them.
 	if status != "running" && status != "finalizing" {
-		if _, e = tx.Exec(ctx, `DELETE FROM active_match_users WHERE match_id=$1`, id); e != nil {
+		if _, e := tx.Exec(ctx, `DELETE FROM active_match_users WHERE match_id=$1`, id); e != nil {
 			return e
 		}
 	}
-	return tx.Commit(ctx)
+	return nil
 }

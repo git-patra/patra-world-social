@@ -10,7 +10,7 @@
 
 **Spec:** [World activities design](../specs/2026-10-28-world-activities-design.md).
 
-**Status:** Draft untuk review, 28 Oktober 2026. User meminta plan dulu; belum ada perubahan kode produk atau implementasi. Baseline `main`/`a71fd85`. Angka dan rules di spec adalah usulan, kecuali pilihan user: top-down shooter, solo/co-op melawan bot, fishing tanpa history.
+**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–2 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md).
 
 ## Ringkasan tahap dan cakupan
 
@@ -32,7 +32,7 @@ Task 1 dan 2 dapat diparalelkan setelah baseline. Task 3→4 membentuk integrasi
 
 ## Global Constraints
 
-- User meminta **plan dulu**. Jangan memasang dependency, mengubah product code, menjalankan migration, atau mulai implementasi dari dokumen ini sebelum user meminta lanjut.
+- User sudah meminta implementasi seluruh tahap 1–6 pada 28 Oktober 2026. Pertahankan urutan, simpan evidence dan commit lokal bertahap.
 - Fullscreen kampung autumn, tanpa CV/sidebar; semi-English labels dan penjelasan Indonesia. Source repo `patra-world` tetap tidak berubah.
 - Private invite worlds; guest solo lokal. Race lama tetap 5 lap / 5 slot; penalti tetap 3 s untuk memilih / 1.5 s untuk reveal. Duck/podium/history, accounts, friends, moderation dan voice tetap berfungsi.
 - Blaster: usulan 1–4 pemain manusia, 3 wave, 180 s, 3 HP, ≤8 bot / 48 projectile; hanya solo/co-op. Pingpong: usulan 7 poin, selisih 2, batas 11, 120 s. Lihat spec untuk rules lengkap.
@@ -66,9 +66,10 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 **Files:** baca CP7/T14 reports dan `docs/HANDOFF.md`; buat `docs/checkpoints/evidence/CP8/activities-baseline.md`; buat profiling fixture `apps/web/tests/activities-performance.fixture.ts`; fokus existing tests di `apps/server/internal/lobby/presence_timing_test.go`, `prepare_test.go`, `apps/server/internal/application/lobby_integration_test.go`.
 
 - [ ] Catat commit, build size per chunk, heap/RAF/timer/listener baseline, frame-time, incoming bytes dan owner tick sebelum perubahan; fixture deterministik berisi 20 avatar, tanpa mengklaimnya sebagai browser multiplayer acceptance.
-- [ ] Selesaikan scoped review T14 putaran 2 yang tertunda. Reproduksi transisi reconnect berurutan serta pemulihan start yang belum pasti yang akan memengaruhi lease. Perbaiki hanya defect yang terbukti dengan RED→GREEN dan fresh review; jangan menganggap T16 seluruhnya selesai.
-- [ ] Gunakan isolated PostgreSQL test helpers yang sudah ada. Simulasikan persist-before-error versus fail-before-persist dan pembuatan ulang room; identifikasi owner sumber kebenaran sebelum Task 3.
-- [ ] Jalankan baseline `npm test`, typecheck/build dan affected Go tests dengan pinned toolchain. Simpan hasil aktual dan keterbatasan; commit baseline/evidence dan perbaikan prerequisite terpisah bila ada.
+- [x] Selesaikan scoped review T14 putaran 2 yang tertunda. Reproduksi transisi reconnect berurutan serta pemulihan start yang belum pasti yang akan memengaruhi lease. Perbaiki hanya defect yang terbukti dengan RED→GREEN dan fresh review; jangan menganggap T16 seluruhnya selesai.
+- [x] Gunakan isolated PostgreSQL test helpers yang sudah ada. Simulasikan persist-before-error versus fail-before-persist dan pembuatan ulang room; identifikasi owner sumber kebenaran sebelum Task 3.
+- [x] Jalankan baseline `npm test`, typecheck/build dan affected Go tests dengan pinned toolchain. Simpan hasil aktual dan keterbatasan; commit baseline/evidence dan perbaikan prerequisite terpisah bila ada.
+
 
 ### Task 1: Minimap klik dan popup terpusat
 
@@ -76,10 +77,11 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 
 **Interfaces:** `mountMinimap(element, {openMap})`; `mapPoint(clientPoint, canvasRect, contentBounds): Point|null`; `openCenteredDialog(dialog, trigger)` dengan focus restoration. Destination tetap lewat world adapter; tidak menulis posisi online.
 
-- [ ] Tambah failing tests `minimap_click_never_routes_ground_behind_it`, `map_click_respects_letterbox_and_dynamic_closed_zone`, `dialog_close_cleanup_precedes_destination`. Assert pemetaan tengah/tepi pada zoom 0.65/1/1.5 dan DPR 1/2; target tidak valid tidak mengirim teleport/destination liar.
-- [ ] Pisahkan minimap menjadi DOM/canvas surface focusable; tap membuka Map di tengah. Peta besar menerima click-to-path dan destination buttons tetap ada. Pada locked area pilih safe entrance, bukan dalam arena.
-- [ ] Terapkan explicit native dialog centering, internal scroll/safe-area dan focus restore; konversi Chat menjadi centered dialog sambil mempertahankan IDs/form/mount. Jangan memberi display:grid/flex pada dialog tertutup.
+- [x] Tambah failing tests `minimap_click_never_routes_ground_behind_it`, `map_click_respects_letterbox_and_dynamic_closed_zone`, `dialog_close_cleanup_precedes_destination`. Assert pemetaan tengah/tepi pada zoom 0.65/1/1.5 dan DPR 1/2; target tidak valid tidak mengirim teleport/destination liar.
+- [x] Pisahkan minimap menjadi DOM/canvas surface focusable; tap membuka Map di tengah. Peta besar menerima click-to-path dan destination buttons tetap ada. Pada locked area pilih safe entrance, bukan dalam arena.
+- [x] Terapkan explicit native dialog centering, internal scroll/safe-area dan focus restore; konversi Chat menjadi centered dialog sambil mempertahankan IDs/form/mount. Jangan memberi display:grid/flex pada dialog tertutup.
 - [ ] Periksa di browser pada 320×568, 390×844, 768×1024, 844×390, desktop, zoom 200%, keyboard/on-screen keyboard. Semua popup terpusat; Tab/Escape dan typing guard tidak menggerakkan world. Jalankan tests/typecheck/build, review, commit.
+
 
 ### Task 2: Sound service ringan
 
@@ -87,10 +89,11 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 
 **Interfaces:** AudioService di atas; kind untuk UI, paddle, kick, goal/save, countdown/finish, grab, ride, fire/hit, cast/catch. Semua task aktivitas mengirim event ke service yang sama.
 
-- [ ] Tambah failing tests `muted_before_gesture_stays_silent`, `duplicate_or_resync_event_never_replays`, `hidden_or_mode_exit_stops_loops`, `eight_voice_limit_and_cleanup`, `account_generation_does_not_restore_old_audio`.
-- [ ] Implementasi satu AudioContext setelah gesture; bank ≤200 KiB compressed atau synth pendek; cache/dedup dibatasi, maksimum 8 voice, attenuation sederhana. Hubungkan preference audio yang ada, tanpa perubahan mute LiveKit.
-- [ ] Sambungkan countdown/finish/penalty reveal/Duck hit. Pastikan producer `duck.shot_resolved` benar-benar mengirim satu event accepted hit/miss, nol untuk rejection; test actual transport + ACK dedup sebelum mengandalkannya untuk SFX.
-- [ ] Uji mute/reload/account-switch, audio suspended, 20 siklus open/close dan feedback visual saat audio mati. Typecheck/test/build + targeted Go bila berubah; review dan commit. Tidak perlu membuat sound per frame.
+- [x] Tambah failing tests `muted_before_gesture_stays_silent`, `duplicate_or_resync_event_never_replays`, `hidden_or_mode_exit_stops_loops`, `eight_voice_limit_and_cleanup`, `account_generation_does_not_restore_old_audio`.
+- [x] Implementasi satu AudioContext setelah gesture; bank ≤200 KiB compressed atau synth pendek; cache/dedup dibatasi, maksimum 8 voice, attenuation sederhana. Hubungkan preference audio yang ada, tanpa perubahan mute LiveKit.
+- [x] Sambungkan countdown/finish/penalty reveal/Duck hit. Pastikan producer `duck.shot_resolved` benar-benar mengirim satu event accepted hit/miss, nol untuk rejection; test actual transport + ACK dedup sebelum mengandalkannya untuk SFX.
+- [x] Uji mute/reload/account-switch, audio suspended, 20 siklus open/close dan feedback visual saat audio mati. Typecheck/test/build + targeted Go bila berubah; review dan commit. Tidak perlu membuat sound per frame.
+
 
 ### Task 3: Kontrak dan area authority
 
@@ -187,7 +190,7 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 - Interface area/input/audio ditetapkan sebelum task yang bergantung padanya; physics loop dan kepemilikan scene terpisah, tidak membocorkan pilihan penalti atau authority ke klien.
 - Batas entitas/traffic/memory/audio memiliki target dan test gate. Framework berat/3D/worker bukan prasyarat.
 - Safe area/pembuatan ulang room/start yang belum pasti/hasil terlambat dan batas spectator memiliki regression eksplisit. Modal/minimap memiliki app-ordering test yang pernah gagal pada integrasi sebelumnya.
-- Plan ini belum dieksekusi; hasil tes 103 frontend / 242 backend adalah baseline sebelumnya, bukan bukti fitur baru. Review desain oleh fresh builder menemukan satu klarifikasi: Duck lama sengaja tetap memakai popup terpusat; spec kini menyatakannya eksplisit.
+- Saat penulisan awal plan belum dieksekusi; hasil tes 103 frontend / 242 backend di atas adalah baseline sebelumnya, bukan bukti fitur baru. Review desain oleh fresh builder menemukan satu klarifikasi: Duck lama sengaja tetap memakai popup terpusat; spec kini menyatakannya eksplisit.
 
 ## Verifikasi dokumen — 28 Oktober 2026
 
@@ -197,4 +200,4 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 
 ## Handoff
 
-Rekomendasi eksekusi: subagent per task dengan fresh review setelah integrasi/lifecycle dan setiap game, satu coordinator untuk integrasi. Pendekatan ini menangani perubahan lintas Go/TS/DB/protocol secara bertahap. Dokumen ini disimpan/commit sebagai plan untuk dibaca user; langkah selanjutnya hanya setelah user meminta implementasi.
+Rekomendasi eksekusi: subagent per task dengan fresh review setelah integrasi/lifecycle dan setiap game, satu coordinator untuk integrasi. Pendekatan ini menangani perubahan lintas Go/TS/DB/protocol secara bertahap. Implementasi sedang berjalan berdasarkan instruksi user; lanjutkan dari task berikut yang belum selesai. Ledger eksekusi ada di `.superpowers/sdd/2026-10-28-world-activities-adjustment/progress.md`, bukti portabel ada di `docs/checkpoints/evidence/CP8/activities-*.md`.

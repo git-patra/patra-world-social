@@ -35,7 +35,7 @@ func (a *Adapter) Tick(at time.Time) bool {
 		return false
 	}
 	for _, e := range a.engine.Tick(at) {
-		a.events = []lobby.GameEvent{{WorldID: a.start.WorldID, Type: e.Type, Payload: e.Snapshot}}
+		a.publishSnapshot(e.Type, e.Snapshot)
 	}
 	_, ok := a.engine.Result()
 	if ok {
@@ -51,7 +51,7 @@ func (a *Adapter) PresenceAt(user, kind string, at time.Time) {
 	before := a.engine.phase
 	a.engine.Presence(user, kind, at)
 	if before != "finished" && a.engine.phase == "finished" {
-		a.events = []lobby.GameEvent{{WorldID: a.start.WorldID, Type: "duck.finished", Payload: a.engine.Snapshot()}}
+		a.publishSnapshot("duck.finished", a.engine.Snapshot())
 		a.timing = clockEstimator{}
 	}
 	if kind == "disconnect" || kind == "leave" || kind == "expired" {
@@ -101,7 +101,11 @@ func (a *Adapter) Shoot(user string, epoch, seq uint64, aim Aim, client float64,
 	if err != nil {
 		return ShotResult{}, err
 	}
-	return a.engine.Shoot(a.start.Actors[0].ActorID, seq, aim, InputTiming{ReceivedAt: at, ClientTimeMs: client, RewindMs: rewind})
+	result, err := a.engine.Shoot(a.start.Actors[0].ActorID, seq, aim, InputTiming{ReceivedAt: at, ClientTimeMs: client, RewindMs: rewind})
+	if err == nil {
+		a.events = append(a.events, lobby.GameEvent{WorldID: a.start.WorldID, Type: "duck.shot_resolved", Payload: ShotResolved{ShotResult: result, WorldID: a.start.WorldID, ServerTimeMs: at.UnixMilli()}})
+	}
+	return result, err
 }
 func Project(ctx context.Context, tx pgx.Tx, r model.MatchResult) error {
 	if len(r.Participants) != 1 || r.RulesID != "duck-v1" || r.RulesVersion != 1 || r.RulesChecksum != RulesChecksum() {
@@ -117,4 +121,23 @@ func Project(ctx context.Context, tx pgx.Tx, r model.MatchResult) error {
 
 func (a *Adapter) Calibration(at time.Time) (ClockCalibration, bool) {
 	return a.timing.calibration(at.UnixMilli())
+}
+
+// Shot count stays monotonic when a transport epoch resets its input sequence.
+// Both the ACK and this event carry that identity for client sound deduplication.
+type ShotResolved struct {
+	ShotResult
+	WorldID      string `json:"worldId"`
+	ServerTimeMs int64  `json:"serverTimeMs"`
+}
+
+func (a *Adapter) publishSnapshot(kind string, snapshot PublicSnapshot) {
+	// Coalesce state updates without dropping accepted shot resolutions.
+	pending := a.events[:0]
+	for _, event := range a.events {
+		if event.Type == "duck.shot_resolved" {
+			pending = append(pending, event)
+		}
+	}
+	a.events = append(pending, lobby.GameEvent{WorldID: a.start.WorldID, Type: kind, Payload: snapshot})
 }

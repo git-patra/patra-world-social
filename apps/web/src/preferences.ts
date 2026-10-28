@@ -7,6 +7,7 @@ export class ActivePreferences{
  private value:Preferences={...defaults};private loadedGeneration=-1;private loadRevision=0;private listeners=new Set<(p:Preferences)=>void>();
  constructor(readonly auth:AuthState,private io:PreferenceIO){}
  snapshot(){return {...this.value}}
+ ready(g=this.auth.snapshot().generation){return this.loadedGeneration===g}
  subscribe(fn:(p:Preferences)=>void){this.listeners.add(fn);return()=>{this.listeners.delete(fn)}}
  private publish(g:number,p:Preferences){if(!this.auth.is(g))return false;this.value={...p};this.loadedGeneration=g;for(const listener of this.listeners)listener(this.snapshot());return true}
  async read(g:number,signal?:AbortSignal){if(!this.auth.is(g))throw Error('Sesi berubah.');const user=this.auth.snapshot().user;const p=user?await this.io.accountLoad(signal):await this.io.deviceLoad();return user?{...(p as Profile).settings,displayName:(p as Profile).displayName,avatar:(p as Profile).avatar}:p as Preferences}

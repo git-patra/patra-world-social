@@ -8,3 +8,21 @@ body[data-controls=touch] .world-stage .movement-pad,body[data-controls=both] .w
 @media(max-height:700px){.world-stage .welcome-note{display:none}}
 @media(max-height:550px){.world-stage .welcome-note,.exploration{display:none}.world-stage .online-status,.world-stage:has(.welcome-note:not([hidden])) .online-status{top:75px;bottom:auto;max-width:320px}.world-stage .location-hud{top:20px}.world-stage .game-dock{bottom:12px}.world-stage .movement-pad{bottom:93px;transform:scale(.85);transform-origin:bottom left}.world-stage .world-camera-controls{bottom:95px}.world-stage #travel-status:not(:empty){bottom:81px}.world-stage #controls-help{display:none}}
 @media(prefers-reduced-motion:reduce){.world-stage *{transition:none!important;animation:none!important}}
+
+/* Native dialogs keep their hidden state; open panels center inside the usable viewport. */
+html body dialog[id]{position:fixed;inset:calc(var(--dialog-viewport-top,0px) + max(12px,env(safe-area-inset-top))) max(12px,env(safe-area-inset-right)) calc(100dvh - var(--dialog-viewport-top,0px) - var(--dialog-viewport-height,100dvh) + max(12px,env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left));margin:auto;box-sizing:border-box;height:fit-content;min-width:0;max-width:calc(100vw - max(12px,env(safe-area-inset-left)) - max(12px,env(safe-area-inset-right)));max-height:calc(var(--dialog-viewport-height,100dvh) - max(12px,env(safe-area-inset-top)) - max(12px,env(safe-area-inset-bottom)));overflow:auto;overscroll-behavior:contain;scroll-padding-block:16px}
+html body dialog:not([open]){display:none}
+html body dialog button{min-height:44px;min-width:44px;touch-action:manipulation}
+html body dialog .dialog-close{width:44px;height:44px}
+html body dialog .dialog-shell{max-height:none}
+html body #chat-panel{width:min(600px,calc(100vw - 24px));padding:24px}
+#chat-panel #chat-form{display:block;padding:10px}
+#chat-panel #chat-form button{width:auto;padding:8px 16px}
+#chat-panel textarea{max-width:100%;min-height:72px}
+#chat-messages{max-height:30dvh}
+.world-stage .minimap{position:absolute;right:18px;bottom:155px;z-index:3;width:174px;padding:7px;border-radius:10px;color:#e5e8d1;text-align:left;touch-action:manipulation}
+.minimap span{display:block;font-size:8px;letter-spacing:.7px;padding-bottom:7px}
+.minimap canvas{display:block;width:100%;height:auto;image-rendering:pixelated;pointer-events:none}
+#village-map{cursor:crosshair;touch-action:manipulation}
+@media(max-width:700px){.world-stage .minimap{width:118px;right:12px;bottom:205px}.minimap span{font-size:6px;letter-spacing:.2px}}
+@media(max-height:500px){.world-stage .minimap{width:100px;bottom:120px}.world-stage .welcome-note{display:none}#village-map{max-height:160px}.world-stage .world-camera-controls{bottom:76px}.world-stage .movement-pad{bottom:90px}}

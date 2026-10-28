@@ -123,7 +123,7 @@ type Service struct {
 	spectators     map[string]bool
 	generations    map[string]uint64
 	pendingMu      sync.Mutex
-	pending        map[[2]string]notification
+	pending        map[[2]string][]notification
 	wake           chan struct{}
 	changed        map[string]bool
 	returns        map[[2]string]Return
@@ -132,7 +132,7 @@ type Service struct {
 
 func New(store Store, clock Clock, version model.Version) *Service {
 	ctx, cancel := context.WithCancel(context.Background())
-	s := &Service{ctx: ctx, cancel: cancel, storage: make(chan func(), 64), store: store, clock: clock, version: version, requests: make(chan request, 128), stop: make(chan struct{}), done: make(chan struct{}), entries: map[[2]string]*entry{}, factories: map[string]Factory{}, preparers: map[string]Prepare{}, rulesMetadata: map[string]RulesMetadata{}, attempts: map[[2]string]*attempt{}, busy: map[string]string{}, spectators: map[string]bool{}, generations: map[string]uint64{}, pending: map[[2]string]notification{}, wake: make(chan struct{}, 1), changed: map[string]bool{}, returns: map[[2]string]Return{}, Changed: make(chan struct{}, 1)}
+	s := &Service{ctx: ctx, cancel: cancel, storage: make(chan func(), 64), store: store, clock: clock, version: version, requests: make(chan request, 128), stop: make(chan struct{}), done: make(chan struct{}), entries: map[[2]string]*entry{}, factories: map[string]Factory{}, preparers: map[string]Prepare{}, rulesMetadata: map[string]RulesMetadata{}, attempts: map[[2]string]*attempt{}, busy: map[string]string{}, spectators: map[string]bool{}, generations: map[string]uint64{}, pending: map[[2]string][]notification{}, wake: make(chan struct{}, 1), changed: map[string]bool{}, returns: map[[2]string]Return{}, Changed: make(chan struct{}, 1)}
 	s.workers.Add(1)
 	go func() {
 		defer s.workers.Done()
