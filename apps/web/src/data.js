@@ -1,5 +1,6 @@
 // Game IDs are stable; destinations describe the approved open village.
 export const stations=[
+ {id:"pingpong",name:"Meja Pingpong",label:"Meja Pingpong",short:"7 poin · 1v1 / BOT",icon:"◉",color:"#6e9682",title:"Rally di meja pingpong",description:"Main di meja halaman arcade. Dua pemain Ready atau pilih BOT; hasil masuk History.",status:"Dunia privat / practice"},
   {
     "id": "arcade",
     "name": "Arcade Latihan",

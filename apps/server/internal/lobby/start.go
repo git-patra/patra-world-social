@@ -64,7 +64,7 @@ func (s *Service) startMatch(ctx context.Context, host, lobby, command string, w
 				return
 			}
 		}
-		if l.GameType == "penalty" && len(l.Players) < 2 && !l.BotChosen {
+		if (l.GameType == "penalty" || l.GameType == "pingpong") && len(l.Players) < 2 && !l.BotChosen {
 			e = ErrNotReady
 			return
 		}
@@ -79,7 +79,7 @@ func (s *Service) startMatch(ctx context.Context, host, lobby, command string, w
 		for _, p := range l.Players {
 			m.Actors = append(m.Actors, p.Actor)
 		}
-		for len(m.Actors) < l.Capacity {
+		for l.GameType != "blaster" && len(m.Actors) < l.Capacity {
 			m.Actors = append(m.Actors, model.Actor{ActorID: id(), ActorType: "bot", DisplayName: "BOT", AvatarID: "pumpkin"})
 		}
 		if prepare := s.preparers[l.GameType]; prepare != nil {
@@ -144,7 +144,7 @@ func (s *Service) persistStart(a *attempt) {
 	ctx, cancel := context.WithTimeout(s.ctx, 10*time.Second)
 	defer cancel()
 	var e error
-	if s.areas != nil && (a.match.GameType == "race" || a.match.GameType == "penalty") {
+	if s.areas != nil && (a.match.GameType == "race" || a.match.GameType == "penalty" || a.match.GameType == "pingpong" || a.match.GameType == "blaster") {
 		if a.lease.Generation == 0 {
 			a.lease, e = s.areas.ReserveArea(ctx, a.match.WorldID, a.match.ArenaID, a.match.MatchID)
 		}

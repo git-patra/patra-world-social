@@ -52,7 +52,7 @@ func (s *Service) ResultAction(ctx context.Context, world, match, user string, r
 			if !allowed {
 				return
 			}
-			if rematch && l.GameType != "penalty" {
+			if rematch && l.GameType != "penalty" && l.GameType != "pingpong" {
 				return
 			}
 			result = nil

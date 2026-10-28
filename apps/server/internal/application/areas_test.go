@@ -51,7 +51,7 @@ func (e *authorityEngine) Tick(time.Time) bool     { return false }
 func (e *authorityEngine) Presence(string, string) {}
 func (e *authorityEngine) Close()                  {}
 func TestStartWaitsForClearAckAndDurabilityAcrossActualOwners(t *testing.T) {
-	for _, game := range []string{"race", "penalty"} {
+	for _, game := range []string{"race", "penalty", "pingpong"} {
 		t.Run(game, func(t *testing.T) { testStartWaitsForClearAckAndDurability(t, game) })
 	}
 }
@@ -81,7 +81,7 @@ func testStartWaitsForClearAckAndDurability(t *testing.T, game string) {
 		t.Fatal(err)
 	}
 	g.SetReady(ctx, "user", l.ID, true)
-	if game == "penalty" {
+	if game == "penalty" || game == "pingpong" {
 		if err = g.ChooseBot(ctx, "user", l.ID, true); err != nil {
 			t.Fatal(err)
 		}

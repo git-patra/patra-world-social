@@ -80,7 +80,7 @@ export class WorldSocket {
  if(e.payload.worldId === this.worldId) this.onEvent(e.type,e.payload);
  return;
  }
- if (e.type.startsWith('penalty.') || e.type === 'chat.message' || e.type === 'chat.deleted' || e.type === 'lobby.updated' || e.type === 'match.started' || e.type === 'match.result_status' || e.type === 'leaderboard.changed') {
+ if (e.type==='pingpong.snapshot' || e.type.startsWith('penalty.') || e.type === 'chat.message' || e.type === 'chat.deleted' || e.type === 'lobby.updated' || e.type === 'match.started' || e.type === 'match.result_status' || e.type === 'leaderboard.changed') {
                     this.onEvent(e.type, e.payload);
                     return;
                 }

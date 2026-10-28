@@ -4,9 +4,10 @@ import { LocalVehicles, nearbyVehicle } from './vehicles';
 import { LocalFootball, nearFootball } from './football';
 import { audio } from '../audio/service';
 import type { RaceSnapshot, Controls } from '../features/race/local';
+import type { PingpongSnapshot } from '../features/pingpong/local';
 import type { PublicPenalty } from '../features/penalty/local';
 import { activityInput } from './input-router';
-export type ActivityKind = 'race' | 'penalty';
+export type ActivityKind = 'race' | 'penalty' | 'pingpong';
 export type ActivityLobby = {
     id: string;
     arenaId: string;
@@ -23,7 +24,7 @@ export type ActivityLobby = {
 export type ActivityGame = {
     kind: ActivityKind;
     matchId: string;
-    snapshot: RaceSnapshot | PublicPenalty;
+    snapshot: RaceSnapshot | PublicPenalty | PingpongSnapshot;
 };
 type Transport = {
     worldId: string;
@@ -34,8 +35,10 @@ type Transport = {
     gameCommand: (type: string, payload: Record<string, unknown>) => Promise<unknown>;
 };
 type LocalSession = {
-    snapshot: (at: number) => RaceSnapshot | PublicPenalty | null;
+    snapshot: (at: number) => RaceSnapshot | PublicPenalty | PingpongSnapshot | null;
     clear: () => void;
+    paddle?: (axis:number,at:number)=>boolean;
+    serve?: (rally:number,at:number)=>boolean;
     input?: (controls: Controls, at: number) => boolean;
     choose?: (turn: string, zone: number, at: number) => boolean;
 };
@@ -119,7 +122,7 @@ export class ActivityStore {
         const games = [...this.games.values()], selfId = this.socket?.selfId ?? 'guest';
         const active = games.find(g => this.localKind === g.kind && !this.socket || this.lobbies.some(l => l.matchId === g.matchId && l.players.some(p => p.userId === selfId))) ?? null;
         const spectating = active ? null : games.find(g => {
-            if (g.kind !== 'penalty')
+            if (g.kind !== 'penalty' && g.kind !== 'pingpong')
                 return false;
             const area = this.areas.get(g.kind);
             if (area && (area.payload.phase === 'OPEN' || area.payload.matchId !== g.matchId))
@@ -147,6 +150,8 @@ export class ActivityStore {
     }
     async attach(socket: Transport | null) {
         this.controls(neutral());
+        this.paddleAxis = 0;
+        audio.stopMode('pingpong');
         this.epoch++;
         this.resyncRequest++;
         this.local?.clear();
@@ -222,25 +227,25 @@ export class ActivityStore {
         const socket = this.socket, epoch = this.epoch, resync = this.resyncRequest;
         if (!socket || socket.status !== 'online')
             return;
-        const lobbies = this.lobbies.filter(l => (l.gameType === 'race' || l.gameType === 'penalty') && l.matchId);
+        const lobbies = this.lobbies.filter(l => (l.gameType === 'race' || l.gameType === 'penalty' || l.gameType === 'pingpong') && l.matchId);
         await Promise.all(lobbies.map(async (lobby) => {
             const read = ++this.readSerial;
             this.gameReads.set(lobby.matchId!, read);
             try {
                 const snapshot = await socket.gameCommand(`${lobby.gameType}.snapshot`, { matchId: lobby.matchId });
                 if (epoch === this.epoch && socket === this.socket && resync === this.resyncRequest && this.gameReads.get(lobby.matchId!) === read) {
-                    this.acceptGame(lobby.gameType as ActivityKind, snapshot as RaceSnapshot | PublicPenalty);
+                    this.acceptGame(lobby.gameType as ActivityKind, snapshot as RaceSnapshot | PublicPenalty | PingpongSnapshot);
                 }
             }
             catch {
             }
         }));
     }
-    private acceptGame(kind: ActivityKind, snapshot: RaceSnapshot | PublicPenalty) {
+    private acceptGame(kind: ActivityKind, snapshot: RaceSnapshot | PublicPenalty | PingpongSnapshot, live = false) {
         if (!snapshot?.matchId || !this.lobbies.some(l => l.matchId === snapshot.matchId && l.gameType === kind))
             return;
         const previous = this.games.get(snapshot.matchId);
-        if (kind === 'race' && previous && 'frame' in previous.snapshot && 'frame' in snapshot && snapshot.frame < previous.snapshot.frame)
+        if ((kind === 'race' || kind === 'pingpong') && previous && 'frame' in previous.snapshot && 'frame' in snapshot && (snapshot.frame < previous.snapshot.frame || kind === 'pingpong' && snapshot.frame === previous.snapshot.frame))
             return;
         if (kind === 'penalty' && previous && 'turn' in previous.snapshot && 'turn' in snapshot) {
             const old = previous.snapshot;
@@ -252,6 +257,7 @@ export class ActivityStore {
                 snapshot = { ...snapshot, chosen: snapshot.chosen.map((chosen, index) => chosen || old.chosen[index]) };
             }
         }
+        if (kind === 'pingpong' && live && previous) this.pingpongCue(previous.snapshot as PingpongSnapshot,snapshot as PingpongSnapshot,this.socket?.serverNow()??this.state.now);
         this.games.set(snapshot.matchId, { kind, matchId: snapshot.matchId, snapshot });
         this.publish(this.socket?.serverNow());
     }
@@ -323,6 +329,8 @@ export class ActivityStore {
         }
         if (type.startsWith('race.') && payload?.karts)
             this.acceptGame('race', payload);
+        if (type === 'pingpong.snapshot' && payload?.actors)
+            this.acceptGame('pingpong', payload, true);
         if (type.startsWith('penalty.') && payload?.actors)
             this.acceptGame('penalty', payload);
         if (type === 'match.result_status') {
@@ -528,16 +536,41 @@ export class ActivityStore {
         this.games.clear();
         this.local = null;
         this.localKind = null;
-        const session = kind === 'race' ? (await import('../features/race/session')).guestRace : (await import('../features/penalty/session')).guestSession;
+        const session = kind === 'pingpong' ? (await import('../features/pingpong/session')).guestPingpong : kind === 'race' ? (await import('../features/race/session')).guestRace : (await import('../features/penalty/session')).guestSession;
         if (epoch !== this.epoch || this.socket)
             return;
-        const snapshot = kind === 'race' ? (session as typeof import('../features/race/session').guestRace).start(at, seed, id) : (session as typeof import('../features/penalty/session').guestSession).start(at, undefined, id);
+        const snapshot = kind === 'pingpong' ? (session as typeof import('../features/pingpong/session').guestPingpong).start(at, seed, id) : kind === 'race' ? (session as typeof import('../features/race/session').guestRace).start(at, seed, id) : (session as typeof import('../features/penalty/session').guestSession).start(at, undefined, id);
         this.localStarting = false;
         this.penaltyStarting = false;
         this.local = session;
         this.localKind = kind;
         this.games.set(snapshot.matchId, { kind, matchId: snapshot.matchId, snapshot });
         this.publish(at, true);
+    }
+    private pingpongCue(old:PingpongSnapshot,next:PingpongSnapshot,at:number) {
+        if(next.frame<=old.frame||at-next.serverTimeMs>1000||at<next.serverTimeMs-250)return;
+        const kind=next.phase==='results'&&old.phase!=='results'?'finish':next.scores.some((n,i)=>n!==old.scores[i])?'goal':next.phase==='rally'&&old.phase==='rally'&&next.ball.vx*old.ball.vx<0?'paddle':null;
+        if(kind)audio.play({kind,mode:'pingpong',eventId:`pingpong:${next.matchId}:${next.frame}:${kind}`,distance:Math.hypot(this.position.x-45,this.position.y-23)});
+    }
+    private paddleAxis = 0;
+    paddle(axis:number) {
+        this.paddleAxis = Math.max(-1,Math.min(1,axis));
+        if (this.local || !this.paddleAxis) this.sendPaddle();
+    }
+    private sendPaddle() {
+        const active=this.state.active;
+        if(active?.kind!=='pingpong'||this.state.inputMode!=='pingpong'||active.snapshot.phase==='results')return;
+        if(this.local){this.local.paddle?.(this.paddleAxis,this.state.now);return}
+        if(!this.socket||this.socket.status!=='online'||this.sending)return;
+        this.sending=true;const epoch=this.epoch;
+        void this.socket.gameCommand('pingpong.input',{matchId:active.matchId,axis:this.paddleAxis}).catch(()=>{}).finally(()=>{if(epoch===this.epoch)this.sending=false});
+    }
+    async serve() {
+        const active=this.state.active;
+        if(active?.kind!=='pingpong'||this.state.inputMode!=='pingpong'||active.snapshot.phase!=='serve'||!this.state.connected)return;
+        const s=active.snapshot as PingpongSnapshot;
+        if(this.local){this.local.serve?.(s.rallyId,this.state.now);this.tick();return}
+        try{await this.socket?.gameCommand('pingpong.serve',{matchId:s.matchId,rallyId:s.rallyId})}catch(e){this.state={...this.state,message:(e as Error).message};this.publish()}
     }
     controls(controls: Controls) {
         const changed = this.held.throttle !== controls.throttle || this.held.brake !== controls.brake || this.held.steer !== controls.steer;
@@ -573,11 +606,15 @@ export class ActivityStore {
             this.localFootball.tick(at);
         }
         this.sendRideInput();
+        this.sendPaddle();
         this.sendInput();
         if (this.local && this.localKind) {
             const snapshot = this.local.snapshot(at);
-            if (snapshot)
+            if (snapshot) {
+                const previous=this.games.get(snapshot.matchId);
+                if(this.localKind==='pingpong'&&previous)this.pingpongCue(previous.snapshot as PingpongSnapshot,snapshot as PingpongSnapshot,at);
                 this.games.set(snapshot.matchId, { kind: this.localKind, matchId: snapshot.matchId, snapshot });
+            }
         }
         this.publish(at);
     }
@@ -632,6 +669,8 @@ export class ActivityStore {
         this.penaltyStarting = false;
         this.localStarting = false;
         this.rideHeld = { x: 0, y: 0 };
+        this.paddleAxis = 0;
+        audio.stopMode('pingpong');
         this.epoch++;
         this.local?.clear();
         this.local = null;
@@ -654,6 +693,8 @@ export class ActivityStore {
         this.controls(neutral());
         this.local?.clear();
         this.local = null;
+        this.paddleAxis = 0;
+        audio.stopMode('pingpong');
         this.epoch++;
         this.listeners.clear();
         this.sceneListeners.clear();
@@ -675,6 +716,7 @@ export function mountActivities(world: {
         activityInput.block('disconnected', !state.connected);
     });
     const raceInput = activityInput.register('race', input => activities.controls(input));
+    const pingpongInput=activityInput.register('pingpong',input=>activities.paddle(input.steer));
     const rideInput = activityInput.register('ride', input => activities.rideControls(input));
     const attachment = (e: Event) => {
         world.stopInput();
@@ -734,6 +776,7 @@ export function mountActivities(world: {
         closures();
         raceInput();
         rideInput();
+        pingpongInput();
         activities.dispose();
         window.removeEventListener('patra-world-attachment', attachment);
         window.removeEventListener('patra-world-event', event);

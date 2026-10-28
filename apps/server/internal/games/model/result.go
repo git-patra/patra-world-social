@@ -2,7 +2,13 @@ package model
 
 // MatchResult is server-authored and deliberately has no seed or hidden choices.
 // Engines supply resolved details only; the foundation never computes winners.
+type PingpongResult struct {
+	Scores  [2]int64 `json:"scores"`
+	Rallies int      `json:"rallies"`
+	Reason  string   `json:"reason"`
+}
 type MatchResult struct {
+	Pingpong *PingpongResult `json:"pingpong,omitempty"`
 	Version
 	MatchID      string              `json:"matchId"`
 	WorldID      string              `json:"worldId"`

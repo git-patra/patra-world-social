@@ -48,7 +48,7 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
  let closedZones:ClosedMapZone[]=[];let onlineSampler:(()=>void)|undefined;
  const previous=new Map<string,Point>();
  const activityScene=new ActivityScene(()=>{dirty=true});
- const positions=VILLAGE_DESTINATIONS;
+ const positions=[...VILLAGE_DESTINATIONS,{id:"pingpong",name:"Meja Pingpong",x:45,y:25}];
  function resize(){const bounds=canvas.getBoundingClientRect();width=bounds.width;height=bounds.height;dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.imageSmoothingEnabled=false;dirty=true;draw()}
  function label(text:string,x:number,y:number,own=false){ctx.font='600 11px "DM Sans",sans-serif';const w=ctx.measureText(text).width+16;ctx.fillStyle=own?'#f5e5bd':'#243b32ed';ctx.beginPath();ctx.roundRect(x-w/2,y-16,w,22,6);ctx.fill();ctx.fillStyle=own?'#304732':'#fcf1d4';ctx.textAlign='center';ctx.fillText(text,x,y-1)}
  function draw(){

@@ -83,20 +83,20 @@ function openProject(id){
  disposeDemo();
  dialog.classList.toggle('game-dialog',id==='arcade');
  dialog.classList.toggle('race-dialog',id==='race');
- content.innerHTML=`<div class="case-header" style="--case-color:${station.color}"><div class="case-eyebrow"><span>${station.icon}</span>${station.status}</div><h2 id="dialog-title">${station.title}</h2><p>${station.description}</p></div>${id==='warkop'?'<div id="voice-root"></div>':''}${id==='arcade'?'<div id="penalty-root"></div>':['race','penalty','duck'].includes(id)?'<div id="lobby-root"></div>':''}<div class="case-footer"><button class="walk-button" id="walk-to-place">Jalan ke ${station.name} →</button><span>${visited.size} / 7 sudut dijelajahi</span><button id="back-to-world">Kembali ke dunia ↗</button></div>`;
+ content.innerHTML=`<div class="case-header" style="--case-color:${station.color}"><div class="case-eyebrow"><span>${station.icon}</span>${station.status}</div><h2 id="dialog-title">${station.title}</h2><p>${station.description}</p></div>${id==='warkop'?'<div id="voice-root"></div>':''}${id==='arcade'?'<div id="penalty-root"></div>':['race','penalty','duck','pingpong'].includes(id)?'<div id="lobby-root"></div>':''}<div class="case-footer"><button class="walk-button" id="walk-to-place">Jalan ke ${station.name} →</button><span>${visited.size} / 7 sudut dijelajahi</span><button id="back-to-world">Kembali ke dunia ↗</button></div>`;
  notify(`Aktivitas ${station.name}.`);
  if(!dialog.open)showDialog();
  else {dialog.scrollTop=0;$('#close-dialog').focus();}
  $('#back-to-world').onclick=()=>dialog.close();
- $('#walk-to-place').onclick=()=>closeDialogThen(dialog,()=>{syncWorldPause();world.travelTo(id);notify(`Walking to ${station.name}.`);});
+ $('#walk-to-place').onclick=()=>closeDialogThen(dialog,()=>{syncWorldPause();id==='pingpong'?world.walkToPoint({x:45,y:25}):world.travelTo(id);notify(`Walking to ${station.name}.`);});
  if(id==='warkop')cleanupDemo=mountVoicePanel($('#voice-root'));
- if(['race','penalty','duck'].includes(id))cleanupDemo=mountLobbyPanel($('#lobby-root'),id);
+ if(['race','penalty','duck','pingpong'].includes(id))cleanupDemo=mountLobbyPanel($('#lobby-root'),id);
  if(id==='arcade')cleanupDemo=mountPenalty($('#penalty-root'));
 }
 document.addEventListener('click',event=>{const button=event.target.closest('[data-project]');if(!button)return;
  if(button.closest('#places')){
   const station=stations.find(s=>s.id===button.dataset.project);
-  hideWelcome();closeDialogThen($('#map-dialog'),()=>{syncWorldPause();notify(`Walking to ${station.name}. Tekan E untuk membuka aktivitas setelah tiba.`);world.travelTo(station.id);});
+  hideWelcome();closeDialogThen($('#map-dialog'),()=>{syncWorldPause();notify(`Walking to ${station.name}. Tekan E untuk membuka aktivitas setelah tiba.`);station.id==='pingpong'?world.walkToPoint({x:45,y:25}):world.travelTo(station.id);});
  }else openProject(button.dataset.project);});
 function openMap(trigger){world.stopInput();world.drawMap($('#village-map'));openCenteredDialog($('#map-dialog'),trigger);}
 $('#list-button').onclick=()=>openMap($('#list-button'));

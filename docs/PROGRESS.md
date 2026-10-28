@@ -445,3 +445,5 @@ User approved the outdoor design and requested fullscreen production integration
 Verification: 103 frontend tests, typecheck, syntax lint, production build; full Go race/integration across20 packages and242 primary tests, vet/build; actual guest penalty/Race/Duck completions and history after reload;390/768 responsive previews. Full evidence is in `docs/checkpoints/evidence/CP8/kampung-senja-integration.md`. This does not approve T14/T16 or deferred account/LiveKit/physical-device acceptance. CP1 remains the only PASS.
 
 Public main uses a clean snapshot to omit inherited CV/PDF history. Published https://github.com/git-patra/patra-world-social as PUBLIC, default branch main; clean root snapshot0adf204 pushed and verified. Inherited feat/social-world remains local. No deployment.
+
+- Activities Task7 pingpong: 4 JS +180 bundled tests, typecheck/lint/build, Go unit/focused race PASS; actual PG/WS BOT+two humans PASS9.03s. Browser guest120s result/history PASS; review approved, no blocking findings. See CP8 activities-task7*. Minor rules constant drift prevention carried to final review; authenticated browser/physical mobile/LiveKit gates remain deferred.

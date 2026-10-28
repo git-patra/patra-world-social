@@ -154,7 +154,7 @@ func (h *Hub) WithControl(ctx context.Context, fn func(context.Context) error) e
 
 func isGameCommand(kind string) bool {
 	switch kind {
-	case "duck.snapshot", "duck.shoot", "duck.clock", "duck.clock_reply", "lobby.list", "lobby.join", "lobby.ready", "lobby.bot", "lobby.leave", "match.start", "race.input", "race.snapshot", "penalty.choose", "penalty.snapshot", "match.return", "match.rematch":
+	case "pingpong.snapshot", "pingpong.input", "pingpong.serve", "duck.snapshot", "duck.shoot", "duck.clock", "duck.clock_reply", "lobby.list", "lobby.join", "lobby.ready", "lobby.bot", "lobby.leave", "match.start", "race.input", "race.snapshot", "penalty.choose", "penalty.snapshot", "match.return", "match.rematch":
 		return true
 	}
 	return false

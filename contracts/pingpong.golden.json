@@ -1,0 +1,66 @@
+{
+  "started": 1000,
+  "cases": [
+    {
+      "name": "serve movement budget",
+      "axis": 1,
+      "steps": 1,
+      "scores": [
+        0,
+        0
+      ],
+      "paddles": [
+        0.55,
+        0.5
+      ],
+      "ball": {
+        "x": 0.53,
+        "y": 0.515,
+        "vx": 0.6,
+        "vy": 0.3
+      },
+      "phase": "rally"
+    },
+    {
+      "name": "miss scores and explicit next serve",
+      "axis": 0,
+      "steps": 17,
+      "scores": [
+        1,
+        0
+      ],
+      "paddles": [
+        0.5,
+        0.5
+      ],
+      "ball": {
+        "x": 0.5,
+        "y": 0.5,
+        "vx": 0,
+        "vy": 0
+      },
+      "phase": "serve"
+    },
+    {
+      "name": "paddle bounce",
+      "axis": 0,
+      "peerAxis": 1,
+      "steps": 15,
+      "scores": [
+        0,
+        0
+      ],
+      "paddles": [
+        0.5,
+        0.75
+      ],
+      "ball": {
+        "x": 0.93,
+        "y": 0.725,
+        "vx": -0.6,
+        "vy": -0.075
+      },
+      "phase": "rally"
+    }
+  ]
+}

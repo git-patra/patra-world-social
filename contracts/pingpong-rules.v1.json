@@ -1,0 +1,23 @@
+{
+  "id": "pingpong-v1",
+  "version": 1,
+  "tickMs": 50,
+  "maxCatchupSteps": 4,
+  "deadlineMs": 120000,
+  "disconnectGraceMs": 15000,
+  "inputExpiryMs": 250,
+  "targetScore": 7,
+  "winBy": 2,
+  "capScore": 11,
+  "paddleSpeed": 1,
+  "paddleHalfHeight": 0.12,
+  "ballRadius": 0.02,
+  "ballSpeedX": 0.6,
+  "serveSpeedY": 0.3,
+  "paddleX": [
+    0.06,
+    0.94
+  ],
+  "botSpeed": 0.65,
+  "botDeadzone": 0.04
+}

@@ -51,7 +51,7 @@ func ValidateCommand(raw []byte) (Command, error) {
 		ok = c.Text(p["targetId"], 128)
 	case "lobby.join":
 		ok = c.Text(p["arenaId"], 128)
-	case "duck.snapshot", "duck.clock", "race.snapshot", "penalty.snapshot", "match.return", "match.rematch":
+	case "pingpong.snapshot", "duck.snapshot", "duck.clock", "race.snapshot", "penalty.snapshot", "match.return", "match.rematch":
 		ok = c.Text(p["matchId"], 128)
 	case "match.start":
 		ok = c.Text(p["lobbyId"], 128)
@@ -61,6 +61,10 @@ func ValidateCommand(raw []byte) (Command, error) {
 	case "lobby.ready":
 		_, ok = p["ready"].(bool)
 		ok = ok && c.Text(p["lobbyId"], 128)
+	case "pingpong.input":
+		ok = c.Text(p["matchId"], 128) && c.Number(p["axis"], -1, 1)
+	case "pingpong.serve":
+		ok = c.Text(p["matchId"], 128) && c.Integer(p["rallyId"], 1, 22)
 	case "race.input":
 		ok = c.Text(p["matchId"], 128) && c.Integer(p["steer"], -1, 1) && c.Integer(p["throttle"], 0, 1) && c.Integer(p["brake"], 0, 1)
 	case "penalty.choose":
@@ -80,7 +84,7 @@ func ValidateCommand(raw []byte) (Command, error) {
 	default:
 		ok = false
 	}
-	allowed := map[string][]string{"activity.snapshot": {}, "voice.leave": {}, "voice.state": {}, "voice.token": {}, "voice.unmute": {}, "voice.chat": {"clientMessageId", "text"}, "voice.moderate": {"target", "action"}, "penalty.snapshot": {"matchId"}, "match.return": {"matchId"}, "match.rematch": {"matchId"}, "penalty.choose": {"zone", "matchId", "turnId"}, "player.input": {"dx", "dy"}, "player.destination": {"x", "y"}, "player.interact": {"targetId"}, "lobby.list": {}, "lobby.leave": {}, "lobby.join": {"arenaId"}, "match.start": {"lobbyId"}, "lobby.bot": {"lobbyId", "enabled"}, "lobby.ready": {"lobbyId", "ready"}, "race.snapshot": {"matchId"}, "race.input": {"matchId", "steer", "throttle", "brake"}, "duck.snapshot": {"matchId"}, "duck.clock": {"matchId"}, "duck.clock_reply": {"matchId", "nonce", "clientTimeMs"}, "duck.shoot": {"matchId", "x", "y", "clientTimeMs"}, "chat.send": {"channelId", "clientMessageId", "text"}, "voice.join": {"table"}}
+	allowed := map[string][]string{"pingpong.snapshot": {"matchId"}, "pingpong.input": {"matchId", "axis"}, "pingpong.serve": {"matchId", "rallyId"}, "activity.snapshot": {}, "voice.leave": {}, "voice.state": {}, "voice.token": {}, "voice.unmute": {}, "voice.chat": {"clientMessageId", "text"}, "voice.moderate": {"target", "action"}, "penalty.snapshot": {"matchId"}, "match.return": {"matchId"}, "match.rematch": {"matchId"}, "penalty.choose": {"zone", "matchId", "turnId"}, "player.input": {"dx", "dy"}, "player.destination": {"x", "y"}, "player.interact": {"targetId"}, "lobby.list": {}, "lobby.leave": {}, "lobby.join": {"arenaId"}, "match.start": {"lobbyId"}, "lobby.bot": {"lobbyId", "enabled"}, "lobby.ready": {"lobbyId", "ready"}, "race.snapshot": {"matchId"}, "race.input": {"matchId", "steer", "throttle", "brake"}, "duck.snapshot": {"matchId"}, "duck.clock": {"matchId"}, "duck.clock_reply": {"matchId", "nonce", "clientTimeMs"}, "duck.shoot": {"matchId", "x", "y", "clientTimeMs"}, "chat.send": {"channelId", "clientMessageId", "text"}, "voice.join": {"table"}}
 	if fields, known := allowed[func() string { s, _ := v["type"].(string); return s }()]; known && !c.Keys(p, fields...) {
 		ok = false
 	}
@@ -105,7 +109,7 @@ func ValidateEvent(raw []byte) (Event, error) {
 		return event, bad
 	}
 	switch v["type"] {
-	case "activity.snapshot", "activity.lifecycle", "world.snapshot", "presence.changed", "world.delta", "command.ack", "lobby.updated", "match.started", "match.result_status", "leaderboard.changed", "race.snapshot", "race.finished", "penalty.snapshot", "penalty.choice_ack", "penalty.turn_opened", "penalty.revealed", "duck.shot_resolved", "duck.snapshot", "duck.finished", "chat.message", "chat.deleted", "command.error", "voice.seat_granted", "voice.seat_revoked":
+	case "pingpong.snapshot", "activity.snapshot", "activity.lifecycle", "world.snapshot", "presence.changed", "world.delta", "command.ack", "lobby.updated", "match.started", "match.result_status", "leaderboard.changed", "race.snapshot", "race.finished", "penalty.snapshot", "penalty.choice_ack", "penalty.turn_opened", "penalty.revealed", "duck.shot_resolved", "duck.snapshot", "duck.finished", "chat.message", "chat.deleted", "command.error", "voice.seat_granted", "voice.seat_revoked":
 	default:
 		return event, bad
 	}

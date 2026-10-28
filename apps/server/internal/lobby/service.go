@@ -226,7 +226,7 @@ func (s *Service) Register(game string, f Factory) error { return s.RegisterPrep
 func (s *Service) RegisterPrepared(game string, f Factory, prepare Prepare) error {
 	var e error
 	err := s.call(context.Background(), func() {
-		if game != "race" && game != "penalty" && game != "duck" || f == nil || s.factories[game] != nil {
+		if game != "race" && game != "penalty" && game != "duck" && game != "pingpong" && game != "blaster" || f == nil || s.factories[game] != nil {
 			e = ErrForbidden
 			return
 		}
@@ -296,6 +296,10 @@ func (s *Service) JoinLobby(ctx context.Context, j JoinContext, arenaID string) 
 			e = ErrForbidden
 			return
 		}
+		if (a.GameType == "pingpong" || a.GameType == "blaster") && s.factories[a.GameType] == nil {
+			e = ErrUnavailable
+			return
+		}
 		key := [2]string{j.WorldID, arenaID}
 		l := s.entries[key]
 		if l != nil {
@@ -347,7 +351,7 @@ func (s *Service) SetReady(ctx context.Context, user, lobby string, ready bool) 
 }
 func (s *Service) ChooseBot(ctx context.Context, user, lobby string, chosen bool) error {
 	return s.edit(ctx, user, lobby, func(l *entry, p *Player) error {
-		if l.GameType != "penalty" || l.HostID != user {
+		if (l.GameType != "penalty" && l.GameType != "pingpong") || l.HostID != user {
 			return ErrForbidden
 		}
 		l.BotChosen = chosen

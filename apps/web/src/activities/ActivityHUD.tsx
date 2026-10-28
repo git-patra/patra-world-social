@@ -4,11 +4,14 @@ import { activities, type ActivityStore } from './store';
 import { activityInput } from './input-router';
 import type { RaceSnapshot } from '../features/race/local';
 import type { PublicPenalty } from '../features/penalty/local';
+import {PingpongHUD} from '../features/pingpong/PingpongHUD';
+import type {PingpongSnapshot} from '../features/pingpong/local';
 import './activities.css';
 export function ActivityHUD({ store = activities }: {
     store?: ActivityStore;
 }) {
     const state = useSyncExternalStore(store.subscribe, store.snapshot, store.snapshot), [collapsed, setCollapsed] = useState(false), game = state.active;
+    if (game?.kind === 'pingpong' || !game && state.spectating?.kind === 'pingpong') return <PingpongHUD store={store} snapshot={(game??state.spectating)!.snapshot as PingpongSnapshot} spectator={!game}/>;
     if (!game && state.spectating?.kind === 'penalty') {
         const penalty = state.spectating.snapshot as PublicPenalty;
         return <section className="activity-hud" aria-label="Penonton penalti">

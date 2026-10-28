@@ -142,10 +142,12 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 
 **Files:** create `contracts/pingpong-rules.v1.json`, `pingpong.golden.json`, `apps/server/internal/games/pingpong/{engine,adapter,bot}.go`, `apps/web/src/features/pingpong/local.ts`, `apps/web/src/features/pingpong/session.ts`, `apps/web/src/features/pingpong/PingpongHUD.tsx`, `world/scenes/pingpong.ts`; extend lobby/protocol/history/result filters, `guest/completion.ts`, `HistoryPage/MatchDetail`; new migration `013_activity_match_types.sql` untuk allowlist pingpong+blaster (engine tersedia hanya bila sudah terdaftar).
 
-- [ ] RED golden rally/serve/bounce/scoring: pertama mencapai 7, unggul 2, batas 11 / deadline 120 s; BOT dipilih eksplisit, kontrol hanya peserta, reconnect 15 s→forfeit dan dedup completed result.
-- [ ] Implementasi physics meja 2D terbatas pada 20 Hz, manusia 1v1 atau manusia melawan BOT; scene terlihat di meja. Input paddle continuous masuk movement budget, model tidak menerima score/hit dari client.
-- [ ] Extend match types melalui migration baru, typed result metadata, query filters, immutable history dan guest completion. Tidak mengubah migration 004 atau podium Duck; bot bukan pengguna/akun baru.
-- [ ] Test kesetaraan Go/TS goldens, match completion/history melalui WS+DB aktual, tidak ada baris untuk spectator, pending/retry, touch/keyboard/focus cleanup. Review dan commit.
+- [x] RED golden rally/serve/bounce/scoring: pertama mencapai 7, unggul 2, batas 11 / deadline 120 s; BOT dipilih eksplisit, kontrol hanya peserta, reconnect 15 s→forfeit dan dedup completed result.
+- [x] Implementasi physics meja 2D terbatas pada 20 Hz, manusia 1v1 atau manusia melawan BOT; scene terlihat di meja. Input paddle continuous masuk movement budget, model tidak menerima score/hit dari client.
+- [x] Extend match types melalui migration baru, typed result metadata, query filters, immutable history dan guest completion. Tidak mengubah migration 004 atau podium Duck; bot bukan pengguna/akun baru.
+- [x] Test kesetaraan Go/TS goldens, match completion/history melalui WS+DB aktual, tidak ada baris untuk spectator, pending/retry, touch/keyboard/focus cleanup. Review dan commit.
+
+Evidence: [implementation](../../checkpoints/evidence/CP8/activities-task7.md), [review](../../checkpoints/evidence/CP8/activities-task7-review.md), [browser](../../checkpoints/evidence/CP8/activities-pingpong-browser.md). Minor constant/JSON drift prevention carried to final review.
 
 ### Task 8: Capit boneka
 

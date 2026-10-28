@@ -55,7 +55,8 @@
         "duck.finished",
         "leaderboard.changed",
         "activity.snapshot",
-        "activity.lifecycle"
+        "activity.lifecycle",
+        "pingpong.snapshot"
       ]
     },
     "payload": {

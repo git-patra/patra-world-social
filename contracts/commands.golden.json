@@ -181,6 +181,28 @@
         "dx": 0,
         "dy": -1
       }
+    },
+    {
+      "v": 2,
+      "commandId": "ping",
+      "seq": 1,
+      "worldId": "private",
+      "type": "pingpong.input",
+      "payload": {
+        "matchId": "m",
+        "axis": 1
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "ping",
+      "seq": 1,
+      "worldId": "private",
+      "type": "pingpong.serve",
+      "payload": {
+        "matchId": "m",
+        "rallyId": 1
+      }
     }
   ],
   "invalid": [
@@ -518,6 +540,40 @@
         "generation": 1,
         "action": "kick",
         "dx": 0
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "ping",
+      "seq": 1,
+      "worldId": "private",
+      "type": "pingpong.input",
+      "payload": {
+        "matchId": "m",
+        "axis": 2
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "ping",
+      "seq": 1,
+      "worldId": "private",
+      "type": "pingpong.input",
+      "payload": {
+        "matchId": "m",
+        "axis": 0,
+        "score": 7
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "ping",
+      "seq": 1,
+      "worldId": "private",
+      "type": "pingpong.serve",
+      "payload": {
+        "matchId": "m",
+        "rallyId": 0
       }
     }
   ]

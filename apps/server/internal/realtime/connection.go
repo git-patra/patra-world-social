@@ -127,7 +127,7 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 					movement = 0
 					control = 0
 				}
-				if cmd.Type == "player.input" || cmd.Type == "player.destination" || cmd.Type == "race.input" || rideDriveCommand(cmd) {
+				if cmd.Type == "player.input" || cmd.Type == "player.destination" || cmd.Type == "race.input" || cmd.Type == "pingpong.input" || rideDriveCommand(cmd) {
 					movement++
 					if movement > 60 {
 						reason = "movement rate exceeded"

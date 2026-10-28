@@ -33,7 +33,19 @@ func encodeResult(r model.MatchResult) ([]byte, [32]byte, error) {
 	if r.MatchID == "" || r.WorldID == "" || r.ArenaID == "" || r.PreparedAt <= 0 || r.StartsAt < r.PreparedAt || r.FinishedAt < r.StartsAt || r.FinishedAt > 9007199254740991 || len(r.Participants) < 1 || len(r.Participants) > 5 {
 		return nil, [32]byte{}, ErrInvalid
 	}
-	if r.GameType != "race" && r.GameType != "penalty" && r.GameType != "duck" {
+	if r.GameType != "race" && r.GameType != "penalty" && r.GameType != "duck" && r.GameType != "pingpong" && r.GameType != "blaster" {
+		return nil, [32]byte{}, ErrInvalid
+	}
+	if r.Pingpong != nil {
+		if r.GameType != "pingpong" || len(r.Participants) != 2 || r.Pingpong.Rallies < 1 || r.Pingpong.Rallies > 22 || (r.Pingpong.Reason != "score" && r.Pingpong.Reason != "deadline" && r.Pingpong.Reason != "forfeit") {
+			return nil, [32]byte{}, ErrInvalid
+		}
+		for i, score := range r.Pingpong.Scores {
+			if score < 0 || score > 11 || r.Participants[i].Score == nil || *r.Participants[i].Score != score {
+				return nil, [32]byte{}, ErrInvalid
+			}
+		}
+	} else if r.GameType == "pingpong" {
 		return nil, [32]byte{}, ErrInvalid
 	}
 	actors, users := map[string]bool{}, map[string]bool{}
@@ -100,5 +112,5 @@ func validOutcome(game, outcome string) bool {
 	if game == "duck" && outcome == "incomplete" {
 		return true
 	}
-	return game == "penalty" && (outcome == "win" || outcome == "loss" || outcome == "draw" || outcome == "forfeit" || outcome == "abandoned")
+	return (game == "penalty" || game == "pingpong") && (outcome == "win" || outcome == "loss" || outcome == "draw" || outcome == "forfeit" || outcome == "abandoned")
 }

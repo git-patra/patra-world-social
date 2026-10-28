@@ -37,7 +37,7 @@ type Page struct {
 
 func uuid(s string) bool { var v pgtype.UUID; return v.Scan(s) == nil && v.Valid }
 func validFilter(f Filter) bool {
-	return (f.Game == "" || f.Game == "race" || f.Game == "penalty" || f.Game == "duck") && (f.World == "" || uuid(f.World)) && (f.Status == "" || f.Status == "running" || f.Status == "finalizing" || f.Status == "completed" || f.Status == "aborted_storage" || f.Status == "aborted_server" || f.Status == "abandoned") && (f.From == nil || f.To == nil || !f.To.Before(*f.From))
+	return (f.Game == "" || f.Game == "race" || f.Game == "penalty" || f.Game == "duck" || f.Game == "pingpong" || f.Game == "blaster") && (f.World == "" || uuid(f.World)) && (f.Status == "" || f.Status == "running" || f.Status == "finalizing" || f.Status == "completed" || f.Status == "aborted_storage" || f.Status == "aborted_server" || f.Status == "abandoned") && (f.From == nil || f.To == nil || !f.To.Before(*f.From))
 }
 
 const recordSelect = `SELECT m.id::text,m.world_id::text,w.name,m.game_type,m.status,m.version,m.prepared_at,m.starts_at,m.finished_at,m.result_payload,
