@@ -1,0 +1,31 @@
+{
+  "v": 1,
+  "id": "beta-v1",
+  "subunitsPerTile": 1024,
+  "hubTickHz": 20,
+  "hubSpeedSubunitsPerSecond": 4608,
+  "movementIntentExpiryMs": 250,
+  "raceTickHz": 30,
+  "raceLaps": 5,
+  "raceSlots": 5,
+  "penaltyZones": 4,
+  "penaltyDeadlineMs": 3000,
+  "checksum": "586159ef90c54575dd44e993259b98d28a9cdc48f1759115a95d74bdefbd9fef",
+  "race": {
+    "trackId": "autumn-ring-v1",
+    "trackChecksum": "f0274d8439e799a9e0eb41e086449c9bc765ad9df7bac074bd04ac6f434f0a42",
+    "acceleration": 5,
+    "brake": 12,
+    "drag": 2,
+    "maxSpeed": 230,
+    "steerDegrees": 3,
+    "radius": 360,
+    "botSpeed": 155,
+    "botLookahead": 3000,
+    "intentExpiryMs": 250,
+    "maxCatchUpSteps": 8,
+    "limitMs": 300000,
+    "finishGraceMs": 45000,
+    "resultsMs": 10000
+  }
+}

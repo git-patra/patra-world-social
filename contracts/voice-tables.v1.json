@@ -1,0 +1,23 @@
+{
+  "v": 1,
+  "id": "kampung-senja-tables-v1",
+  "mapId": "kampung-senja-v1",
+  "mapVersion": 1,
+  "mapChecksum": "71814ab8a87be0bd7166cbe2c1049f38e6fa774825ca87230fa0b155b0bb0768",
+  "tables": [
+    {
+      "id": 0,
+      "name": "Meja Depan",
+      "x": 11,
+      "y": 23,
+      "radius": 1.4
+    },
+    {
+      "id": 1,
+      "name": "Meja Pojok",
+      "x": 20,
+      "y": 23,
+      "radius": 1.4
+    }
+  ]
+}

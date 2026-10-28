@@ -1,0 +1,91 @@
+// Game IDs are stable; destinations describe the approved open village.
+export const stations=[
+  {
+    "id": "arcade",
+    "name": "Arcade Latihan",
+    "label": "Arcade Latihan",
+    "short": "Penalti solo melawan bot",
+    "icon": "✧",
+    "color": "#b59bf3",
+    "title": "Main penalti",
+    "description": "Pilih sudut gawang dan coba kalahkan kiper. Latihan solo sudah bisa dimainkan di sini.",
+    "status": "Tersedia · solo"
+  },
+  {
+    "id": "race",
+    "name": "Lintasan Mini",
+    "label": "Lintasan Mini",
+    "short": "5 lap · 5 peserta termasuk bot",
+    "icon": "⚑",
+    "color": "#dfbc78",
+    "title": "Bersiap di garis start",
+    "description": "Balapan lima lap untuk lima peserta. Main solo lokal atau bersama teman di dunia privat; slot kosong diisi BOT. Semua kart mulai bersama setelah hitung mundur.",
+    "status": "Solo lokal / dunia privat"
+  },
+  {
+    "id": "penalty",
+    "name": "Lapangan Penalti",
+    "label": "Lapangan Penalti",
+    "short": "Duel 1 lawan 1 atau bot",
+    "icon": "⚽",
+    "color": "#b59bf3",
+    "title": "Tantang penjaga gawang",
+    "description": "Duel pilihan rahasia dalam tiga detik. Masuk dunia privat untuk melawan teman atau pilih BOT secara eksplisit; guest dapat practice lokal melawan BOT.",
+    "status": "Tersedia · duel privat / practice"
+  },
+  {
+    "id": "duck",
+    "name": "Duck Arcade",
+    "label": "Duck Arcade",
+    "short": "Tembak bebek selama 60 detik",
+    "icon": "◎",
+    "color": "#f4a267",
+    "title": "Bidik skor terbaikmu",
+    "description": "Empat kabinet privat dengan sesi 60 detik dan history akun. Guest dapat practice lokal. Podium tiga akun unik dan riwayat champion tersedia untuk anggota dunia.",
+    "status": "Tersedia · kabinet privat / practice"
+  },
+  {
+    "id": "warkop",
+    "name": "Warkop Senja",
+    "label": "Warkop Senja",
+    "short": "Meja mic dan chat bersama teman",
+    "icon": "☕",
+    "color": "#d99679",
+    "title": "Nongkrong setelah main",
+    "description": "Singgah di Meja Depan atau Meja Pojok untuk obrolan di dunia privat. Periksa ketersediaan voice di bawah.",
+    "status": "Voice & chat · dunia privat"
+  },
+  {
+    "id": "plaza",
+    "name": "Alun-alun",
+    "label": "Alun-alun",
+    "short": "Titik temu kampung. Berjalan ke halaman permainan, Warkop, taman, atau sungai.",
+    "icon": "✦",
+    "color": "#d5bc8a",
+    "title": "Alun-alun",
+    "description": "Titik temu kampung. Berjalan ke halaman permainan, Warkop, taman, atau sungai.",
+    "status": "Ruang bersama"
+  },
+  {
+    "id": "garden",
+    "name": "Kebun Lentera",
+    "label": "Kebun Lentera",
+    "short": "Sudut tenang dengan api unggun dan bangku. Jalan taman menyambung kembali ke alun-alun.",
+    "icon": "❧",
+    "color": "#d5bc8a",
+    "title": "Kebun Lentera",
+    "description": "Sudut tenang dengan api unggun dan bangku. Jalan taman menyambung kembali ke alun-alun.",
+    "status": "Ruang bersama"
+  },
+  {
+    "id": "river",
+    "name": "Tepi Sungai",
+    "label": "Tepi Sungai",
+    "short": "Nikmati dermaga dan jembatan. Jalur ini menghubungkan sisi timur kampung.",
+    "icon": "≈",
+    "color": "#d5bc8a",
+    "title": "Tepi Sungai",
+    "description": "Nikmati dermaga dan jembatan. Jalur ini menghubungkan sisi timur kampung.",
+    "status": "Ruang bersama"
+  }
+];

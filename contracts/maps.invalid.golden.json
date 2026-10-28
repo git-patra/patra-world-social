@@ -1,0 +1,488 @@
+{
+  "disconnectedEntrance": {
+    "v": 1,
+    "id": "autumn-village",
+    "width": 64,
+    "height": 64,
+    "spawn": {
+      "x": 32,
+      "y": 32
+    },
+    "buildings": [
+      {
+        "id": "arcade",
+        "x": 28,
+        "y": 28,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 28,
+          "y": 30
+        }
+      },
+      {
+        "id": "chat",
+        "x": 34,
+        "y": 27,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 34,
+          "y": 29
+        }
+      },
+      {
+        "id": "fintech",
+        "x": 37,
+        "y": 30,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 37,
+          "y": 32
+        }
+      },
+      {
+        "id": "coffee",
+        "x": 28,
+        "y": 34,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 28,
+          "y": 36
+        }
+      },
+      {
+        "id": "erp",
+        "x": 33,
+        "y": 36,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 33,
+          "y": 38
+        }
+      },
+      {
+        "id": "pos",
+        "x": 37,
+        "y": 35,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 37,
+          "y": 37
+        }
+      },
+      {
+        "id": "jajaneun",
+        "x": 26,
+        "y": 31,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 26,
+          "y": 33
+        }
+      },
+      {
+        "id": "race",
+        "x": 30,
+        "y": 10,
+        "width": 5,
+        "height": 4,
+        "entrance": {
+          "x": 30,
+          "y": 14
+        }
+      },
+      {
+        "id": "penalty",
+        "x": 50,
+        "y": 28,
+        "width": 5,
+        "height": 4,
+        "entrance": {
+          "x": 50,
+          "y": 32
+        }
+      },
+      {
+        "id": "duck",
+        "x": 30,
+        "y": 49,
+        "width": 5,
+        "height": 4,
+        "entrance": {
+          "x": 30,
+          "y": 53
+        }
+      },
+      {
+        "id": "warkop",
+        "x": 8,
+        "y": 28,
+        "width": 5,
+        "height": 4,
+        "entrance": {
+          "x": 8,
+          "y": 32
+        }
+      }
+    ],
+    "districts": [
+      {
+        "id": "central",
+        "x": 24,
+        "y": 24,
+        "width": 20,
+        "height": 20
+      },
+      {
+        "id": "race",
+        "x": 24,
+        "y": 4,
+        "width": 18,
+        "height": 14
+      },
+      {
+        "id": "penalty",
+        "x": 46,
+        "y": 24,
+        "width": 14,
+        "height": 12
+      },
+      {
+        "id": "duck",
+        "x": 24,
+        "y": 46,
+        "width": 14,
+        "height": 12
+      },
+      {
+        "id": "warkop",
+        "x": 4,
+        "y": 24,
+        "width": 18,
+        "height": 14
+      }
+    ],
+    "obstacles": [
+      {
+        "x": 26,
+        "y": 26
+      },
+      {
+        "x": 29,
+        "y": 25
+      },
+      {
+        "x": 32,
+        "y": 25
+      },
+      {
+        "x": 36,
+        "y": 25
+      },
+      {
+        "x": 39,
+        "y": 27
+      },
+      {
+        "x": 39,
+        "y": 32
+      },
+      {
+        "x": 39,
+        "y": 38
+      },
+      {
+        "x": 35,
+        "y": 39
+      },
+      {
+        "x": 30,
+        "y": 39
+      },
+      {
+        "x": 26,
+        "y": 38
+      },
+      {
+        "x": 25,
+        "y": 35
+      },
+      {
+        "x": 25,
+        "y": 28
+      },
+      {
+        "x": 28,
+        "y": 38
+      },
+      {
+        "x": 30,
+        "y": 36
+      },
+      {
+        "x": 35,
+        "y": 32
+      },
+      {
+        "x": 31,
+        "y": 29
+      },
+      {
+        "x": 29,
+        "y": 30
+      },
+      {
+        "x": 27,
+        "y": 30
+      },
+      {
+        "x": 28,
+        "y": 31
+      }
+    ],
+    "checksum": "cb56899197324a5017021b345d60acc9a38da9b4ad78d14cace30130e29c99b2"
+  },
+  "overlappingDistricts": {
+    "v": 1,
+    "id": "autumn-village",
+    "width": 64,
+    "height": 64,
+    "spawn": {
+      "x": 32,
+      "y": 32
+    },
+    "buildings": [
+      {
+        "id": "arcade",
+        "x": 28,
+        "y": 28,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 28,
+          "y": 30
+        }
+      },
+      {
+        "id": "chat",
+        "x": 34,
+        "y": 27,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 34,
+          "y": 29
+        }
+      },
+      {
+        "id": "fintech",
+        "x": 37,
+        "y": 30,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 37,
+          "y": 32
+        }
+      },
+      {
+        "id": "coffee",
+        "x": 28,
+        "y": 34,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 28,
+          "y": 36
+        }
+      },
+      {
+        "id": "erp",
+        "x": 33,
+        "y": 36,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 33,
+          "y": 38
+        }
+      },
+      {
+        "id": "pos",
+        "x": 37,
+        "y": 35,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 37,
+          "y": 37
+        }
+      },
+      {
+        "id": "jajaneun",
+        "x": 26,
+        "y": 31,
+        "width": 2,
+        "height": 2,
+        "entrance": {
+          "x": 26,
+          "y": 33
+        }
+      },
+      {
+        "id": "race",
+        "x": 30,
+        "y": 10,
+        "width": 5,
+        "height": 4,
+        "entrance": {
+          "x": 30,
+          "y": 14
+        }
+      },
+      {
+        "id": "penalty",
+        "x": 50,
+        "y": 28,
+        "width": 5,
+        "height": 4,
+        "entrance": {
+          "x": 50,
+          "y": 32
+        }
+      },
+      {
+        "id": "duck",
+        "x": 30,
+        "y": 49,
+        "width": 5,
+        "height": 4,
+        "entrance": {
+          "x": 30,
+          "y": 53
+        }
+      },
+      {
+        "id": "warkop",
+        "x": 8,
+        "y": 28,
+        "width": 5,
+        "height": 4,
+        "entrance": {
+          "x": 8,
+          "y": 32
+        }
+      }
+    ],
+    "districts": [
+      {
+        "id": "central",
+        "x": 24,
+        "y": 24,
+        "width": 20,
+        "height": 20
+      },
+      {
+        "id": "race",
+        "x": 24,
+        "y": 24,
+        "width": 18,
+        "height": 14
+      },
+      {
+        "id": "penalty",
+        "x": 46,
+        "y": 24,
+        "width": 14,
+        "height": 12
+      },
+      {
+        "id": "duck",
+        "x": 24,
+        "y": 46,
+        "width": 14,
+        "height": 12
+      },
+      {
+        "id": "warkop",
+        "x": 4,
+        "y": 24,
+        "width": 18,
+        "height": 14
+      }
+    ],
+    "obstacles": [
+      {
+        "x": 26,
+        "y": 26
+      },
+      {
+        "x": 29,
+        "y": 25
+      },
+      {
+        "x": 32,
+        "y": 25
+      },
+      {
+        "x": 36,
+        "y": 25
+      },
+      {
+        "x": 39,
+        "y": 27
+      },
+      {
+        "x": 39,
+        "y": 32
+      },
+      {
+        "x": 39,
+        "y": 38
+      },
+      {
+        "x": 35,
+        "y": 39
+      },
+      {
+        "x": 30,
+        "y": 39
+      },
+      {
+        "x": 26,
+        "y": 38
+      },
+      {
+        "x": 25,
+        "y": 35
+      },
+      {
+        "x": 25,
+        "y": 28
+      },
+      {
+        "x": 28,
+        "y": 38
+      },
+      {
+        "x": 30,
+        "y": 36
+      },
+      {
+        "x": 35,
+        "y": 32
+      },
+      {
+        "x": 31,
+        "y": 29
+      }
+    ],
+    "checksum": "cb56899197324a5017021b345d60acc9a38da9b4ad78d14cace30130e29c99b2"
+  }
+}

@@ -1,0 +1,254 @@
+{
+  "valid": [
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "presence.changed",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "world.delta",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "command.ack",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "lobby.updated",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "match.started",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "race.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "race.finished",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "penalty.choice_ack",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "penalty.turn_opened",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "penalty.revealed",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "duck.shot_resolved",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "duck.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "chat.message",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "command.error",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "voice.seat_granted",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "voice.seat_revoked",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "result-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "match.result_status",
+      "payload": {
+        "matchId": "11111111-1111-4111-8111-111111111111",
+        "status": "unconfirmed"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "v": 2,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": -1,
+      "serverTimeMs": 0,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": null,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "unknown",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "world.snapshot",
+      "payload": []
+    },
+    {
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTimeMs": 0,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "type": "world.snapshot",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "eventId": "event-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "world.snapshot"
+    },
+    {
+      "v": 1,
+      "eventId": "result-1",
+      "serverTick": 0,
+      "serverTimeMs": 0,
+      "type": "match.result_status",
+      "payload": {
+        "matchId": "m",
+        "status": "saved_before_commit"
+      }
+    }
+  ]
+}

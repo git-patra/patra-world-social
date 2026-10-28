@@ -1,0 +1,24 @@
+/goal Implementasikan Patra World Social sampai checkpoint CP1–CP8 lulus, dengan task dan commit yang dapat dilanjutkan dari progres terakhir.
+
+Baca terlebih dahulu:
+1. /Users/patra/Project/docs/superpowers/specs/2026-10-26-patra-world-social-design.md
+2. /Users/patra/Project/docs/superpowers/plans/2026-10-26-patra-world-social.md
+3. /Users/patra/Project/docs/superpowers/plans/2026-10-26-patra-world-social-progress.md
+
+Saya memilih default rancangan dalam dokumen untuk dieksekusi dan mengotorisasi pembuatan repo lokal serta commit implementasi. Gunakan /Users/patra/Project/patra-world-social sebagai repo baru, diturunkan dari /Users/patra/Project/patra-world. Pertahankan history sumber, revalidasi commit basis yang tercatat, jangan mengubah source lama atau membawa file untracked/secret. Gunakan branch feat/social-world pada repo baru. Jika repo tujuan sudah ada, baca progres aktual dan resume; jangan overwrite atau bootstrap ulang.
+
+Kebutuhan wajib: backend Golang; frontend mempertahankan tema isometrik Patra World; private world lewat undangan; guest solo; akun username/password untuk multiplayer dan history; race tepat 5 lap dan 5 slot total dengan bot pengisi; penalti 1v1/bot dengan pilihan rahasia 3 detik dan random timeout; duck shooting dengan history, podium top 3 dan champion; warkop mic/chat per meja.
+
+Jalankan T1–T16 mengikuti dependensi dan acceptance plan. Gunakan subagent untuk pekerjaan independen dan review checkpoint, dengan satu coordinator mengelola integrasi, kontrak, migration numbering dan commit checkout bersama. Jangan meminta persetujuan rutin setiap task/checkpoint. Keputusan implementasi kecil boleh diselesaikan sendiri dan dicatat; perubahan kebutuhan utama tetap diklarifikasi.
+
+Setiap task: implementasikan, jalankan pengujian relevan, perbaiki kegagalan, review diff, lalu commit perubahan yang utuh. Ikuti label/batas C01–C16 dan subject commit pada plan; task besar boleh dipecah menjadi subcommit terverifikasi. C01–C16 bukan SHA: selalu catat hash Git yang benar-benar dibuat. Jangan commit secret atau perubahan pengguna yang tidak terkait.
+
+Pada T1, salin spec/plan/prompt/progress awal ke repo baru dengan link relatif yang tetap valid, lalu gunakan docs/PROGRESS.md sebagai ledger aktif. Catat task status, highest contiguous passed checkpoint, last verified task commit, latest code commit, commands/evidence, kendala, dan next task. Setiap checkpoint lulus, buat docs/checkpoints/CPN.md, commit laporan docs: record checkpoint cpN, laporkan SHA kode dan SHA laporan, kemudian lanjut otomatis. Saat resume, cocokkan ledger dengan git status, git log, diff dan evidence; jangan mengulang task yang sudah sah selesai.
+
+Target akhir adalah paket beta lokal/staging yang terverifikasi sampai CP8, seluruh perubahan milik task sudah di-commit, preview yang bisa dijalankan, dan runbook deployment/rollback. Jangan push remote, membuat remote GitHub, deploy publik, mengubah VPS/Caddy produksi, atau membeli/provision layanan berbayar dalam goal ini.
+
+Jika kredensial LiveKit, provider staging, perangkat fisik, atau resource pengujian belum tersedia, minta prasyarat spesifik dan lanjutkan semua task independen yang masih bisa dikerjakan. Catat implemented_pending_external_verification untuk task yang kodenya siap tetapi bukti eksternalnya belum ada. Mock, browser emulation, atau token decode tidak boleh diklaim sebagai pengujian audio/perangkat nyata. Jangan menandai CP7/CP8 PASS atau goal complete selama acceptance wajib masih belum terpenuhi.
+
+Selesai hanya jika T1–T16 done dan CP1–CP8 PASS sesuai plan. Laporan akhir memuat fitur yang bekerja, hasil tes dan batas validasinya, lokasi repo/branch, daftar commit/checkpoint nyata, cara menjalankan, serta status source lama. Jika benar-benar terhambat input eksternal, laporkan posisi terakhir dan kebutuhan spesifik tanpa mengklaim implementasi lengkap.
+
+Pastikan produk sepenuhnya fokus world game seperti Gather: hapus konten CV/portfolio, timeline karier, link LinkedIn, PDF resume dan showcase bisnis dari UI serta aset publik. Pertahankan perubahan pembersihan yang sudah ada, verifikasi ulang sebelum commit berikutnya.

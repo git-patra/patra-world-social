@@ -1,0 +1,141 @@
+diff --git a/apps/web/src/app.js b/apps/web/src/app.js
+index 01f5d6e..001c5d8 100644
+--- a/apps/web/src/app.js
++++ b/apps/web/src/app.js
+@@ -1,5 +1,5 @@
+ import {mountSettings} from './features/settings/SettingsPage';
+-import {mountGuestLifecycle} from './guest/session';
++import {mountGuestLifecycle,mountGuestUICleanup} from './guest/session';
+ import {activePreferences} from './preferences';
+ import {mountVoice,mountVoicePanel} from './features/voice/VoicePanel';
+ import {createWorld} from './world.js';
+@@ -140,7 +140,7 @@ function applyPreferences(p){motion=!p.reducedMotion;document.body.dataset.contr
+ activePreferences.subscribe(applyPreferences);
+ activePreferences.start();
+ window.addEventListener('patra-guest-storage-error',e=>notify(e.detail));
+-for(const name of ['patra-auth-change','patra-world-attachment','patra-guest-reset'])window.addEventListener(name,()=>{releaseInputs();if(dialog.open)dialog.close();else disposeDemo()});
++mountGuestUICleanup(releaseInputs,dialog,disposeDemo);
+ $('#solo-button').onclick=()=>{window.dispatchEvent(new Event('patra-solo-request'));$('#settings-button').click()};
+ $('#friends-play-button').onclick=()=>window.dispatchEvent(new Event('patra-worlds-request'));
+ $('#motion-button').onclick=()=>{void activePreferences.toggleMotion().catch(()=>notify('Pengaturan belum tersimpan.'))};
+diff --git a/apps/web/src/auth-state.ts b/apps/web/src/auth-state.ts
+index a0551d8..439c13b 100644
+--- a/apps/web/src/auth-state.ts
++++ b/apps/web/src/auth-state.ts
+@@ -12,4 +12,6 @@ export class AuthState{
+  update(expected:number,user:User|null){if(!this.is(expected))return false;if(!user)return this.transition(null,expected);if(user.id!==this.value.user?.id)return false;this.value={...this.value,user};this.emit();return true}
+ }
+ export const authState=new AuthState();
+-authState.subscribe(({user})=>{if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('patra-auth-change',{detail:user}))});
++// Profile refreshes notify state subscribers, but only a new session tears down play.
++let bridgedGeneration=authState.snapshot().generation;
++authState.subscribe(({user,generation})=>{if(generation===bridgedGeneration)return;bridgedGeneration=generation;if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('patra-auth-change',{detail:user}))});
+diff --git a/apps/web/src/guest/session.ts b/apps/web/src/guest/session.ts
+index 965692f..1b742d6 100644
+--- a/apps/web/src/guest/session.ts
++++ b/apps/web/src/guest/session.ts
+@@ -9,3 +9,11 @@ export const GuestSession={
+ };
+ /** Finished records/settings survive reload; unfinished clocks never do. */
+ export function mountGuestLifecycle(){const clear=()=>GuestSession.clear();window.addEventListener('patra-auth-change',clear);window.addEventListener('patra-world-attachment',clear);window.addEventListener('patra-guest-reset',clear);window.addEventListener('pagehide',clear);return()=>{clear();window.removeEventListener('patra-auth-change',clear);window.removeEventListener('patra-world-attachment',clear);window.removeEventListener('patra-guest-reset',clear);window.removeEventListener('pagehide',clear)}}
++
++/** Input/modal teardown shares the session boundary used by the local engines. */
++export function mountGuestUICleanup(releaseInputs:()=>void,dialog:Pick<HTMLDialogElement,'open'|'close'>,disposeDemo:()=>void){
++ const events=['patra-auth-change','patra-world-attachment','patra-guest-reset'];
++ const clear=()=>{releaseInputs();if(dialog.open)dialog.close();else disposeDemo()};
++ for(const name of events)window.addEventListener(name,clear);
++ return()=>{for(const name of events)window.removeEventListener(name,clear)};
++}
+diff --git a/apps/web/src/net/api.ts b/apps/web/src/net/api.ts
+index d1cc141..7fcaa97 100644
+--- a/apps/web/src/net/api.ts
++++ b/apps/web/src/net/api.ts
+@@ -17,7 +17,10 @@ async function csrf(signal?:AbortSignal) {
+     return (await response.json()).token as string;
+ }
+ async function post<T>(path: string, data: unknown,signal?:AbortSignal): Promise<T> {
+-    const response = await fetch(path, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': await csrf(signal) }, body: JSON.stringify(data),signal });
++    const token=await csrf(signal);
++    // Session-owned requests may become obsolete while the CSRF lookup is pending.
++    signal?.throwIfAborted();
++    const response = await fetch(path, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': token }, body: JSON.stringify(data),signal });
+     if (response.status === 204)
+         return undefined as T;
+     const body = await response.json().catch(() => ({ error: 'Layanan akun belum tersedia.' }));
+diff --git a/apps/web/src/preferences.ts b/apps/web/src/preferences.ts
+index 955b59e..2ab8869 100644
+--- a/apps/web/src/preferences.ts
++++ b/apps/web/src/preferences.ts
+@@ -1,8 +1,8 @@
+ import {AuthState,authState,type AuthSnapshot} from './auth-state';
+ import {api,type User,type Profile} from './net/api';
+ import {defaults,loadPreferences,savePreferences,saveMotion,resetGuestData,type Preferences} from './guest/history';
+-export type PreferenceIO={deviceLoad:()=>Promise<Preferences>;deviceSave:(p:Preferences)=>Promise<void>;deviceReset:()=>Promise<void>;deviceMotion:(reduced:boolean)=>Promise<Preferences|undefined>;accountMotion:(reduced:boolean)=>Promise<Profile>;accountLoad:(signal?:AbortSignal)=>Promise<Profile>;accountSave:(p:Profile,signal?:AbortSignal)=>Promise<User>};
+-const io:PreferenceIO={deviceLoad:loadPreferences,deviceSave:savePreferences,deviceReset:resetGuestData,deviceMotion:saveMotion,accountMotion:reduced=>api.updateMotion(reduced),accountLoad:signal=>api.profile(signal),accountSave:(p,signal)=>api.updateProfile(p,signal)};
++export type PreferenceIO={deviceLoad:()=>Promise<Preferences>;deviceSave:(p:Preferences)=>Promise<void>;deviceReset:()=>Promise<void>;deviceMotion:(reduced:boolean)=>Promise<Preferences|undefined>;accountMotion:(reduced:boolean,signal?:AbortSignal)=>Promise<Profile>;accountLoad:(signal?:AbortSignal)=>Promise<Profile>;accountSave:(p:Profile,signal?:AbortSignal)=>Promise<User>};
++const io:PreferenceIO={deviceLoad:loadPreferences,deviceSave:savePreferences,deviceReset:resetGuestData,deviceMotion:saveMotion,accountMotion:(reduced,signal)=>api.updateMotion(reduced,signal),accountLoad:signal=>api.profile(signal),accountSave:(p,signal)=>api.updateProfile(p,signal)};
+ export class ActivePreferences{
+  private value:Preferences={...defaults};private loadedGeneration=-1;private loadRevision=0;private listeners=new Set<(p:Preferences)=>void>();
+  constructor(readonly auth:AuthState,private io:PreferenceIO){}
+@@ -16,11 +16,21 @@ export class ActivePreferences{
+  if(user){updated=await this.io.accountSave({displayName:p.displayName,avatar:p.avatar,settings:{audio:p.audio,controls:p.controls,reducedMotion:p.reducedMotion}},signal)}else await this.io.deviceSave(p);
+  if(!this.auth.is(g)||signal?.aborted)return false;this.loadRevision++;if(updated&&!this.auth.update(g,updated))return false;return this.publish(g,p)
+  }
+- async toggleMotion(){const g=this.auth.snapshot().generation;if(this.loadedGeneration!==g)await this.load();if(!this.auth.is(g)||this.loadedGeneration!==g)return false;const user=this.auth.snapshot().user,reduced=!this.value.reducedMotion;
+- const result=user?await this.io.accountMotion(reduced):await this.io.deviceMotion(reduced);
+- if(!result||!this.auth.is(g))return false;
++ async toggleMotion(){
++ const g=this.auth.snapshot().generation,controller=new AbortController();
++ // Own cancellation here, not in start(): standalone callers need the same fence.
++ const off=this.auth.subscribe(({generation})=>{if(generation!==g)controller.abort()});
++ try{
++ if(this.loadedGeneration!==g)await this.load();
++ if(controller.signal.aborted||!this.auth.is(g)||this.loadedGeneration!==g)return false;
++ const user=this.auth.snapshot().user,reduced=!this.value.reducedMotion;
++ const result=user?await this.io.accountMotion(reduced,controller.signal):await this.io.deviceMotion(reduced);
++ if(!result||controller.signal.aborted||!this.auth.is(g))return false;
+  const p=user?{...(result as Profile).settings,displayName:(result as Profile).displayName,avatar:(result as Profile).avatar}:result as Preferences;
+- this.loadRevision++;if(user&&!this.auth.update(g,{...user,displayName:p.displayName,avatar:p.avatar}))return false;return this.publish(g,p)}
++ this.loadRevision++;if(user&&!this.auth.update(g,{...user,displayName:p.displayName,avatar:p.avatar}))return false;return this.publish(g,p);
++ }catch(error){if(controller.signal.aborted||!this.auth.is(g))return false;throw error}
++ finally{off()}
++ }
+  async resetDevice(g=this.auth.snapshot().generation){await this.io.deviceReset();if(this.auth.is(g)&&!this.auth.snapshot().user){this.loadRevision++;this.publish(g,{...defaults})}}
+ }
+ export const activePreferences=new ActivePreferences(authState,io);
+diff --git a/apps/web/tests/settings.test.ts b/apps/web/tests/settings.test.ts
+index 648c6dd..bda04b5 100644
+--- a/apps/web/tests/settings.test.ts
++++ b/apps/web/tests/settings.test.ts
+@@ -42,3 +42,31 @@ test('Motion uses fresh persisted fields and rejects delayed result after same-a
+  const f=fixture();f.state.transition(A);await f.store.load();const fresh={...account,displayName:'Concurrent account edit',avatar:'autumn' as const,audio:true,controls:'keyboard' as const};await f.io.accountSave(profile(fresh));await f.store.toggleMotion();assert.deepEqual(f.store.snapshot(),{...fresh,reducedMotion:false});assert.equal(f.state.snapshot().user?.displayName,fresh.displayName);
+  let finish!:(p:Profile)=>void;f.io.accountMotion=()=>new Promise(r=>{finish=r});const pending=f.store.toggleMotion();f.state.transition(null);f.state.transition(A);await f.store.load();const before=f.store.snapshot(),auth=f.state.snapshot();finish(profile({...account,displayName:'Stale motion response'}));assert.equal(await pending,false);assert.deepEqual(f.store.snapshot(),before);assert.deepEqual(f.state.snapshot(),auth);
+ });
++
++import {GuestSession,mountGuestLifecycle,mountGuestUICleanup} from '../src/guest/session';
++import {guestSession} from '../src/features/penalty/session';
++test('singleton auth bridge keeps an account solo match through Motion and profile updates but clears session transitions',async()=>{
++ const saved={window:globalThis.window,profile:api.profile,motion:api.updateMotion,save:api.updateProfile};Object.assign(globalThis,{window:new EventTarget()});api.profile=async()=>profile(account);api.updateMotion=async reducedMotion=>profile({...account,reducedMotion});api.updateProfile=async p=>({...A,displayName:p.displayName,avatar:p.avatar});
++ let released=0,disposed=0,closed=0;const dialog={open:false,close(){closed++;this.open=false}};const offUI=mountGuestUICleanup(()=>{released++},dialog,()=>{disposed++});
++ const dispose=mountGuestLifecycle();let transitions=0;window.addEventListener('patra-auth-change',()=>{transitions++});
++ try{authState.transition(A);await activePreferences.load();GuestSession.start('penalty',{at:0});const original=guestSession.snapshot(100);assert.ok(original);const initial=transitions,uiBefore={released,disposed,closed};
++ await activePreferences.toggleMotion();assert.ok(guestSession.snapshot(100),'Motion must preserve the running game');assert.equal(transitions,initial);
++ await activePreferences.save({...account,displayName:'Updated account'});assert.ok(guestSession.snapshot(100),'same-session profile save must preserve game');assert.equal(transitions,initial);assert.deepEqual({released,disposed,closed},uiBefore,'preference and profile updates must not release inputs or dispose modal UI');
++ authState.transition(null);assert.equal(guestSession.snapshot(100),null);assert.equal(transitions,initial+1);assert.equal(released,uiBefore.released+1);assert.equal(disposed,uiBefore.disposed+1);
++ authState.transition(A);GuestSession.start('penalty',{at:0});dialog.open=true;authState.begin();assert.equal(closed,1,'new session closes an open game panel');assert.equal(guestSession.snapshot(100),null,'same-account new session generation must still clear game');
++ }finally{offUI();dispose();authState.transition(null);api.profile=saved.profile;api.updateMotion=saved.motion;api.updateProfile=saved.save;globalThis.window=saved.window}
++});
++test('production Motion CSRF boundary dispatches no obsolete POST for new account or same-account session',async()=>{
++ const saved={fetch:globalThis.fetch,profile:api.profile};api.profile=async()=>profile(account);
++ try{for(const next of [B,A]){authState.transition(A);await activePreferences.load();let release!:(r:Response)=>void;let csrfSignal:AbortSignal|undefined;const posts:string[]=[];
++ globalThis.fetch=async(input,init)=>{if(String(input)==='/api/v1/auth/csrf'){csrfSignal=init?.signal as AbortSignal|undefined;return new Promise<Response>(r=>{release=r})}posts.push(String(input));return new Response(JSON.stringify(profile({...account,reducedMotion:false})),{status:200})};
++ const pending=activePreferences.toggleMotion();await turn();assert.equal(typeof release,'function');authState.transition(null);authState.transition(next);const current=authState.snapshot();release(new Response(JSON.stringify({token:'synthetic-csrf'}),{status:200}));assert.equal(await pending,false);assert.deepEqual(posts,[],'old CSRF completion must not dispatch under the newer session');assert.equal(csrfSignal?.aborted,true);assert.deepEqual(authState.snapshot(),current);
++ }}finally{authState.transition(null);globalThis.fetch=saved.fetch;api.profile=saved.profile}
++});
++test('production Motion forwards cancellation to an already dispatched POST and fences its late response',async()=>{
++ const saved={fetch:globalThis.fetch,profile:api.profile};api.profile=async()=>profile(account);
++ try{authState.transition(A);await activePreferences.load();let release!:(r:Response)=>void;let csrfSignal:AbortSignal|undefined,postSignal:AbortSignal|undefined;
++ globalThis.fetch=async(input,init)=>{if(String(input)==='/api/v1/auth/csrf'){csrfSignal=init?.signal as AbortSignal|undefined;return new Response(JSON.stringify({token:'synthetic-csrf'}),{status:200})}assert.equal(String(input),'/api/v1/account/motion');postSignal=init?.signal as AbortSignal|undefined;return new Promise<Response>(r=>{release=r})};
++ const pending=activePreferences.toggleMotion();await turn();assert.equal(typeof release,'function');assert.ok(postSignal);assert.equal(postSignal,csrfSignal);authState.transition(null);authState.transition(A);const current=authState.snapshot(),preferences=activePreferences.snapshot();assert.equal(postSignal.aborted,true);release(new Response(JSON.stringify(profile({...account,displayName:'Obsolete result'})),{status:200}));assert.equal(await pending,false);assert.deepEqual(authState.snapshot(),current);assert.deepEqual(activePreferences.snapshot(),preferences);
++ }finally{authState.transition(null);globalThis.fetch=saved.fetch;api.profile=saved.profile}
++});

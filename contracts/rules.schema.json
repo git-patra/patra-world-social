@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "checksum": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "subunitsPerTile": {
+      "const": 1024
+    },
+    "hubTickHz": {
+      "const": 20
+    },
+    "hubSpeedSubunitsPerSecond": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000
+    },
+    "movementIntentExpiryMs": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "raceTickHz": {
+      "const": 30
+    },
+    "raceLaps": {
+      "const": 5
+    },
+    "raceSlots": {
+      "const": 5
+    },
+    "penaltyZones": {
+      "const": 4
+    },
+    "penaltyDeadlineMs": {
+      "const": 3000
+    },
+    "race": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "trackId": {
+          "const": "autumn-ring-v1"
+        },
+        "trackChecksum": {
+          "const": "f0274d8439e799a9e0eb41e086449c9bc765ad9df7bac074bd04ac6f434f0a42"
+        },
+        "acceleration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "brake": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "drag": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "maxSpeed": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "steerDegrees": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "radius": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "botSpeed": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "botLookahead": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "intentExpiryMs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "maxCatchUpSteps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "limitMs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "finishGraceMs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        },
+        "resultsMs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 300000
+        }
+      },
+      "required": [
+        "trackId",
+        "trackChecksum",
+        "acceleration",
+        "brake",
+        "drag",
+        "maxSpeed",
+        "steerDegrees",
+        "radius",
+        "botSpeed",
+        "botLookahead",
+        "intentExpiryMs",
+        "maxCatchUpSteps",
+        "limitMs",
+        "finishGraceMs",
+        "resultsMs"
+      ]
+    }
+  },
+  "required": [
+    "v",
+    "id",
+    "checksum",
+    "subunitsPerTile",
+    "hubTickHz",
+    "hubSpeedSubunitsPerSecond",
+    "movementIntentExpiryMs",
+    "raceTickHz",
+    "raceLaps",
+    "raceSlots",
+    "penaltyZones",
+    "penaltyDeadlineMs",
+    "race"
+  ],
+  "additionalProperties": false
+}

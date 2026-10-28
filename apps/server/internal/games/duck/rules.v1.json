@@ -1,0 +1,1 @@
+{"id":"duck-v1","version":1,"countdownMs":3000,"durationMs":60000,"spawnMs":700,"lifetimeMs":2500,"cooldownMs":250,"maxTargets":8,"maxRewindMs":150,"maxCatchUpSteps":8,"radius":45,"points":{"normal":100,"fast":200,"gold":500},"speeds":{"normal":180,"fast":300,"gold":220}}

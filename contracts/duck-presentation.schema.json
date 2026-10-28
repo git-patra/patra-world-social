@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "duck-presentation-v1",
+  "$comment": "Presentation-only extension. For an eligible measured sample, display time is local monotonic time + offsetMs + max(0, rttMs/2 - rewindMs). Predict only current snapshot targets, at most500ms beyond serverTimeMs, never at or beyond their expiresAt. Server still selects receipt-minus-bounded-rewind independently. No target seed or future spawn schedule is public.",
+  "$defs": {
+    "target": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer", "minimum": 1},
+        "kind": {"enum": ["normal", "fast", "gold"]},
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "radius": {"type": "number", "exclusiveMinimum": 0},
+        "vx": {"type": "number", "minimum": -0.3, "maximum": 0.3},
+        "expiresAt": {"type": "integer", "minimum": 0}
+      },
+      "required": ["id", "kind", "x", "y", "radius", "vx", "expiresAt"],
+      "additionalProperties": false
+    },
+    "calibration": {
+      "type": "object",
+      "$comment": "Only in admitted shooter's duck.clock_reply ACK. Offset and RTT come from the same minimum-RTT recent sample that authoritative rewind uses. Rewind=min(150,floor(RTT/2)), expiresAt=measuredAt+15000. Reset on epoch/disconnect/departure/end. RTT includes queues and client processing; symmetry remains an estimate.",
+      "properties": {
+        "offsetMs": {"type": "number"},
+        "rttMs": {"type": "integer", "minimum": 0, "maximum": 1000},
+        "rewindMs": {"type": "integer", "minimum": 0, "maximum": 150},
+        "measuredAt": {"type": "integer", "minimum": 0},
+        "expiresAt": {"type": "integer", "minimum": 0}
+      },
+      "required": ["offsetMs", "rttMs", "rewindMs", "measuredAt", "expiresAt"],
+      "additionalProperties": false
+    }
+  }
+}

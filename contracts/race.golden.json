@@ -1,0 +1,168 @@
+{
+  "crossings": [
+    {
+      "name": "skip finish",
+      "to": {
+        "x": 20500,
+        "y": 6144
+      },
+      "next": 0,
+      "laps": 0,
+      "wantNext": 0,
+      "wantLaps": 0,
+      "from": {
+        "x": 20400,
+        "y": 6144
+      }
+    },
+    {
+      "name": "reverse finish",
+      "to": {
+        "x": 20400,
+        "y": 6144
+      },
+      "next": 3,
+      "laps": 2,
+      "wantNext": 3,
+      "wantLaps": 2,
+      "from": {
+        "x": 20500,
+        "y": 6144
+      }
+    },
+    {
+      "name": "correct finish",
+      "to": {
+        "x": 20500,
+        "y": 6144
+      },
+      "next": 3,
+      "laps": 4,
+      "wantNext": 0,
+      "wantLaps": 5,
+      "from": {
+        "x": 20400,
+        "y": 6144
+      }
+    },
+    {
+      "name": "right checkpoint",
+      "to": {
+        "x": 34816,
+        "y": 14400
+      },
+      "next": 0,
+      "laps": 0,
+      "wantNext": 1,
+      "wantLaps": 0,
+      "from": {
+        "x": 34816,
+        "y": 14300
+      }
+    },
+    {
+      "name": "repeated checkpoint",
+      "to": {
+        "x": 34816,
+        "y": 14400
+      },
+      "next": 1,
+      "laps": 0,
+      "wantNext": 1,
+      "wantLaps": 0,
+      "from": {
+        "x": 34816,
+        "y": 14300
+      }
+    },
+    {
+      "name": "bottom checkpoint",
+      "to": {
+        "x": 20400,
+        "y": 22528
+      },
+      "next": 1,
+      "laps": 1,
+      "wantNext": 2,
+      "wantLaps": 1,
+      "from": {
+        "x": 20500,
+        "y": 22528
+      }
+    },
+    {
+      "name": "left checkpoint",
+      "to": {
+        "x": 6144,
+        "y": 14300
+      },
+      "next": 2,
+      "laps": 1,
+      "wantNext": 3,
+      "wantLaps": 1,
+      "from": {
+        "x": 6144,
+        "y": 14400
+      }
+    },
+    {
+      "name": "outside finish gate",
+      "to": {
+        "x": 20500,
+        "y": 22528
+      },
+      "next": 3,
+      "laps": 3,
+      "wantNext": 3,
+      "wantLaps": 3,
+      "from": {
+        "x": 20400,
+        "y": 22528
+      }
+    }
+  ],
+  "physics": [
+    {
+      "controls": {
+        "throttle": 1,
+        "brake": 0,
+        "steer": 0
+      },
+      "ticks": 6,
+      "want": {
+        "x": 18537,
+        "y": 5600,
+        "heading": 0,
+        "speed": 30
+      }
+    },
+    {
+      "controls": {
+        "throttle": 1,
+        "brake": 0,
+        "steer": 1
+      },
+      "ticks": 1,
+      "want": {
+        "x": 18571,
+        "y": 5601,
+        "heading": 3,
+        "speed": 35
+      }
+    },
+    {
+      "controls": {
+        "throttle": 0,
+        "brake": 1,
+        "steer": 0
+      },
+      "ticks": 1,
+      "want": {
+        "x": 18594,
+        "y": 5603,
+        "heading": 3,
+        "speed": 23
+      }
+    }
+  ]
+}

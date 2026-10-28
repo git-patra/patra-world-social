@@ -1,0 +1,86 @@
+{
+  "seed": 1,
+  "targets": [
+    {
+      "id": 1,
+      "kind": "gold",
+      "born": 4000,
+      "x": 900,
+      "y": 211,
+      "vx": -220,
+      "dead": false
+    },
+    {
+      "id": 2,
+      "kind": "normal",
+      "born": 4700,
+      "x": 900,
+      "y": 404,
+      "vx": -180,
+      "dead": false
+    },
+    {
+      "id": 3,
+      "kind": "normal",
+      "born": 5400,
+      "x": 100,
+      "y": 329,
+      "vx": 180,
+      "dead": false
+    },
+    {
+      "id": 4,
+      "kind": "normal",
+      "born": 6100,
+      "x": 900,
+      "y": 393,
+      "vx": -180,
+      "dead": false
+    },
+    {
+      "id": 5,
+      "kind": "normal",
+      "born": 6800,
+      "x": 100,
+      "y": 469,
+      "vx": 180,
+      "dead": false
+    }
+  ],
+  "overlap": [
+    {
+      "id": 1,
+      "kind": "normal",
+      "born": 4500,
+      "x": 500,
+      "y": 500,
+      "vx": 0,
+      "dead": false
+    },
+    {
+      "id": 2,
+      "kind": "gold",
+      "born": 4500,
+      "x": 500,
+      "y": 500,
+      "vx": 0,
+      "dead": false
+    }
+  ],
+  "collisions": [
+    {
+      "aim": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "targetId": 2
+    },
+    {
+      "aim": {
+        "x": 0.9,
+        "y": 0.9
+      },
+      "targetId": 0
+    }
+  ]
+}

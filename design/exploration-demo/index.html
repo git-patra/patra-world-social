@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#283a33"><title>Patra World — Kampung Senja · Demo desain</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="game" aria-label="Demo desain Kampung Senja">
+    <canvas id="world" tabindex="0" aria-label="Dunia yang bisa dijelajahi. WASD atau panah untuk berjalan. Klik tanah untuk menuju lokasi. E untuk berinteraksi." aria-describedby="instructions"></canvas>
+    <header class="brand surface"><span class="brand-icon" aria-hidden="true">✦</span><div><h1>PATRA WORLD</h1><p>Kampung Senja <span>·</span> Autumn ‘26</p></div></header>
+    <div class="location surface"><span class="live-dot"></span><span id="zone-name">Alun-alun</span><span class="location-detail" id="zone-sub">Ruang untuk bertemu</span></div>
+    <div class="demo-tag surface"><span class="demo-dot"></span>DEMO LOKAL<button id="help-button" aria-label="Petunjuk dan batas demo">?</button></div>
+    <section class="welcome surface" id="welcome"><button id="dismiss-welcome" class="dismiss" aria-label="Tutup sambutan">×</button><span class="eyebrow">JALAN DULU, TUJUAN BELAKANGAN</span><h2>Ruang kecil.<br>Cerita ke mana-mana.</h2><p>Lewati taman, duduk di Warkop,<br>atau temukan sudut favoritmu.</p><div class="welcome-keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>atau klik tanah</span></div></section>
+    <div class="discovery surface"><span class="leaf-icon" aria-hidden="true">❧</span><div><strong>Jejak musim gugur</strong><span id="leaves-count">0 / 5 daun ditemukan</span></div><div class="leaf-slots" id="leaf-slots" aria-hidden="true">○ ○ ○ ○ ○</div></div>
+    <div class="nearby surface" id="nearby" hidden><span class="near-icon">◌</span><div><strong id="nearby-name"></strong><small id="nearby-copy"></small></div></div>
+    <div class="map-wrap surface"><div class="map-caption"><span>KAMPUNG SENJA</span><span id="zone-count">1 / 7</span></div><button id="mini-button" aria-label="Buka peta kampung"><canvas id="minimap" width="240" height="180" aria-hidden="true"></canvas></button><div class="zoom-controls"><span>Kamu <i></i></span><button id="zoom-out" aria-label="Perkecil tampilan">−</button><output id="zoom-value">100%</output><button id="zoom-in" aria-label="Perbesar tampilan">+</button></div></div>
+    <div class="touch-pad" role="group" aria-label="Kontrol berjalan"><button data-dir="up" class="up" aria-label="Jalan ke atas">↑</button><button data-dir="left" class="left" aria-label="Jalan ke kiri">←</button><button data-dir="down" class="down" aria-label="Jalan ke bawah">↓</button><button data-dir="right" class="right" aria-label="Jalan ke kanan">→</button></div>
+    <div class="interaction-prompt" id="interaction-prompt"><span id="interaction-text">Jelajahi sesukamu</span></div>
+    <nav class="dock surface" aria-label="Kontrol game"><div class="player-profile"><span class="player-face" aria-hidden="true">◕</span><div><strong>Kamu</strong><small id="player-status">Berkeliling</small></div></div><span class="dock-divider"></span><button id="map-button"><span aria-hidden="true">▧</span><span>Peta</span><kbd>M</kbd></button><button id="wave-button"><span aria-hidden="true">✋</span><span>Sapa</span><kbd>Q</kbd></button><button id="interact-button"><span aria-hidden="true">⌑</span><span id="interact-label">Duduk</span><kbd>E</kbd></button><span class="dock-divider"></span><button id="motion-button" aria-pressed="true" aria-label="Kurangi animasi"><span aria-hidden="true">✧</span><span class="motion-label">Animasi</span></button></nav>
+    <p id="instructions" class="control-note">WASD / panah · Klik untuk jalan · Shift untuk lari</p>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <p id="sr-location" class="sr-only" role="status" aria-live="polite"></p>
+  </main>
+  <dialog id="map-dialog" aria-labelledby="map-title"><div class="dialog-heading"><div><span class="eyebrow">SATU KAMPUNG, BANYAK SUDUT</span><h2 id="map-title">Mau jalan ke mana?</h2></div><button class="close-dialog" aria-label="Tutup peta">×</button></div><p class="dialog-intro">Pilih sudut kampung. Karaktermu akan berjalan melewati jalurnya.</p><div class="full-map"><canvas id="full-minimap" width="768" height="576" aria-label="Peta seluruh kampung"></canvas></div><div id="destinations" class="destinations"></div><p class="dialog-footnote">NPC, obrolan dekat, dan aktivitas di sini adalah simulasi lokal.</p></dialog>
+  <dialog id="detail-dialog" aria-labelledby="detail-title"><div class="dialog-heading"><span class="eyebrow">DEMO DESAIN · BISA DICOBA LOKAL</span><button class="close-dialog" aria-label="Tutup detail">×</button></div><h2 id="detail-title"></h2><p id="detail-copy"></p><div id="detail-extra"></div><button id="detail-action" class="primary-button">Kembali menjelajah</button></dialog>
+  <script type="module" src="demo.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "subunitsPerTile": 1024,
+  "hubTickHz": 20,
+  "hubSpeedSubunitsPerSecond": 4608,
+  "raceTickHz": 30,
+  "examples": [
+    {
+      "tiles": 4.5,
+      "subunits": 4608
+    },
+    {
+      "tiles": 1,
+      "subunits": 1024
+    },
+    {
+      "tiles": 0.5,
+      "subunits": 512
+    }
+  ]
+}

@@ -1,0 +1,291 @@
+{
+  "choiceMs": 3000,
+  "animationMs": 1500,
+  "regularKicks": 5,
+  "extraPairs": 5,
+  "combinations": [
+    {
+      "kick": 0,
+      "keep": 0,
+      "goal": false
+    },
+    {
+      "kick": 0,
+      "keep": 1,
+      "goal": true
+    },
+    {
+      "kick": 0,
+      "keep": 2,
+      "goal": true
+    },
+    {
+      "kick": 0,
+      "keep": 3,
+      "goal": true
+    },
+    {
+      "kick": 1,
+      "keep": 0,
+      "goal": true
+    },
+    {
+      "kick": 1,
+      "keep": 1,
+      "goal": false
+    },
+    {
+      "kick": 1,
+      "keep": 2,
+      "goal": true
+    },
+    {
+      "kick": 1,
+      "keep": 3,
+      "goal": true
+    },
+    {
+      "kick": 2,
+      "keep": 0,
+      "goal": true
+    },
+    {
+      "kick": 2,
+      "keep": 1,
+      "goal": true
+    },
+    {
+      "kick": 2,
+      "keep": 2,
+      "goal": false
+    },
+    {
+      "kick": 2,
+      "keep": 3,
+      "goal": true
+    },
+    {
+      "kick": 3,
+      "keep": 0,
+      "goal": true
+    },
+    {
+      "kick": 3,
+      "keep": 1,
+      "goal": true
+    },
+    {
+      "kick": 3,
+      "keep": 2,
+      "goal": true
+    },
+    {
+      "kick": 3,
+      "keep": 3,
+      "goal": false
+    }
+  ],
+  "boundaries": [
+    {
+      "offsetMs": 2999,
+      "accepted": true
+    },
+    {
+      "offsetMs": 3000,
+      "accepted": false
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "early-win",
+      "turns": [
+        {
+          "kick": 0,
+          "keep": 1
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 1
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 1
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        }
+      ],
+      "scores": [
+        3,
+        0
+      ],
+      "outcomes": [
+        "win",
+        "loss"
+      ]
+    },
+    {
+      "name": "equal-sudden-death",
+      "turns": [
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 1
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        }
+      ],
+      "scores": [
+        1,
+        0
+      ],
+      "outcomes": [
+        "win",
+        "loss"
+      ]
+    },
+    {
+      "name": "maximum-draw",
+      "turns": [
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        },
+        {
+          "kick": 0,
+          "keep": 0
+        }
+      ],
+      "scores": [
+        0,
+        0
+      ],
+      "outcomes": [
+        "draw",
+        "draw"
+      ]
+    }
+  ]
+}

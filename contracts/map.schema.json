@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "v": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "checksum": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "width": {
+      "const": 64
+    },
+    "height": {
+      "const": 64
+    },
+    "spawn": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 63
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 63
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false
+    },
+    "buildings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "x": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "entrance": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              },
+              "y": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 63
+              }
+            },
+            "required": [
+              "x",
+              "y"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "x",
+          "y",
+          "width",
+          "height",
+          "entrance"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "districts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "x": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "width": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          },
+          "height": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64
+          }
+        },
+        "required": [
+          "id",
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "obstacles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 63
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "v",
+    "id",
+    "checksum",
+    "width",
+    "height",
+    "spawn",
+    "buildings",
+    "districts",
+    "obstacles"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,261 @@
+{
+  "valid": [
+    {
+      "v": 1,
+      "commandId": "c1",
+      "seq": 0,
+      "worldId": "private",
+      "type": "penalty.choose",
+      "payload": {
+        "zone": 3,
+        "matchId": "match-1",
+        "turnId": "match-1:1"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "c2",
+      "seq": 1,
+      "worldId": "private",
+      "type": "player.destination",
+      "payload": {
+        "x": 32,
+        "y": 32
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "unicode",
+      "seq": 2,
+      "worldId": "private",
+      "type": "chat.send",
+      "payload": {
+        "text": "\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9",
+        "channelId": "world",
+        "clientMessageId": "message-1"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "lobby.list-1",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.list",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "commandId": "lobby.leave-1",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.leave",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "commandId": "lobby.join-1",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.join",
+      "payload": {
+        "arenaId": "race"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "lobby.ready-1",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.ready",
+      "payload": {
+        "lobbyId": "lobby-1",
+        "ready": true
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "lobby.bot-1",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.bot",
+      "payload": {
+        "lobbyId": "lobby-1",
+        "enabled": true
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "match.start-1",
+      "seq": 1,
+      "worldId": "private",
+      "type": "match.start",
+      "payload": {
+        "lobbyId": "lobby-1"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "penalty",
+      "seq": 1,
+      "worldId": "w",
+      "type": "penalty.snapshot",
+      "payload": {
+        "matchId": "m"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "penalty",
+      "seq": 1,
+      "worldId": "w",
+      "type": "match.return",
+      "payload": {
+        "matchId": "m"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "penalty",
+      "seq": 1,
+      "worldId": "w",
+      "type": "match.rematch",
+      "payload": {
+        "matchId": "m"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "v": 2,
+      "commandId": "c1",
+      "seq": 0,
+      "worldId": "private",
+      "type": "penalty.choose",
+      "payload": {
+        "zone": 3,
+        "matchId": "match-1",
+        "turnId": "match-1:1"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "c1",
+      "seq": 0,
+      "worldId": "private",
+      "type": "penalty.choose",
+      "payload": {
+        "zone": 4,
+        "matchId": "match-1",
+        "turnId": "match-1:1"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "c1",
+      "seq": 0,
+      "worldId": "private",
+      "type": "penalty.choose",
+      "payload": {
+        "zone": null,
+        "matchId": "match-1",
+        "turnId": "match-1:1"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "c1",
+      "seq": 0,
+      "worldId": "private",
+      "type": "player.destination",
+      "payload": {
+        "x": 32
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "spoof",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.join",
+      "payload": {}
+    },
+    {
+      "v": 1,
+      "commandId": "spoof",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.join",
+      "payload": {
+        "arenaId": "race",
+        "userId": "spoof"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "spoof",
+      "seq": 1,
+      "worldId": "private",
+      "type": "match.start",
+      "payload": {
+        "lobbyId": "lobby-1",
+        "hostId": "spoof"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "spoof",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.ready",
+      "payload": {
+        "ready": true
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "spoof",
+      "seq": 1,
+      "worldId": "private",
+      "type": "lobby.leave",
+      "payload": {
+        "userId": "spoof"
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "penalty",
+      "seq": 1,
+      "worldId": "w",
+      "type": "penalty.choose",
+      "payload": {
+        "zone": 0
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "penalty",
+      "seq": 1,
+      "worldId": "w",
+      "type": "penalty.choose",
+      "payload": {
+        "zone": 0,
+        "matchId": "m",
+        "turnId": "m:1",
+        "receivedAt": 2999
+      }
+    },
+    {
+      "v": 1,
+      "commandId": "penalty",
+      "seq": 1,
+      "worldId": "w",
+      "type": "penalty.choose",
+      "payload": {
+        "zone": 0,
+        "matchId": "m",
+        "turnId": "m:1",
+        "actorId": "spoof"
+      }
+    }
+  ]
+}

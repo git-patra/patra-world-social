@@ -1,0 +1,7 @@
+import {test,expect} from '@playwright/test';
+test('guest penalty locks choices and preserves the match across modal unmount and hidden-time catchup',async({page,context})=>{
+ await page.goto('/');await page.getByRole('button',{name:'Main penalti',exact:true}).click();await page.getByRole('button',{name:'Mulai practice vs BOT',exact:true}).click();
+ const duel=page.getByRole('region',{name:'Duel penalti',exact:true});await expect(duel.getByRole('button',{name:'Pilih kanan atas',exact:true})).toBeEnabled();await duel.getByRole('button',{name:'Pilih kanan atas',exact:true}).click();await expect(duel.getByRole('button',{name:'Pilih kiri atas',exact:true})).toBeDisabled();
+ await page.locator('#close-dialog').click();const hidden=await context.newPage();await hidden.goto('about:blank');await hidden.bringToFront();await page.waitForTimeout(4700);await page.bringToFront();await page.getByRole('button',{name:'Main penalti',exact:true}).click();await expect(page.getByRole('button',{name:'Mulai practice vs BOT',exact:true})).toHaveCount(0);await expect(duel.getByRole('list',{name:'Hasil tendangan'}).locator('li').first()).toContainText('zona 2/');
+ await page.emulateMedia({reducedMotion:'reduce'});await page.evaluate(()=>{document.body.classList.add('reduced-motion');Date.now=()=>1});await expect(duel).toContainText('3 detik');await expect(duel.getByRole('list',{name:'Hasil tendangan'}).locator('li').first()).toContainText('zona 2/');await hidden.close();
+});
