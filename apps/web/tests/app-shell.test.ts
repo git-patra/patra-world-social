@@ -84,7 +84,7 @@ function shellFixture(pixelRatio=1){
   routerKey:(type:string,key:string)=>emit(windowEvents,type,{type,key,target:get('body'),preventDefault(){},stopImmediatePropagation(){}}),
   padDown:(pointerId:number)=>emit(pad.listeners,'pointerdown',{pointerId,currentTarget:pad,preventDefault(){}}),
   pointerEnd:(pointerId:number)=>emit(windowEvents,'pointerup',{pointerId}),
-  repeatInput:()=>(environment.activityInput as InputRouter).repeat(),visibility:(hidden:boolean)=>{document.hidden=hidden;emit(documentEvents,'visibilitychange',{})},frameCount:()=>frames.size,keydown:(key:string)=>emit(documentEvents,'keydown',{key,target:pad,preventDefault(){}}),keyup:(key:string)=>emit(windowEvents,'keyup',{key}),choose(id:string){const choice=new Element();choice.dataset.project=id;choice.parent=get('#places');choice.click(1)},restore(){for(const close of activitySubscriptions)close();activities.clearLocal();world.destroy();Object.assign(globalThis,original)}};
+  repeatInput:()=>(environment.activityInput as InputRouter).repeat(),visibility:(hidden:boolean)=>{document.hidden=hidden;emit(documentEvents,'visibilitychange',{})},frameCount:()=>frames.size,keydown:(key:string,repeat=false)=>emit(documentEvents,'keydown',{key,repeat,target:pad,preventDefault(){}}),keyup:(key:string)=>emit(windowEvents,'keyup',{key}),choose(id:string){const choice=new Element();choice.dataset.project=id;choice.parent=get('#places');choice.click(1)},restore(){for(const close of activitySubscriptions)close();activities.clearLocal();world.destroy();Object.assign(globalThis,original)}};
 }
 
 test('actual Map selection retains its online destination after dialog close cleanup',async()=>{
@@ -220,4 +220,42 @@ test('world_pad_release_preserves_held_keyboard_and_ignores_unrelated_pointerup'
   assert.equal(keyboardOnly.x,stillDiagonal.x);assert.ok(keyboardOnly.y<stillDiagonal.y,'ending the pad pointer preserves held W');
   shell.routerKey('keyup','w');shell.tick();assert.deepEqual(shell.world.getState().player,keyboardOnly);
  }finally{shell.restore()}
+});
+
+test('contextual_dock_keeps_action_text_separate_from_its_E_keycap', () => {
+ const shell=shellFixture();
+ try {
+  activities.setPosition({x:28,y:46});
+  activities.tick(activities.snapshot().now+100);
+  assert.equal(shell.get('#interact-button span').textContent,'Kick');
+  activities.interactRide({x:39,y:46});
+  assert.equal(shell.get('#interact-button span').textContent,'Turun');
+  activities.interactRide();
+  activities.setPosition({x:41,y:46});
+  activities.tick(activities.snapshot().now+100);
+  assert.equal(shell.get('#interact-button span').textContent,'Naik Sepeda');
+ } finally {shell.restore()}
+});
+
+test('held_E_does_not_repeat_discrete_world_interaction', () => {
+ const shell=shellFixture();
+ try {
+  let interactions=0;
+  shell.world.interact=()=>{interactions++};
+  shell.keydown('e');
+  shell.keydown('e',true);
+  assert.equal(interactions,1);
+ } finally {shell.restore()}
+});
+
+test('football_cooldown_does_not_fall_through_to_opening_the_penalty_menu', () => {
+ const shell=shellFixture();
+ try {
+  shell.world.walkToPoint({x:28,y:46});
+  for(let i=0;i<200;i++)shell.tick();
+  assert.deepEqual(shell.world.getState().player,{x:28,y:46});
+  shell.world.interact();
+  shell.world.interact();
+  assert.equal(shell.get('#project-dialog').open,false,'cooldown is still the ball context');
+ } finally {shell.restore()}
 });

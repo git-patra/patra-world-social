@@ -42,9 +42,9 @@ function updateMotion(){
 function notify(message){$('#travel-status').textContent=message;}
 function updateInteraction(){
  const state=activities.snapshot(),station=stations.find(s=>s.id===nearby);
- const riding=state.inputMode==='ride',vehicle=state.nearbyRide;
- $('#interact-button').disabled=!(riding||vehicle||station);
- $('#interact-button span').textContent=riding?'Turun · E':vehicle?`Naik ${vehicle.kind==='bicycle'?'Sepeda':'Mobil'} · E`:station?`Explore ${station.name}`:'Dekati aktivitas';
+ const riding=state.inputMode==='ride',vehicle=state.nearbyRide,football=state.nearbyFootball;
+ $('#interact-button').disabled=!(football||riding||vehicle||station);
+ $('#interact-button span').textContent=football?'Kick':riding?'Turun':vehicle?`Naik ${vehicle.kind==='bicycle'?'Sepeda':'Mobil'}`:station?`Explore ${station.name}`:'Dekati aktivitas';
  if(riding)$('#current-location').textContent=stations.find(s=>s.id==='race').name;
 }
 
@@ -131,7 +131,7 @@ media.addEventListener('change',e=>{motion=!e.matches;updateMotion();});
 document.addEventListener('keydown',event=>{
  if(document.body.dataset.controls==='touch'||!worldVisible||document.querySelector('dialog[open]')||event.ctrlKey||event.metaKey||event.altKey||!acceptsMovement(event.target))return;
  const key=event.key.toLowerCase();
- if(key==='e'&&['walk','ride'].includes(activityInput.mode())){event.preventDefault();world.interact();}
+ if(key==='e'&&['walk','ride'].includes(activityInput.mode())){event.preventDefault();if(!event.repeat)world.interact();}
  else if(key==='m'){event.preventDefault();$('#list-button').click();}
 });
 const pointerHold=new PointerHold((dx,dy)=>activityInput.direction(dx,dy),()=>activityInput.direction(0,0));

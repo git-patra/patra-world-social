@@ -9,6 +9,22 @@ export function ActivityHUD({ store = activities }: {
     store?: ActivityStore;
 }) {
     const state = useSyncExternalStore(store.subscribe, store.snapshot, store.snapshot), [collapsed, setCollapsed] = useState(false), game = state.active;
+    if (!game && state.spectating?.kind === 'penalty') {
+        const penalty = state.spectating.snapshot as PublicPenalty;
+        return <section className="activity-hud" aria-label="Penonton penalti">
+            <strong>Penalti · {penalty.scores.join(' : ')}</strong>
+            <span>{penalty.phase === 'choosing' ? `Pilihan private · ${Math.max(0, Math.ceil((penalty.choiceDeadlineAt - state.now) / 1000))}s` : penalty.phase === 'results' ? 'Penalti selesai' : 'Reveal'}</span>
+            <span>Menonton dari luar · jalan untuk pergi</span>
+        </section>;
+    }
+    if (!game && state.nearbyFootball) {
+        return <section className="activity-hud" aria-label="Bola bebas">
+            <strong>Free ball · Kick</strong>
+            <span>Dekati dari arah operan · E / tap untuk menendang</span>
+            <button type="button" disabled={!state.connected || Boolean(typeof document !== 'undefined' && document.querySelector('dialog[open]'))} onClick={() => store.interactFootball()}>Kick · E</button>
+            {state.message && <span role="status">{state.message}</span>}
+        </section>;
+    }
     if (!game) {
         const rider = state.vehicles.find(v => v.riderId === state.selfId);
         if (state.inputMode !== 'ride' && !state.nearbyRide)

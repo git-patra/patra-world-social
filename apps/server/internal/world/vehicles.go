@@ -34,7 +34,10 @@ type CasualIntent struct {
 // MarshalJSON preserves the exact union, including explicit zero axes on neutral drive.
 func (i CasualIntent) MarshalJSON() ([]byte, error) {
 	payload := map[string]any{"incarnation": i.Incarnation, "areaGeneration": i.AreaGeneration, "vehicleId": i.VehicleID, "generation": i.Generation, "action": i.Action}
-	if i.Action == "drive" {
+	if i.Action == "kick" {
+		delete(payload, "vehicleId")
+	}
+	if i.Action == "drive" || i.Action == "kick" {
 		payload["dx"] = i.DX
 		payload["dy"] = i.DY
 	}
@@ -104,6 +107,10 @@ func (r *Runtime) ApplyCasualIntent(ctx context.Context, id string, epoch, seq u
 	err := r.call(ctx, func() {
 		if ctx.Err() != nil {
 			result = ctx.Err()
+			return
+		}
+		if intent.Action == "kick" {
+			result = r.kickFootball(id, epoch, seq, intent)
 			return
 		}
 		p := r.players[id]

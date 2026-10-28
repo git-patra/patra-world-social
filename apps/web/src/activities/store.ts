@@ -1,6 +1,7 @@
 import { activityContract } from './contracts';
-import type { ActivitySnapshot, AreaSnapshot, VehiclesSnapshot, Vehicle } from './contracts';
+import type { ActivitySnapshot, AreaSnapshot, VehiclesSnapshot, Vehicle, FootballSnapshot, Football } from './contracts';
 import { LocalVehicles, nearbyVehicle } from './vehicles';
+import { LocalFootball, nearFootball } from './football';
 import { audio } from '../audio/service';
 import type { RaceSnapshot, Controls } from '../features/race/local';
 import type { PublicPenalty } from '../features/penalty/local';
@@ -41,9 +42,12 @@ type LocalSession = {
 export type ActivityState = {
     games: ActivityGame[];
     areas: AreaSnapshot[];
+    football: Football | null;
+    nearbyFootball: boolean;
     vehicles: Vehicle[];
     nearbyRide: Vehicle | null;
     active: ActivityGame | null;
+    spectating: ActivityGame | null;
     inputMode: 'walk' | 'ride' | ActivityKind;
     lobbies: ActivityLobby[];
     selfId: string;
@@ -64,6 +68,10 @@ function newerArea(next: AreaSnapshot, previous: AreaSnapshot) {
 }
 const penaltyPhase = { choosing: 0, animation: 1, results: 2 };
 export class ActivityStore {
+    private localFootball = new LocalFootball();
+    private footballState: FootballSnapshot | null = null;
+    private kickPending = false;
+    private penaltyStarting = false;
     private localVehicles = new LocalVehicles();
     private vehicleState: VehiclesSnapshot | null = null;
     private position = { x: 32, y: 32 };
@@ -90,7 +98,7 @@ export class ActivityStore {
     private sending = false;
     private lastNotify = -Infinity;
     private timer: ReturnType<typeof setInterval> | null = null;
-    private state: ActivityState = { games: [], areas: [], vehicles: this.localVehicles.vehicles, nearbyRide: null, lobbies: [], active: null, inputMode: 'walk', selfId: 'guest', online: false, connected: true, now: 0, message: '' };
+    private state: ActivityState = { games: [], areas: [], football: this.localFootball.ball, nearbyFootball: false, vehicles: this.localVehicles.vehicles, nearbyRide: null, lobbies: [], active: null, spectating: null, inputMode: 'walk', selfId: 'guest', online: false, connected: true, now: 0, message: '' };
     constructor(private effect: (snapshot: ActivitySnapshot) => void = () => {
     }) {
     }
@@ -110,14 +118,25 @@ export class ActivityStore {
     private publish(at = this.state.now, force = false) {
         const games = [...this.games.values()], selfId = this.socket?.selfId ?? 'guest';
         const active = games.find(g => this.localKind === g.kind && !this.socket || this.lobbies.some(l => l.matchId === g.matchId && l.players.some(p => p.userId === selfId))) ?? null;
+        const spectating = active ? null : games.find(g => {
+            if (g.kind !== 'penalty')
+                return false;
+            const area = this.areas.get(g.kind);
+            if (area && (area.payload.phase === 'OPEN' || area.payload.matchId !== g.matchId))
+                return false;
+            return activityContract.areas.find(a => a.id === g.kind)?.spectatorStrips.some(b => this.position.x >= b.x && this.position.x < b.x + b.width && this.position.y >= b.y && this.position.y < b.y + b.height);
+        }) ?? null;
         const area = active ? this.areas.get(active.kind) : undefined, gameMode = active && (!this.socket || !area || area.payload.phase !== 'OPEN' && area.payload.matchId === active.matchId) ? active.kind : 'walk';
         const vehicles = this.socket ? this.vehicleState?.payload.vehicles ?? [] : this.localVehicles.vehicles;
         const raceClosed = this.socket ? this.areas.get('race')?.payload.phase !== 'OPEN' : this.localStarting || this.localKind === 'race';
+        const penaltyClosed = this.socket ? this.areas.get('penalty')?.payload.phase !== 'OPEN' : this.penaltyStarting || this.localKind === 'penalty';
+        const ball = this.socket ? this.footballState?.payload.ball ?? null : this.localFootball.ball;
+        const football = ball && penaltyClosed ? { ...ball, visible: false } : ball;
         const inputMode = gameMode !== 'walk' ? gameMode : !raceClosed && vehicles.some(v => v.riderId === selfId) ? 'ride' : 'walk';
         if (this.state.inputMode === 'ride' && inputMode !== 'ride')
             this.rideHeld = { x: 0, y: 0 };
         const nearbyRide = gameMode === 'walk' && !raceClosed ? nearbyVehicle(vehicles, this.position) ?? null : null;
-        this.state = { ...this.state, vehicles, nearbyRide, games, areas: [...this.areas.values()], lobbies: this.lobbies, active, inputMode, selfId, online: Boolean(this.socket), connected: !this.socket || this.socket.status === 'online', now: at };
+        this.state = { ...this.state, football, nearbyFootball: inputMode === 'walk' && nearFootball(football, this.position), vehicles, nearbyRide, games, areas: [...this.areas.values()], lobbies: this.lobbies, active, spectating, inputMode, selfId, online: Boolean(this.socket), connected: !this.socket || this.socket.status === 'online', now: at };
         for (const fn of this.sceneListeners)
             fn();
         if (force || at - this.lastNotify >= 100) {
@@ -136,6 +155,10 @@ export class ActivityStore {
         this.socket = socket;
         this.games.clear();
         this.localVehicles.reset();
+        this.localFootball.reset();
+        this.footballState = null;
+        this.kickPending = false;
+        this.penaltyStarting = false;
         this.vehicleState = null;
         this.rideHeld = { x: 0, y: 0 };
         this.rideSending = false;
@@ -262,13 +285,26 @@ export class ActivityStore {
         if (type === 'activity.snapshot' || type === 'activity.lifecycle') {
             if (!this.socket || payload.worldId !== this.socket.worldId)
                 return;
+            if (payload.kind === 'football') {
+                const previous = this.footballState;
+                if (previous && payload.incarnation !== previous.incarnation)
+                    return;
+                this.mergeFootball(payload);
+                const age = this.socket.serverNow() - payload.serverTimeMs;
+                if (age >= -250 && age <= 1000 && type === 'activity.lifecycle' && previous && this.footballState !== previous && payload.generation > previous.generation && payload.payload.ball.visible && Math.hypot(payload.payload.ball.vx, payload.payload.ball.vy) > 0)
+                    audio.play({ kind: 'kick', mode: 'football', eventId: `kick:${payload.incarnation}:${payload.generation}`, distance: Math.hypot(payload.payload.ball.x - this.position.x, payload.payload.ball.y - this.position.y) });
+                this.publish(this.socket.serverNow());
+                return;
+            }
             if (payload.kind === 'vehicles') {
                 if (this.vehicleState && payload.incarnation !== this.vehicleState.incarnation)
                     return;
                 const previous = this.vehicleState;
                 this.mergeVehicles(payload);
-                if (type === 'activity.lifecycle' && previous && this.vehicleState !== previous && payload.payload.vehicles.some((v: Vehicle) => v.riderId === this.socket?.selfId))
-                    audio.play({ kind: 'ride', mode: 'ride', eventId: `ride:${payload.incarnation}:${payload.generation}` });
+                const oldRide = previous?.payload.vehicles.find(v => v.riderId === this.socket?.selfId);
+                const ownRide = this.vehicleState?.payload.vehicles.find(v => v.riderId === this.socket?.selfId);
+                if (type === 'activity.lifecycle' && previous && this.vehicleState !== previous && ownRide && (!oldRide || oldRide.id !== ownRide.id || oldRide.generation !== ownRide.generation))
+                    audio.play({ kind: 'ride', mode: 'ride', eventId: `ride:${payload.incarnation}:${ownRide.id}:${ownRide.generation}` });
                 this.publish(this.socket.serverNow());
                 return;
             }
@@ -302,10 +338,67 @@ export class ActivityStore {
                 continue;
             if (area.kind === 'area')
                 this.mergeArea(area, revisions);
+            else if (area.kind === 'football')
+                this.mergeFootball(area, revisions);
             else if (area.kind === 'vehicles')
                 this.mergeVehicles(area, revisions);
         }
         this.publish(this.socket?.serverNow());
+    }
+    private mergeFootball(snapshot: FootballSnapshot, revisions?: Map<string, number>) {
+        const previous = this.footballState, key = 'football';
+        if (previous) {
+            if (snapshot.incarnation === previous.incarnation) {
+                if (snapshot.generation < previous.generation || snapshot.generation === previous.generation && snapshot.tick <= previous.tick)
+                    return;
+            } else {
+                if (this.retiredIncarnations.get(key)?.has(snapshot.incarnation) || revisions && (revisions.get(key) ?? 0) !== (this.areaRevisions.get(key) ?? 0))
+                    return;
+                const retired = this.retiredIncarnations.get(key) ?? new Set<string>();
+                retired.add(previous.incarnation);
+                this.retiredIncarnations.set(key, retired);
+            }
+        }
+        this.footballState = snapshot;
+        this.areaRevisions.set(key, (this.areaRevisions.get(key) ?? 0) + 1);
+    }
+    interactFootball(position = this.position) {
+        this.position = { ...position };
+        const ball = this.state.football;
+        if (this.state.inputMode !== 'walk' || !this.state.connected || this.kickPending || !nearFootball(ball, position) || !ball)
+            return false;
+        const x = ball.x - position.x, y = ball.y - position.y, length = Math.hypot(x, y);
+        const dx = length > .05 ? x / length : 0, dy = length > .05 ? y / length : -1;
+        if (!this.socket) {
+            if (!this.localFootball.kick(position, dx, dy, this.state.now))
+                return false;
+            audio.play({ kind: 'kick', mode: 'football', eventId: `kick:local:${this.localFootball.revision}` });
+            this.publish(undefined, true);
+            return true;
+        }
+        if (!this.footballState || this.areas.get('penalty')?.payload.phase !== 'OPEN')
+            return false;
+        this.kickPending = true;
+        const epoch = this.epoch, socket = this.socket;
+        const intent = {
+            incarnation: this.footballState.incarnation,
+            areaGeneration: this.areas.get('penalty')?.generation ?? 0,
+            generation: this.footballState.generation,
+            action: 'kick', dx, dy
+        };
+        void socket.gameCommand('activity.kick', intent).then(() => {
+            if (epoch === this.epoch)
+                return this.reload();
+        }).catch(e => {
+            if (epoch === this.epoch) {
+                this.state = { ...this.state, message: (e as Error).message };
+                this.publish(undefined, true);
+            }
+        }).finally(() => {
+            if (epoch === this.epoch)
+                this.kickPending = false;
+        });
+        return true;
     }
     private mergeVehicles(snapshot: VehiclesSnapshot, revisions?: Map<string, number>) {
         const previous = this.vehicleState, key = 'vehicles';
@@ -425,6 +518,8 @@ export class ActivityStore {
         if (this.socket)
             return;
         this.localVehicles.reset();
+        this.localFootball.reset(kind !== 'penalty', at);
+        this.penaltyStarting = kind === 'penalty';
         this.rideHeld = { x: 0, y: 0 };
         this.localStarting = kind === 'race';
         this.publish(at, true);
@@ -438,6 +533,7 @@ export class ActivityStore {
             return;
         const snapshot = kind === 'race' ? (session as typeof import('../features/race/session').guestRace).start(at, seed, id) : (session as typeof import('../features/penalty/session').guestSession).start(at, undefined, id);
         this.localStarting = false;
+        this.penaltyStarting = false;
         this.local = session;
         this.localKind = kind;
         this.games.set(snapshot.matchId, { kind, matchId: snapshot.matchId, snapshot });
@@ -472,8 +568,10 @@ export class ActivityStore {
     }
     tick(at = this.socket?.serverNow() ?? performance.now()) {
         this.state = { ...this.state, now: at };
-        if (!this.socket)
+        if (!this.socket) {
             this.localVehicles.tick(at);
+            this.localFootball.tick(at);
+        }
         this.sendRideInput();
         this.sendInput();
         if (this.local && this.localKind) {
@@ -530,6 +628,8 @@ export class ActivityStore {
     }
     clearLocal() {
         this.localVehicles.reset();
+        this.localFootball.reset();
+        this.penaltyStarting = false;
         this.localStarting = false;
         this.rideHeld = { x: 0, y: 0 };
         this.epoch++;

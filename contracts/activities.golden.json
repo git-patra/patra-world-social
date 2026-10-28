@@ -80,6 +80,60 @@
           }
         ]
       }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 0,
+          "vy": 0,
+          "visible": true
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 2,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 0,
+          "vy": -8,
+          "visible": true
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 3,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 0,
+          "vy": 0,
+          "visible": false
+        }
+      }
     }
   ],
   "invalid": [
@@ -462,6 +516,172 @@
             "x": 45,
             "y": 46,
             "heading": 0
+          }
+        ]
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 0,
+          "y": 46,
+          "vx": 0,
+          "vy": 0,
+          "visible": true
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 9,
+          "vy": 0,
+          "visible": true
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 8,
+          "vy": 8,
+          "visible": true
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 0,
+          "vy": 1,
+          "visible": false
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 0,
+          "vy": 0,
+          "visible": true,
+          "score": 1
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "race",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 0,
+          "vy": 0,
+          "visible": true
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 0,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 0,
+          "vy": 0,
+          "visible": true
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "ball": {
+          "x": 28,
+          "y": 46,
+          "vx": 0,
+          "vy": 0,
+          "visible": true
+        },
+        "matchId": "fake"
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "penalty",
+      "incarnation": "runtime-1",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "football",
+      "payload": {
+        "balls": [
+          {
+            "x": 28,
+            "y": 46,
+            "vx": 0,
+            "vy": 0,
+            "visible": true
           }
         ]
       }

@@ -15,6 +15,7 @@ import (
 	"patra-world-social/server/internal/lobby"
 	"patra-world-social/server/internal/realtime"
 	"patra-world-social/server/internal/testutil"
+	"patra-world-social/server/internal/world"
 	"strings"
 	"sync"
 	"testing"
@@ -106,6 +107,32 @@ func TestPenaltyActualTransportHistoryAndMutualRematch(t *testing.T) {
 		}
 		return app.Hub.Execute(ctx, j, command(kind, payload))
 	}
+
+	// A successful casual kick uses the actual wire and never creates a durable match.
+	at := world.Point{X: 28, Y: 46}
+	if err = app.Hub.SetActivity(ctx, w.ID, users[0], false, &at); err != nil {
+		t.Fatal(err)
+	}
+	casualStates, err := app.Hub.ActivitySnapshots(ctx, hj)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var casualKick world.CasualIntent
+	for _, state := range casualStates {
+		if state.Kind == "football" {
+			casualKick.Incarnation = state.Incarnation
+			casualKick.Generation = state.Generation
+			casualKick.Action = "kick"
+			casualKick.DY = -1
+		}
+	}
+	if kind, _ := send(host, command("activity.kick", casualKick)); kind != "command.ack" {
+		t.Fatal("casual kick failed", kind)
+	}
+	var casualMatches int
+	if err = p.QueryRow(ctx, `SELECT count(*) FROM matches WHERE world_id=$1`, w.ID).Scan(&casualMatches); err != nil || casualMatches != 0 {
+		t.Fatal("casual football wrote match/history", casualMatches, err)
+	}
 	kind, raw := send(host, command("lobby.join", map[string]any{"arenaId": "penalty"}))
 	if kind != "command.ack" {
 		t.Fatal(kind)
@@ -144,6 +171,15 @@ func TestPenaltyActualTransportHistoryAndMutualRematch(t *testing.T) {
 		return s
 	}
 	s := snapshot()
+	activityStates, e := app.Hub.WorldActivities(ctx, w.ID)
+	if e != nil {
+		t.Fatal(e)
+	}
+	for _, state := range activityStates {
+		if state.Kind == "football" && (state.Payload.Ball.Visible || state.Payload.Ball.VX != 0 || state.Payload.Ball.VY != 0) {
+			t.Fatal("active penalty retained casual football", state)
+		}
+	}
 	if _, e := direct(hj, "match.return", map[string]any{"matchId": mid}); e == nil {
 		t.Fatal("running result released")
 	}
@@ -183,6 +219,37 @@ func TestPenaltyActualTransportHistoryAndMutualRematch(t *testing.T) {
 	_, public = send(spectator, command("penalty.snapshot", map[string]any{"matchId": mid}))
 	if strings.Contains(string(public), "kickZone") {
 		t.Fatal("choice leaked", string(public))
+	}
+	// A real new transport admission one millisecond before reveal must retain secrecy.
+	app.Hub.Leave(sj)
+	spectator.CloseNow()
+	spectator, sj = dial(2)
+	_, public = send(spectator, command("penalty.snapshot", map[string]any{"matchId": mid}))
+	var reconnected penalty.PublicSnapshot
+	if err = json.Unmarshal(public, &reconnected); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(public), "kickZone") || !reconnected.Chosen[0] || len(reconnected.Turns) != 0 {
+		t.Fatal("reconnect before reveal lost public lock or exposed choice", string(public))
+	}
+	states, e := app.Hub.ActivitySnapshots(ctx, sj)
+	if e != nil {
+		t.Fatal(e)
+	}
+	var kick world.CasualIntent
+	for _, state := range states {
+		if state.Kind == "football" {
+			kick.Incarnation = state.Incarnation
+			kick.Generation = state.Generation
+			kick.Action = "kick"
+			kick.DY = -1
+		}
+		if state.Kind == "area" && state.AreaID == "penalty" {
+			kick.AreaGeneration = state.Generation
+		}
+	}
+	if _, e = direct(sj, "activity.kick", kick); e == nil {
+		t.Fatal("reconnected spectator kicked match ball")
 	}
 	clock.set(s.ChoiceDeadlineAt)
 	app.Hub.Validate(ctx, pj)

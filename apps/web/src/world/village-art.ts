@@ -334,7 +334,6 @@ export function createWorldArt() {
     rect(ctx,1064,1257,5,55,'#e4d9b2');rect(ctx,1171,1257,5,55,'#e4d9b2');rect(ctx,1064,1257,112,5,'#e4d9b2');
     for(let x=1076;x<1172;x+=12)rect(ctx,x,1262,1,47,'#c9d3af');for(let y=1272;y<1309;y+=12)rect(ctx,1068,y,104,1,'#c9d3af');
   });
-  object(1120,1560,ctx=>{shadow(ctx,1120,1562,9,4);ellipse(ctx,1120,1554,9,9,'#ece4c4');rect(ctx,1116,1550,7,7,'#4c6151');rect(ctx,1125,1555,4,4,'#4c6151');});
   // Spectator bench is outside the boundary and does not interrupt the outer road.
   bench(1334,1460,true); pumpkin(1307,1718,.8);
 

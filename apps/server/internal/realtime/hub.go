@@ -368,15 +368,21 @@ func (h *Hub) Submit(ctx context.Context, j JoinContext, c Command) error {
 	}
 	r := h.rooms[s.world]
 	switch c.Type {
-	case "activity.ride":
+	case "activity.ride", "activity.kick":
 		if h.GameBusy != nil && h.GameBusy(s.user) {
 			return ErrUnsupported
 		}
 		owner, ok := r.(interface {
+			ResumeCasual(context.Context, string, uint64) error
 			ApplyCasualIntent(context.Context, string, uint64, uint64, world.CasualIntent) error
 		})
 		if !ok {
 			return ErrUnsupported
+		}
+		if h.GameBusy != nil {
+			if err := owner.ResumeCasual(ctx, s.user, s.epoch); err != nil {
+				return err
+			}
 		}
 		var intent world.CasualIntent
 		if err := json.Unmarshal(c.Payload, &intent); err != nil {

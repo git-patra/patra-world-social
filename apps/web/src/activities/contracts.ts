@@ -32,7 +32,25 @@ export type VehiclesSnapshot = Omit<AreaSnapshot, 'kind' | 'payload'> & {
         vehicles: Vehicle[];
     };
 };
-export type ActivitySnapshot = AreaSnapshot | VehiclesSnapshot;
+export type Football = { x: number; y: number; vx: number; vy: number; visible: boolean };
+export type FootballSnapshot = Omit<AreaSnapshot, 'kind' | 'payload'> & {
+    kind: 'football';
+    payload: { ball: Football };
+};
+export type KickIntent = {
+    incarnation: string;
+    areaGeneration: number;
+    generation: number;
+    action: 'kick';
+    dx: number;
+    dy: number;
+};
+export const footballRules = { kickRadius: 1.5, radius: .15, speed: 8, cooldownMs: 400, idleMs: 15000, friction: .9 };
+export const footballInside = (x: number, y: number) => {
+    const b = contract.areas.find(a => a.id === 'penalty')!.bounds, r = footballRules.radius;
+    return x >= b.x + r && x <= b.x + b.width - r && y >= b.y + r && y <= b.y + b.height - r;
+};
+export type ActivitySnapshot = AreaSnapshot | VehiclesSnapshot | FootballSnapshot;
 export type RideIntent = {
     incarnation: string;
     areaGeneration: number;
@@ -60,7 +78,16 @@ export function validateRideIntent(raw: unknown): RideIntent {
         throw Error('Invalid ride intent');
     return structuredClone(raw) as RideIntent;
 }
+export function validateKickIntent(raw: unknown): KickIntent {
+    const p = raw as Record<string, unknown>;
+    if (!keys(raw, ['incarnation', 'areaGeneration', 'generation', 'action', 'dx', 'dy']) || !text(p.incarnation) || !int(p.areaGeneration) || !int(p.generation) || Number(p.generation) < 1 || p.action !== 'kick' || !number(p.dx, -1, 1) || !number(p.dy, -1, 1) || p.dx === 0 && p.dy === 0)
+        throw Error('Invalid kick intent');
+    return structuredClone(raw) as KickIntent;
+}
 export type ActivityIntent = {
+    type: 'activity.kick';
+    payload: KickIntent;
+} | {
     type: 'activity.snapshot';
     payload: Record<string, never>;
 } | {
@@ -73,8 +100,16 @@ const number = (v: unknown, min: number, max: number) => typeof v === 'number' &
 const int = (v: unknown) => Number.isSafeInteger(v) && Number(v) >= 0;
 const text = (v: unknown) => typeof v === 'string' && v.length > 0 && v.length <= 128;
 export function validateActivitySnapshot(raw: unknown, worldId?: string): ActivitySnapshot {
-    if (!keys(raw, ['worldId', 'areaId', 'incarnation', 'generation', 'serverTimeMs', 'tick', 'kind', 'payload']) || !text(raw.worldId) || (worldId !== undefined && raw.worldId !== worldId) || !text(raw.incarnation) || !contract.areas.some(a => a.id === raw.areaId) || !['area', 'vehicles'].includes(String(raw.kind)) || ![raw.generation, raw.serverTimeMs, raw.tick].every(int))
+    if (!keys(raw, ['worldId', 'areaId', 'incarnation', 'generation', 'serverTimeMs', 'tick', 'kind', 'payload']) || !text(raw.worldId) || (worldId !== undefined && raw.worldId !== worldId) || !text(raw.incarnation) || !contract.areas.some(a => a.id === raw.areaId) || !['area', 'vehicles', 'football'].includes(String(raw.kind)) || ![raw.generation, raw.serverTimeMs, raw.tick].every(int))
         throw Error('Invalid activity snapshot');
+    if (raw.kind === 'football') {
+        if (raw.areaId !== 'penalty' || Number(raw.generation) < 1 || !keys(raw.payload, ['ball']))
+            throw Error('Invalid football snapshot');
+        const b = raw.payload.ball;
+        if (!keys(b, ['x', 'y', 'vx', 'vy', 'visible']) || !number(b.x, 0, 63) || !number(b.y, 0, 63) || !footballInside(Number(b.x), Number(b.y)) || !number(b.vx, -8, 8) || !number(b.vy, -8, 8) || Math.hypot(Number(b.vx), Number(b.vy)) > 8.000000001 || typeof b.visible !== 'boolean' || !b.visible && (b.vx !== 0 || b.vy !== 0))
+            throw Error('Invalid football');
+        return structuredClone(raw) as FootballSnapshot;
+    }
     if (raw.kind === 'vehicles') {
         if (raw.areaId !== 'race' || Number(raw.generation) < 1 || !keys(raw.payload, ['vehicles']) || !Array.isArray(raw.payload.vehicles) || raw.payload.vehicles.length !== 4)
             throw Error('Invalid vehicle pool');

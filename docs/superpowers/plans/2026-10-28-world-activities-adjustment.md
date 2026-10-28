@@ -10,7 +10,7 @@
 
 **Spec:** [World activities design](../specs/2026-10-28-world-activities-design.md).
 
-**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–5 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
+**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–6 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
 
 ## Ringkasan tahap dan cakupan
 
@@ -133,10 +133,10 @@ Definisikan kontrak di Task 3 sebelum implementasi yang bergantung padanya. Nama
 
 **Files:** create `apps/server/internal/world/football.go`, `apps/web/src/activities/football.ts`, `world/scenes/football.ts`; modify penalty scene/Duel/Pitch integration dan application areas; tests new football owner tests, penalty integration, scene/app tests.
 
-- [ ] RED `kick_requires_proximity_and_cooldown`, `casual_ball_disabled_when_penalty_reserved`, `secret_choice_not_in_spectator_payload`, `result_storage_delay_does_not_lock_pitch_forever`.
-- [ ] Satu bola dengan impulse yang dibatasi, friction dan swept bounds; Kick intent memeriksa proximity, reset bila keluar/idle. Tidak membuat match/history. Reservasi penalti menyembunyikan/reset bola casual; bola match hanya projection engine.
-- [ ] Tampilkan kicker/keeper/bola saat reveal dari public snapshot + server time; pilihan pada HUD empat zona tetap private sampai reveal. Penonton pasif berdiri di strip luar, dapat berjalan pergi, tanpa hak input/baris history.
-- [ ] Uji penonton terlambat/reconnect tepat sebelum reveal, kick/start pada milidetik terakhir, failure/return/rematch dan history yang sudah ada. Simulasikan hasil pending: lapangan tetap dibuka setelah reset tanpa melepas durable claim. Review dan commit.
+- [x] RED `kick_requires_proximity_and_cooldown`, `casual_ball_disabled_when_penalty_reserved`, `secret_choice_not_in_spectator_payload`, `result_storage_delay_does_not_lock_pitch_forever`.
+- [x] Satu bola dengan impulse yang dibatasi, friction dan swept bounds; Kick intent memeriksa proximity, reset bila keluar/idle. Tidak membuat match/history. Reservasi penalti menyembunyikan/reset bola casual; bola match hanya projection engine.
+- [x] Tampilkan kicker/keeper/bola saat reveal dari public snapshot + server time; pilihan pada HUD empat zona tetap private sampai reveal. Penonton pasif berdiri di strip luar, dapat berjalan pergi, tanpa hak input/baris history.
+- [x] Uji penonton terlambat/reconnect tepat sebelum reveal, kick/start pada milidetik terakhir, failure/return/rematch dan history yang sudah ada. Simulasikan hasil pending: lapangan tetap dibuka setelah reset tanpa melepas durable claim. Review dan commit.
 
 ### Task 7: Pingpong
 

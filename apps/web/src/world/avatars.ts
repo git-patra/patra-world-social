@@ -1,4 +1,4 @@
-import {validateActivitySnapshot,validateRideIntent} from '../activities/contracts';
+import {validateActivitySnapshot,validateRideIntent,validateKickIntent} from '../activities/contracts';
 import { finite, point, type Point } from './map';
 export interface Avatar extends Point {
     id: string;
@@ -16,7 +16,7 @@ export function validateAvatars(state: PublicState): PublicState { if (!state ||
         throw Error('Invalid avatar');
     ids.add(a.id);
 } return structuredClone(state); }
-export const commandTypes = ['activity.ride','activity.snapshot', 'world.join', 'world.leave', 'player.input', 'player.destination', 'player.interact', 'lobby.list', 'lobby.join', 'lobby.bot', 'lobby.ready', 'lobby.leave', 'match.start', 'race.input', 'race.snapshot', 'penalty.snapshot', 'match.return', 'match.rematch', 'penalty.choose', 'duck.shoot', 'duck.snapshot', 'duck.clock', 'duck.clock_reply', 'chat.send', 'voice.join', 'voice.leave','voice.state','voice.token','voice.unmute','voice.chat','voice.moderate', 'session.resume'] as const;
+export const commandTypes = ['activity.kick','activity.ride','activity.snapshot', 'world.join', 'world.leave', 'player.input', 'player.destination', 'player.interact', 'lobby.list', 'lobby.join', 'lobby.bot', 'lobby.ready', 'lobby.leave', 'match.start', 'race.input', 'race.snapshot', 'penalty.snapshot', 'match.return', 'match.rematch', 'penalty.choose', 'duck.shoot', 'duck.snapshot', 'duck.clock', 'duck.clock_reply', 'chat.send', 'voice.join', 'voice.leave','voice.state','voice.token','voice.unmute','voice.chat','voice.moderate', 'session.resume'] as const;
 export interface Command {
     v: 2;
     commandId: string;
@@ -32,6 +32,7 @@ export function validateCommand(raw: unknown): Command {
         throw Error('Invalid command');
     const p = c.payload;
  if(c.type==='activity.ride')validateRideIntent(p);
+ if(c.type==='activity.kick')validateKickIntent(p);
     const integer = (n: unknown, min: number, max: number) => finite(n, min, max) && Number.isInteger(n);
     if (c.type === 'penalty.choose' && (!integer(p.zone, 0, 3)||!text(p.matchId)||!text(p.turnId)) || ['duck.snapshot','duck.clock','race.snapshot','penalty.snapshot','match.return','match.rematch'].includes(c.type)&&!text(p.matchId) || c.type === 'player.destination' && !point(p) || c.type === 'player.input' && (!finite(p.dx, -1, 1) || !finite(p.dy, -1, 1)) || c.type === 'chat.send' && (typeof p.text !== 'string' || Array.from(p.text).length < 1 || Array.from(p.text).length > 500 || p.channelId !== 'world' || !text(p.clientMessageId)) || c.type === 'lobby.join' && !text(p.arenaId) || c.type === 'match.start' && !text(p.lobbyId) || c.type === 'lobby.bot' && (!text(p.lobbyId) || typeof p.enabled !== 'boolean') || c.type === 'lobby.ready' && (!text(p.lobbyId) || typeof p.ready !== 'boolean') || c.type === 'duck.shoot' && (!text(p.matchId)||!finite(p.clientTimeMs,0,9007199254740991)||!finite(p.x, 0, 1) || !finite(p.y, 0, 1)) || c.type === 'duck.clock_reply' && (!text(p.matchId)||!text(p.nonce)||!finite(p.clientTimeMs,0,9007199254740991)) || c.type === 'race.input' && (!text(p.matchId)||!integer(p.steer, -1, 1) || !integer(p.throttle, 0, 1)||!integer(p.brake,0,1)) || c.type === 'player.interact' && !text(p.targetId) || c.type === 'voice.join' && !integer(p.table, 0, 1))
         throw Error('Invalid command payload');

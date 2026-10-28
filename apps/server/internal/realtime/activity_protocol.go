@@ -2,6 +2,7 @@ package realtime
 
 import (
 	"errors"
+	"math"
 	c "patra-world-social/server/internal/contracts"
 	"patra-world-social/server/internal/world"
 )
@@ -9,7 +10,7 @@ import (
 func validateActivityPayload(raw any) error {
 	bad := errors.New("invalid activity snapshot")
 	p, ok := raw.(map[string]any)
-	if !ok || len(p) != 8 || !c.Keys(p, "worldId", "areaId", "incarnation", "generation", "serverTimeMs", "tick", "kind", "payload") || !c.Text(p["worldId"], 128) || !c.Text(p["incarnation"], 128) || (p["kind"] != "area" && p["kind"] != "vehicles") {
+	if !ok || len(p) != 8 || !c.Keys(p, "worldId", "areaId", "incarnation", "generation", "serverTimeMs", "tick", "kind", "payload") || !c.Text(p["worldId"], 128) || !c.Text(p["incarnation"], 128) || (p["kind"] != "area" && p["kind"] != "vehicles" && p["kind"] != "football") {
 		return bad
 	}
 	id, _ := p["areaId"].(string)
@@ -20,6 +21,9 @@ func validateActivityPayload(raw any) error {
 		if !c.Integer(p[k], 0, 9007199254740991) {
 			return bad
 		}
+	}
+	if p["kind"] == "football" {
+		return validateFootballPayload(p)
 	}
 	if p["kind"] == "vehicles" {
 		return validateVehiclesPayload(p)
@@ -102,6 +106,26 @@ func validateVehiclesPayload(p map[string]any) error {
 		}
 		seen[id] = true
 		riders[rider] = true
+	}
+	return nil
+}
+
+func validateKickIntent(p map[string]any) bool {
+	return len(p) == 6 && c.Keys(p, "incarnation", "areaGeneration", "generation", "action", "dx", "dy") && c.Text(p["incarnation"], 128) && c.Integer(p["areaGeneration"], 0, 9007199254740991) && c.Integer(p["generation"], 1, 9007199254740991) && p["action"] == "kick" && c.Number(p["dx"], -1, 1) && c.Number(p["dy"], -1, 1) && (p["dx"] != float64(0) || p["dy"] != float64(0))
+}
+func validateFootballPayload(p map[string]any) error {
+	bad := errors.New("invalid football snapshot")
+	s, ok := p["payload"].(map[string]any)
+	if !ok || len(s) != 1 || !c.Keys(s, "ball") || p["areaId"] != "penalty" || !c.Integer(p["generation"], 1, 9007199254740991) {
+		return bad
+	}
+	b, ok := s["ball"].(map[string]any)
+	if !ok || len(b) != 5 || !c.Keys(b, "x", "y", "vx", "vy", "visible") || !c.Number(b["x"], 0, 63) || !c.Number(b["y"], 0, 63) || !c.Number(b["vx"], -8, 8) || !c.Number(b["vy"], -8, 8) {
+		return bad
+	}
+	visible, ok := b["visible"].(bool)
+	if !ok || !world.FootballInside(b["x"].(float64), b["y"].(float64)) || math.Hypot(b["vx"].(float64), b["vy"].(float64)) > 8.000000001 || !visible && (b["vx"] != float64(0) || b["vy"] != float64(0)) {
+		return bad
 	}
 	return nil
 }

@@ -1,5 +1,6 @@
 import {activityContract} from '../activities/contracts';
 import {ActivityScene} from '../activities/scene';
+import {nearFootball} from '../activities/football';
 import {activities,type ActivityState} from '../activities/store';
 import mapData from '../../../../contracts/map.v1.json';
 import {mapPoint,type CanvasRect,type ClosedMapZone} from './minimap';
@@ -59,7 +60,7 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
   if(target){const t=projectVillage(target);ctx.strokeStyle='#ffe7a8';ctx.lineWidth=2;ctx.beginPath();ctx.arc(t.x,t.y,10,0,Math.PI*2);ctx.stroke()}
   for(const t of TABLES.tables){const c=projectVillage(t);ctx.strokeStyle='#f3d49670';ctx.lineWidth=1;ctx.setLineDash([4,6]);ctx.beginPath();ctx.arc(c.x,c.y,t.radius*40,0,Math.PI*2);ctx.stroke();ctx.setLineDash([])}
   const avatars=(online?publicState.avatars:[{...player,id:'local',name:localName,avatarId:localAvatar,status:'available' as const}]).filter(a=>!activityScene.replaces(a.id==='local'?'guest':a.id));
-  const objects=art.foregroundObjects.filter(o=>!(o.x===1120&&o.y===1560&&activityActors.some(a=>a.id==='penalty:ball'))).filter(o=>visibleVillageProp(o,camera,zoom,{width,height})).map(o=>({depth:o.y,draw:()=>o.draw(ctx,motion?elapsed*1000:0)}));
+  const objects=art.foregroundObjects.filter(o=>visibleVillageProp(o,camera,zoom,{width,height})).map(o=>({depth:o.y,draw:()=>o.draw(ctx,motion?elapsed*1000:0)}));
   for(const avatar of avatars){const at=projectVillage(avatar),old=previous.get(avatar.id);const moving=old&&Math.hypot(old.x-avatar.x,old.y-avatar.y)>.001;const dx=old?avatar.x-old.x:0,dy=old?avatar.y-old.y:0;
    if(!visibleVillageProp(at,camera,zoom,{width,height}))continue;
    const own=avatar.id==='local'||avatar.id===selfID;const look=own?facing:moving?(Math.abs(dx)>Math.abs(dy)?dx>0?'right':'left':dy>0?'down':'up'):'down';
@@ -103,7 +104,19 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
  }
  function travelTo(id:string){const place=positions.find(s=>s.id===id);if(place)destination(place)}
  function move(dx:number,dy:number){if(paused||activityOwner||!Number.isFinite(dx)||!Number.isFinite(dy))return;direction={x:Math.sign(dx),y:Math.sign(dy)};route=[];target=null;if(online)online.input(direction.x,direction.y);dirty=true}
- function interact(){if(paused)return;if(activities.interactRide(displayPlayer??player)){stopDirection();route=[];target=null;return}if(!near)return;stopDirection();route=[];target=null;if(stations.some(s=>s.id===near))onSelect(near)}
+ function interact(){
+  if(paused)return;
+  const position=displayPlayer??player;
+  if(nearFootball(activities.snapshot().football,position)){
+   activities.interactFootball(position);
+   stopDirection();route=[];target=null;
+   return;
+  }
+  if(activities.interactRide(position)){stopDirection();route=[];target=null;return}
+  if(!near)return;
+  stopDirection();route=[];target=null;
+  if(stations.some(s=>s.id===near))onSelect(near);
+ }
  const pointer=(e:PointerEvent)=>{const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
  function pointerDown(e:PointerEvent){if(e.button!==undefined&&e.button!==0)return;pointerStart={...pointer(e),id:e.pointerId};canvas.setPointerCapture?.(e.pointerId)}
  function pointerUp(e:PointerEvent){const p=pointer(e),start=pointerStart;pointerStart=null;if(!start||start.id!==e.pointerId||Math.hypot(p.x-start.x,p.y-start.y)>10)return;const tile=unprojectVillage({x:(p.x-camera.x)/zoom,y:(p.y-camera.y)/zoom});destination({x:Math.round(tile.x),y:Math.round(tile.y)});canvas.focus?.({preventScroll:true})}

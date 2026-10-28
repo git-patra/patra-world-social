@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"patra-world-social/server/internal/auth"
 	"patra-world-social/server/internal/games/model"
 	"patra-world-social/server/internal/lobby"
@@ -50,6 +51,11 @@ func (e *authorityEngine) Tick(time.Time) bool     { return false }
 func (e *authorityEngine) Presence(string, string) {}
 func (e *authorityEngine) Close()                  {}
 func TestStartWaitsForClearAckAndDurabilityAcrossActualOwners(t *testing.T) {
+	for _, game := range []string{"race", "penalty"} {
+		t.Run(game, func(t *testing.T) { testStartWaitsForClearAckAndDurability(t, game) })
+	}
+}
+func testStartWaitsForClearAckAndDurability(t *testing.T, game string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	clock := &authorityClock{at: time.Unix(1000, 0)}
@@ -65,16 +71,21 @@ func TestStartWaitsForClearAckAndDurabilityAcrossActualOwners(t *testing.T) {
 	g.SetAreaCoordinator(areaCoordinator{h})
 	h.GameBusy = g.MovementBusy
 	engine := &authorityEngine{}
-	g.Register("race", func(model.MatchStart) (lobby.Engine, error) { return engine, nil })
+	g.Register(game, func(model.MatchStart) (lobby.Engine, error) { return engine, nil })
 	seat, err := h.Join(ctx, realtime.JoinContext{Token: "token", WorldID: "world"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	l, err := g.JoinLobby(ctx, lobby.JoinContext{UserID: "user", WorldID: "world", DisplayName: "User"}, "race")
+	l, err := g.JoinLobby(ctx, lobby.JoinContext{UserID: "user", WorldID: "world", DisplayName: "User"}, game)
 	if err != nil {
 		t.Fatal(err)
 	}
 	g.SetReady(ctx, "user", l.ID, true)
+	if game == "penalty" {
+		if err = g.ChooseBot(ctx, "user", l.ID, true); err != nil {
+			t.Fatal(err)
+		}
+	}
 	done := make(chan error, 1)
 	go func() { _, err := g.StartMatch(ctx, "user", l.ID, "start"); done <- err }()
 	phase := func(want string) {
@@ -82,7 +93,7 @@ func TestStartWaitsForClearAckAndDurabilityAcrossActualOwners(t *testing.T) {
 		for {
 			states, _ := h.WorldActivities(ctx, "world")
 			for _, s := range states {
-				if s.AreaID == "race" && s.Payload.Phase == want {
+				if s.Kind == "area" && s.AreaID == game && s.Payload.Phase == want {
 					return
 				}
 			}
@@ -133,9 +144,12 @@ func TestStartWaitsForClearAckAndDurabilityAcrossActualOwners(t *testing.T) {
 	all, _ := g.List(ctx, "world")
 	var matchID string
 	for _, l := range all {
-		if l.Arena.ID == "race" {
+		if l.Arena.ID == game {
 			matchID = l.MatchID
 		}
+	}
+	if err = h.SetActivity(ctx, "world", "user", true, nil); err != nil {
+		t.Fatal(err)
 	}
 	if err = g.Transition(ctx, matchID, "finalizing"); err != nil {
 		t.Fatal(err)
@@ -144,11 +158,41 @@ func TestStartWaitsForClearAckAndDurabilityAcrossActualOwners(t *testing.T) {
 	phase("RESETTING")
 	clock.add(2 * time.Second)
 	phase("OPEN")
+	if game == "penalty" {
+		states, err := h.WorldActivities(ctx, "world")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var i world.CasualIntent
+		for _, s := range states {
+			if s.Kind == "football" {
+				if !s.Payload.Ball.Visible {
+					t.Fatal("result storage delay kept ball hidden")
+				}
+				i.Incarnation = s.Incarnation
+				i.Generation = s.Generation
+				i.Action = "kick"
+				i.DY = -1
+			}
+			if s.Kind == "area" && s.AreaID == "penalty" {
+				i.AreaGeneration = s.Generation
+			}
+		}
+		at := world.Point{X: 28, Y: 46}
+		if err = h.SetActivity(ctx, "world", "user", true, &at); err != nil {
+			t.Fatal(err)
+		}
+		raw, _ := json.Marshal(i)
+		_, err = h.Execute(ctx, admitted, realtime.Command{V: 2, CommandID: "kick-after-simulation", Seq: 1, WorldID: "world", Type: "activity.kick", Payload: raw})
+		if err != nil {
+			t.Fatal("spatial release did not restore football while durable result pending", err)
+		}
+	}
 	before, err := h.Snapshot(ctx, admitted)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = h.Submit(ctx, admitted, realtime.Command{V: 2, CommandID: "walk-after-simulation", Seq: 1, WorldID: "world", Type: "player.input", Payload: []byte(`{"dx":1,"dy":0}`)}); err != nil {
+	if err = h.Submit(ctx, admitted, realtime.Command{V: 2, CommandID: "walk-after-simulation", Seq: 2, WorldID: "world", Type: "player.input", Payload: []byte(`{"dx":1,"dy":0}`)}); err != nil {
 		t.Fatal("durable result claim blocked walking", err)
 	}
 	clock.add(100 * time.Millisecond)

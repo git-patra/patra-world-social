@@ -166,6 +166,21 @@
         "generation": 1,
         "action": "dismount"
       }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 1,
+        "action": "kick",
+        "dx": 0,
+        "dy": -1
+      }
     }
   ],
   "invalid": [
@@ -381,6 +396,128 @@
         "vehicleId": "car-9",
         "generation": 1,
         "action": "mount"
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 1,
+        "action": "kick",
+        "dx": 0,
+        "dy": -1,
+        "x": 28
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 1,
+        "action": "kick",
+        "dx": 0,
+        "dy": -1,
+        "score": 1
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 1,
+        "action": "kick",
+        "dx": 0,
+        "dy": -1,
+        "vehicleId": "car-2"
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 1,
+        "action": "kick",
+        "dx": 0,
+        "dy": 0
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 1,
+        "action": "kick",
+        "dx": 2,
+        "dy": -1
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 0,
+        "action": "kick",
+        "dx": 0,
+        "dy": -1
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 1,
+        "action": "drive",
+        "dx": 0,
+        "dy": -1
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "kick",
+      "seq": 1,
+      "worldId": "private",
+      "type": "activity.kick",
+      "payload": {
+        "incarnation": "runtime-1",
+        "areaGeneration": 0,
+        "generation": 1,
+        "action": "kick",
+        "dx": 0
       }
     }
   ]

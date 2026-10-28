@@ -32,10 +32,11 @@ type Snapshot struct {
 }
 type player struct {
 	Avatar
-	epoch   uint64
-	dx, dy  float64
-	expires time.Time
-	path    []Point
+	epoch            uint64
+	dx, dy           float64
+	expires          time.Time
+	path             []Point
+	lastFootballKick time.Time
 }
 type request struct {
 	fn   func()
@@ -44,25 +45,28 @@ type request struct {
 
 // Runtime owns simulation state on one goroutine. No database/network work runs here.
 type Runtime struct {
-	vehicles        [4]Vehicle
-	vehicleRevision uint64
-	incarnation     string
-	areaGeneration  uint64
-	areas           map[string]*areaState
-	clock           Clock
-	m               MapDefinition
-	requests        chan request
-	stop            chan struct{}
-	done            chan struct{}
-	once            sync.Once
-	players         map[string]*player
-	last            time.Time
-	tick            uint64
+	football         Football
+	footballRevision uint64
+	vehicles         [4]Vehicle
+	vehicleRevision  uint64
+	incarnation      string
+	areaGeneration   uint64
+	areas            map[string]*areaState
+	clock            Clock
+	m                MapDefinition
+	requests         chan request
+	stop             chan struct{}
+	done             chan struct{}
+	once             sync.Once
+	players          map[string]*player
+	last             time.Time
+	tick             uint64
 }
 
 func NewRuntime(m MapDefinition, c Clock) *Runtime {
 	r := &Runtime{incarnation: incarnation(), areas: map[string]*areaState{}, clock: c, m: m, requests: make(chan request, 128), stop: make(chan struct{}), done: make(chan struct{}), players: map[string]*player{}, last: c.Now()}
 	r.initVehicles()
+	r.resetFootball(true)
 	go r.run()
 	return r
 }
@@ -114,6 +118,7 @@ func (r *Runtime) advance() {
 		r.tick++
 		if vehicleSteps < 4 {
 			r.moveVehicles(r.last)
+			r.moveFootball(r.last)
 			vehicleSteps++
 		}
 		for _, p := range r.players {

@@ -163,7 +163,15 @@ export class WorldSocket {
             this.pending.set(id,{resolve,reject,timer});
         });
     }
-    async activitySnapshots():Promise<ActivitySnapshot[]> {const result=await this.gameCommand('activity.snapshot',{}) as {activities:unknown[]};if(!Array.isArray(result?.activities)||result.activities.length!==5)throw Error('Invalid activity resync');const snapshots=result.activities.map(a=>validateActivitySnapshot(a,this.worldId));if(new Set(snapshots.filter(a=>a.kind==='area').map(a=>a.areaId)).size!==4||snapshots.filter(a=>a.kind==='vehicles').length!==1)throw Error('Invalid activity resync');return snapshots;}
+    async activitySnapshots(): Promise<ActivitySnapshot[]> {
+        const result = await this.gameCommand('activity.snapshot', {}) as { activities: unknown[] };
+        if (!Array.isArray(result?.activities) || result.activities.length !== 6)
+            throw Error('Invalid activity resync');
+        const snapshots = result.activities.map(a => validateActivitySnapshot(a, this.worldId));
+        if (new Set(snapshots.filter(a => a.kind === 'area').map(a => a.areaId)).size !== 4 || snapshots.filter(a => a.kind === 'vehicles').length !== 1 || snapshots.filter(a => a.kind === 'football').length !== 1)
+            throw Error('Invalid activity resync');
+        return snapshots;
+    }
     input(dx: number, dy: number) { this.send('player.input', { dx, dy }); }
     destination(x: number, y: number) { this.send('player.destination', { x, y }); }
     /** A deliberate exit is complete only after the server releases its seat. */

@@ -17,6 +17,30 @@ func (r *Runtime) Activity(ctx context.Context, user string, playing bool, at *P
 	return r.activity(ctx, user, playing, at, nil)
 }
 
+// ResumeCasual is called by the Hub after the simulation movement claim ends.
+// It restores stale game presence without canceling a walker's path or held input.
+func (r *Runtime) ResumeCasual(ctx context.Context, user string, epoch uint64) error {
+	var result error
+	err := r.call(ctx, func() {
+		if ctx.Err() != nil {
+			result = ctx.Err()
+			return
+		}
+		p := r.players[user]
+		if p == nil || p.epoch != epoch {
+			result = ErrActivitySuperseded
+			return
+		}
+		if p.Status == "playing" {
+			p.Status = "available"
+		}
+	})
+	if err != nil {
+		return err
+	}
+	return result
+}
+
 func (r *Runtime) ReturnActivity(ctx context.Context, user string, at Point, guard ActivityGuard) error {
 	return r.activity(ctx, user, false, &at, guard)
 }

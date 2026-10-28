@@ -21,6 +21,7 @@ type AreaLease struct {
 	Generation  uint64 `json:"generation"`
 }
 type AreaPayload struct {
+	Ball     *Football   `json:"-"`
 	Vehicles *[4]Vehicle `json:"-"`
 	Phase    string      `json:"phase"`
 	MatchID  string      `json:"matchId"`
@@ -30,6 +31,11 @@ type AreaPayload struct {
 }
 
 func (p AreaPayload) MarshalJSON() ([]byte, error) {
+	if p.Ball != nil {
+		return json.Marshal(struct {
+			Ball *Football `json:"ball"`
+		}{p.Ball})
+	}
 	if p.Vehicles != nil {
 		return json.Marshal(struct {
 			Vehicles *[4]Vehicle `json:"vehicles"`
@@ -82,6 +88,9 @@ func (r *Runtime) ReserveArea(ctx context.Context, worldID, areaID, matchID stri
 		r.areaGeneration++
 		out = AreaLease{worldID, r.incarnation, areaID, matchID, r.areaGeneration}
 		r.areas[areaID] = &areaState{out, AreaPayload{Phase: "CLEARING", MatchID: matchID, ClearAt: r.clock.Now().UnixMilli() + 3000}}
+		if areaID == "penalty" {
+			r.resetFootball(false)
+		}
 		if areaID == "race" {
 			r.resetVehicles()
 		}
@@ -155,11 +164,14 @@ func (r *Runtime) ReleaseArea(ctx context.Context, l AreaLease) error {
 	})
 }
 func (r *Runtime) advanceAreas() {
-	for _, s := range r.areas {
+	for id, s := range r.areas {
 		if s.payload.Phase == "RESETTING" && r.clock.Now().UnixMilli() >= s.payload.ResetAt {
 			s.payload.Phase = "OPEN"
 			s.payload.MatchID = ""
 			s.payload.StartsAt = 0
+			if id == "penalty" {
+				r.resetFootball(true)
+			}
 		}
 	}
 }
@@ -191,6 +203,8 @@ func (r *Runtime) HasAreaLeases(ctx context.Context) (bool, error) {
 func (r *Runtime) ActivitySnapshots(ctx context.Context, worldID string) ([]ActivitySnapshot, error) {
 	out := []ActivitySnapshot{}
 	err := r.call(ctx, func() {
+		ball := r.football
+		out = append(out, ActivitySnapshot{worldID, "penalty", r.incarnation, r.footballRevision, r.clock.Now().UnixMilli(), r.tick, "football", AreaPayload{Ball: &ball}})
 		vehicles := r.vehicleSnapshot()
 		out = append(out, ActivitySnapshot{worldID, "race", r.incarnation, r.vehicleRevision, r.clock.Now().UnixMilli(), r.tick, "vehicles", AreaPayload{Vehicles: &vehicles}})
 		for _, a := range ActivityAreas() {

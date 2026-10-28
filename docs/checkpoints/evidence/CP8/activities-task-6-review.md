@@ -1,0 +1,42 @@
+### Spec Compliance
+
+- ❌ Issues found: the new kick admission path cancels normal authoritative walking before deciding whether the kick is accepted (`apps/server/internal/realtime/hub.go:375`), conflicting with free football retaining walking input ownership. The remaining reviewed Task 6 behavior is compliant: one owner-authoritative casual ball enforces proximity, cooldown, admitted epoch/sequence, incarnation, area generation, ball generation and rider exclusion (`apps/server/internal/world/football.go:36`); reservation hides/resets it before clear ACK and OPEN restores it (`apps/server/internal/world/areas.go:84`, `apps/server/internal/world/areas.go:167`). Casual play has no completion/history writer.
+- ✅ Penalty integration preserves private current choices and public reveal projection. Added actual-transport coverage verifies successful casual kick creates no match and spectator re-admission immediately before reveal exposes chosen flags without secret zones (`apps/server/internal/application/penalty_integration_test.go:109`, `apps/server/internal/application/penalty_integration_test.go:216`). Pending-storage coverage checks restored football/walking while durable Busy remains (`apps/server/internal/application/areas_test.go:161`).
+- ✅ Local penalty startup hides the free ball before the lazy session resolves; passive spectator state retains walking and renders no input buttons (`apps/web/src/activities/store.ts:121`, `apps/web/src/activities/store.ts:514`, `apps/web/src/activities/ActivityHUD.tsx:12`). Football, vehicles and masks have independent revision keys, and the actual socket requires all six resync components (`apps/web/src/activities/store.ts:348`, `apps/web/src/net/socket.ts:166`).
+- ⚠️ Cannot verify from this diff: physical-device FPS/heap/load, authenticated multiplayer browser acceptance, and LiveKit acceptance. They remain explicit release gates, as stated in `docs/checkpoints/evidence/CP8/activities-football-browser.md:3` and `:13`. Root separately reports final dock-copy and held-E browser retests; the frozen browser note predates those follow-ups. Historical protocol-1 data/checksums and unchanged account/friend/moderation/voice behavior require their existing regression evidence; this task does not rewrite them.
+
+### Strengths
+
+- ✅ Owner state stays serialized and bounded: fixed-step integration has a four-step casual cap, swept radius-inset bounds, friction, sleep and idle/escape reset (`apps/server/internal/world/runtime.go:112`, `apps/server/internal/world/football.go:59`). Focused tests cover 2999 ms clear timing, rematch lease fencing, reconnect cooldown and catch-up (`apps/server/internal/world/football_test.go:66`, `:161`, `:197`).
+- ✅ Exact wire unions reject client position/score/vehicle fields and malformed impulses; rendering reuses the world RAF and removes the decorative second ball (`apps/server/internal/realtime/activity_protocol.go:106`, `apps/web/src/activities/contracts.ts:82`, `apps/web/src/activities/scene.ts:76`, `apps/web/src/world/village-art.ts:337`).
+- ✅ The scoped two-rider sound fix keys off self vehicle ownership/generation, suppressing peer mount/dismount and resync replay, with a behavioral regression (`apps/web/src/activities/store.ts:304`, `apps/web/tests/football.test.ts:72`). Football sound additionally checks timestamp freshness (`apps/web/src/activities/store.ts:293`).
+
+### Issues
+
+#### Critical (Must Fix)
+
+- ✅ None found.
+
+#### Important (Should Fix)
+
+- `apps/server/internal/realtime/hub.go:375`: Every kick calls `r.Activity(ctx, user, false, nil)` before `ApplyCasualIntent`, even for an already available walking player. That method unconditionally zeros dx/dy and clears the destination path (`apps/server/internal/world/activity.go:31`). Thus a HUD kick permanently cancels click-to-walk; even a rejected cooldown/stale-generation kick changes movement. Held keyboard only recovers when its next movement command arrives. The HUD invokes `store.interactFootball()` directly (`apps/web/src/activities/ActivityHUD.tsx:24`), so unlike the world E/dock interaction's deliberate stop this is an implicit server-side cancellation. Restore stale playing status only when needed after spatial release, without neutralizing already available walking state; retain the MovementBusy/durable claim fences. Cover accepted and rejected kicks with an active destination path.
+
+#### Minor (Nice to Have)
+
+- `apps/web/src/activities/store.ts:306`: The revised ride-entry cue checks ownership/revision but lacks the freshness fence used for football at line 293. A delayed live mount lifecycle can therefore play an old entry sound even though resync/stale revisions are suppressed. A focused probe with serverNow=3000 and lifecycle.serverTimeMs=1000 produced one sound call. Apply the same age window and add that case to the existing scoped audio regression. This does not undermine ball authority or the two-rider fix.
+
+### Assessment
+
+- **Task quality: Needs fixes.** Fix the Important kick/walking cancellation; the minor delayed ride cue is nonblocking.
+- **Reasoning:** The authority, reservation, local-mode and spectator seams are otherwise coherent, and the added tests exercise the required races/privacy/durability boundaries. The new re-admission path adds an unintended mutation before kick validation. Reported full suites were not rerun.
+- **Check:** Read the frozen review package in bounded passes; initial combined tool output was truncated, so only its unread/truncated opening portion was recovered. No changed source was reread as a substitute for the diff.
+- **Check:** Named cross-cutting risk—casual Hub re-admission might disturb ownership or durable claims. Inspected `apps/server/internal/world/activity.go:24` and existing Hub walking admission at `apps/server/internal/realtime/hub.go:396`; the MovementBusy gate and area/rider/epoch/sequence fences remain, but the unconditional movement reset creates the Important finding above. No new claim release was introduced.
+- **Check:** Named cross-cutting risk—late lifecycle audio could replay old effects. Inspected lifecycle generation emission (`apps/server/internal/realtime/areas.go:60`), resync admission (`apps/web/src/activities/store.ts:180`) and audio deduplication (`apps/web/src/audio/service.ts:19`); ran only the focused 2-second-old ride-lifecycle probe above. No existing suite was rerun and no implementation/index/branch state was changed.
+
+### Scoped re-review — Fix round 1
+
+- **Important kick/walking cancellation: ADDRESSED.** `apps/server/internal/world/activity.go:22` adds owner-serialized, context/epoch-fenced `ResumeCasual`; its only successful mutation changes `playing` to `available` at line 35. It leaves destination paths, held axes, expiry, sequence, position and rider ownership untouched. `apps/server/internal/realtime/hub.go:372` retains the MovementBusy rejection before calling this method at line 383; general Activity/ReturnActivity neutralization remains unchanged.
+- ✅ Regression coverage exercises actual Hub admission with an active destination for accepted, cooldown-rejected and stale-generation-rejected kicks, verifies the precise rejection reasons, and advances without replacement movement commands (`apps/server/internal/realtime/football_test.go:77`). Owner coverage checks wrong-epoch rejection and preserved held walking (`apps/server/internal/world/activity_test.go:48`). No new breakage found in this scoped diff.
+- ✅ Read the appended `task-6-report.md` round-1 evidence: all three destination cases failed RED; the same focused command passed GREEN; pending-result restoration passed; the affected-scope world/realtime/application race-detector run passed without warnings. These runs cover the addressed behavior and preserve the durable Busy regression; no suite or probe was rerun during re-review.
+- **Current spec-compliance verdict: ✅ Spec compliant within the verified task scope. Current task quality: Approved.** This supersedes the initial Needs fixes assessment after the Important finding above was corrected. Previously stated cannot-verify release gates remain unchanged. The Minor delayed ride cue remains logged and explicitly deferred to Task 11; it was outside this fix review.
+- **Check:** Read `task-6-fix-round1.diff` once and the appended report evidence. Review was limited to the Important finding and new breakage caused by its fix; no source/index/branch changes or subagents.

@@ -51,3 +51,35 @@ func TestArenaReturnGuardFencesPositionAndActivityTogether(t *testing.T) {
 		t.Fatal("current return not applied", p)
 	}
 }
+
+func TestResumeCasualPreservesWalkingAndFencesEpoch(t *testing.T) {
+	r, clock := testRuntime(t)
+	ctx := context.Background()
+	if err := r.Join(ctx, "u", "User", 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Activity(ctx, "u", true, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.ResumeCasual(ctx, "u", 2); err != ErrActivitySuperseded {
+		t.Fatal("old epoch restored game presence", err)
+	}
+	before, err := r.Snapshot(ctx)
+	if err != nil || before.Avatars[0].Status != "playing" {
+		t.Fatal("rejected resume mutated presence", before, err)
+	}
+	if err := r.ResumeCasual(ctx, "u", 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Input(ctx, "u", 1, 1, 1, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := r.ResumeCasual(ctx, "u", 1); err != nil {
+		t.Fatal(err)
+	}
+	clock.add(100 * time.Millisecond)
+	after, err := r.Snapshot(ctx)
+	if err != nil || after.Avatars[0].X <= before.Avatars[0].X || after.Avatars[0].Status != "available" {
+		t.Fatal("casual resume canceled held walking", after, err)
+	}
+}
