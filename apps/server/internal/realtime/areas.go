@@ -3,6 +3,7 @@ package realtime
 import (
 	"context"
 	"patra-world-social/server/internal/world"
+	"time"
 )
 
 type areaRoom interface {
@@ -113,4 +114,17 @@ func (h *Hub) WorldActivities(ctx context.Context, worldID string) ([]world.Acti
 		return nil, ErrUnsupported
 	}
 	return r.ActivitySnapshots(ctx, worldID)
+}
+
+// ObserveWorldTicks is a trusted diagnostics hook, never exposed as a command.
+func (h *Hub) ObserveWorldTicks(ctx context.Context, id string, observer func(time.Duration)) error {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	owner, ok := h.rooms[id].(interface {
+		ObserveTicks(context.Context, func(time.Duration)) error
+	})
+	if !ok {
+		return ErrUnsupported
+	}
+	return owner.ObserveTicks(ctx, observer)
 }

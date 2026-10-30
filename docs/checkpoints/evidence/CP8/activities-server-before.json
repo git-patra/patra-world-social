@@ -1,0 +1,402 @@
+{
+  "runtime": {
+    "os": "macOS26.5.2 arm64",
+    "go": "1.26.8",
+    "device": "Apple M1 (prior baseline; not reverified via denied sysctl)"
+  },
+  "scope": "Actual authenticated test WebSockets and isolated PostgreSQL, uncompressed application JSON bytes excluding TCP/WS framing/TLS; 8s measurement windows, not soak. Before activityBytes counts snapshots only; final includes all activity/lobby/match/game lifecycle bytes.",
+  "runs": [
+    {
+      "baselineDurationSeconds": 2.000142666,
+      "clients": 20,
+      "durationSeconds": 8.123201709,
+      "idleBaselineClient": {
+        "activitiesKiBps": 23.819589939690832,
+        "eventHz": {
+          "activity.snapshot": 54.99607696484187,
+          "world.delta": 9.499322384836322
+        },
+        "readError": "<nil>",
+        "totalKiBps": 49.513069646702895
+      },
+      "measurement": "actual authenticated test WS and isolated PostgreSQL schema; application JSON payload bytes exclude websocket/TCP/TLS overhead; owner queue metric is not pure tick CPU",
+      "rows": [
+        {
+          "activitiesKiBps": 76.60878260114124,
+          "client": 0,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 10.094541898319369
+          },
+          "readError": "<nil>",
+          "totalKiBps": 215.5407340722727,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.60878260114124,
+          "client": 1,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 215.87025411971092,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.81315475752395,
+          "client": 2,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.170375118651384,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 10.094541898319369
+          },
+          "readError": "<nil>",
+          "totalKiBps": 216.40474741810945,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.25894555698027,
+          "client": 3,
+          "eventHz": {
+            "activity.snapshot": 54.78135542380633,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 10.094541898319369
+          },
+          "readError": "<nil>",
+          "totalKiBps": 215.85053821756577,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.60878260114124,
+          "client": 4,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 10.094541898319369
+          },
+          "readError": "<nil>",
+          "totalKiBps": 216.20037526172675,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 5,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 212.82595052201725,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 6,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 212.82595052201725,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.60878260114124,
+          "client": 7,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 10.094541898319369
+          },
+          "readError": "<nil>",
+          "totalKiBps": 216.20061569955777,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 8,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 215.24319225636256,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 9,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 215.24319225636256,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 10,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 215.24319225636256,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 11,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 214.5835510669085,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 12,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "command.ack": 7.632458508485376,
+            "lobby.updated": 20.558396305113835,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 215.24319225636256,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 13,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 212.82595052201725,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 14,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 212.82595052201725,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 75.9817207377929,
+          "client": 15,
+          "eventHz": {
+            "activity.snapshot": 54.165834576347834,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 212.82595052201725,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.60878260114124,
+          "client": 16,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 10.094541898319369
+          },
+          "readError": "<nil>",
+          "totalKiBps": 213.78313352738144,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.60878260114124,
+          "client": 17,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 10.094541898319369
+          },
+          "readError": "<nil>",
+          "totalKiBps": 213.78313352738144,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.60878260114124,
+          "client": 18,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 9.971437728827668
+          },
+          "readError": "<nil>",
+          "totalKiBps": 213.4530123853656,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 76.60878260114124,
+          "client": 19,
+          "eventHz": {
+            "activity.snapshot": 55.51998044075653,
+            "blaster.snapshot": 5.047270949159684,
+            "lobby.updated": 20.435292135622138,
+            "match.started": 0.12310416949169962,
+            "penalty.revealed": 0.24620833898339925,
+            "penalty.turn_opened": 0.12310416949169962,
+            "pingpong.snapshot": 5.047270949159684,
+            "race.snapshot": 15.264917016970752,
+            "world.delta": 10.094541898319369
+          },
+          "readError": "<nil>",
+          "totalKiBps": 213.78313352738144,
+          "world": 0
+        }
+      ],
+      "scenario": "A20",
+      "snapshotOwnerQueueP95ms": 0.16475,
+      "snapshotOwnerQueueSamples": 62,
+      "worlds": 1
+    }
+  ]
+}

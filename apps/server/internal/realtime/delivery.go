@@ -3,6 +3,7 @@ package realtime
 import (
 	"context"
 	"encoding/json"
+	"math"
 	"patra-world-social/server/internal/world"
 	"strings"
 	"time"
@@ -220,4 +221,100 @@ func CheckAdmissionTime(ctx context.Context, at time.Time) error {
 		return ErrUnauthorized
 	}
 	return ctx.Err()
+}
+
+// PublishGameSnapshot limits replaceable visual state to participants and public
+// spectators. Durable lifecycle and terminal results continue through Publish.
+// The four area keys are replaced on a new match, never accumulated per match.
+func (h *Hub) PublishGameSnapshot(ctx context.Context, worldID, areaID, matchID string, participants, spectators []string, kind string, payload any) {
+	area, ok := world.ActivityArea(areaID)
+	if !ok {
+		return
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	room := h.rooms[worldID]
+	if room == nil {
+		return
+	}
+	snapshot, err := room.Snapshot(ctx)
+	if err != nil {
+		return
+	}
+	members := map[string]bool{}
+	watchers := map[string]bool{}
+	for _, id := range participants {
+		members[id] = true
+	}
+	for _, id := range spectators {
+		watchers[id] = true
+	}
+	for _, a := range snapshot.Avatars {
+		for _, strip := range area.SpectatorStrips {
+			if a.X >= float64(strip.X) && a.X < float64(strip.X+strip.Width) && a.Y >= float64(strip.Y) && a.Y < float64(strip.Y+strip.Height) {
+				watchers[a.ID] = true
+			}
+		}
+	}
+	encoded, err := json.Marshal(payload)
+	if err != nil {
+		return
+	}
+	cost := float64(len(encoded) + 256) // Conservative event envelope allowance.
+	now := h.clock.Now()
+	for _, s := range h.seats {
+		if s.world != worldID || !s.disconnected.IsZero() {
+			continue
+		}
+		if !members[s.user] && !watchers[s.user] {
+			if previous, ok := s.gameSnapshots[areaID]; ok {
+				previous.interested = false
+				s.gameSnapshots[areaID] = previous
+			}
+			continue
+		}
+		if s.gameSnapshots == nil {
+			s.gameSnapshots = map[string]snapshotDelivery{}
+		}
+		previous := s.gameSnapshots[areaID]
+		previous.seen = now
+		previous.spectator = !members[s.user]
+		if !members[s.user] {
+			const capacity = 10 * 1024.0
+			active := 1
+			for id, state := range s.gameSnapshots {
+				if id != areaID && state.spectator && now.Sub(state.seen) < time.Second {
+					active++
+				}
+			}
+			if previous.refill.IsZero() {
+				previous.tokens = capacity
+			} else {
+				previous.tokens = math.Min(capacity, previous.tokens+math.Max(0, now.Sub(previous.refill).Seconds())*capacity/float64(active))
+			}
+			previous.refill = now
+			// Each recently watched area receives an equal refill share, so a large
+			// high-rate stream cannot starve another. Initial/new-match full snapshots
+			// bypass the replaceable visual budget; they are measured as resync bursts.
+			if previous.interested && previous.match == matchID && (now.Sub(previous.at) < 250*time.Millisecond || previous.tokens < cost) {
+				s.gameSnapshots[areaID] = previous
+				continue
+			}
+			previous.tokens -= cost
+		}
+		previous.match = matchID
+		previous.interested = true
+		previous.at = now
+		s.gameSnapshots[areaID] = previous
+		select {
+		case s.events <- Delivery{kind, payload}:
+		default:
+			h.stopSeat(s)
+			s.disconnected = now
+			if h.SeatChanged != nil {
+				h.SeatChanged("disconnect", s.world, s.user)
+			}
+			room.Idle(ctx, s.user)
+		}
+	}
 }

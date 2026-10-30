@@ -1,0 +1,135 @@
+{
+  "fixture": "combined-spectator-cadence-v1",
+  "snapshotCadencesMs": [
+    300,
+    600
+  ],
+  "build": "Vite production fixture (production constructors)",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "dpr": 1,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "requestedDurationMs": 20000,
+  "elapsedMs": 20021,
+  "cyclesRequested": 4,
+  "cyclesCompleted": 4,
+  "scenario": "B",
+  "entities": {
+    "avatars": 20,
+    "raceKarts": 0,
+    "penaltyPlayers": 0,
+    "freeRiders": 4,
+    "freeBall": 1,
+    "blasterPlayers": 4,
+    "blasterBots": 8,
+    "projectiles": 48,
+    "pingpongPlayers": 2,
+    "clawOperators": 1,
+    "fishingOwners": 4,
+    "footballUsers": 3,
+    "spectators": 2
+  },
+  "renderCallbackCPU": {
+    "samples": 603,
+    "p50ms": 3.1,
+    "p95ms": 5,
+    "p99ms": 5.5,
+    "maxMs": 51
+  },
+  "frameIntervals": {
+    "samples": 603,
+    "p50ms": 33.3,
+    "p95ms": 34.2,
+    "p99ms": 34.4,
+    "maxMs": 34.5
+  },
+  "stallsOver50ms": 0,
+  "setupCPU": {
+    "samples": 4,
+    "p50ms": 19.2,
+    "p95ms": 29.7,
+    "p99ms": 29.7,
+    "maxMs": 29.699999999254942
+  },
+  "snapshotUpdateCPU": {
+    "samples": 49,
+    "p50ms": 0.3,
+    "p95ms": 0.6,
+    "p99ms": 1.9,
+    "maxMs": 1.8999999985098839
+  },
+  "hiddenMs": 0,
+  "counts": {
+    "raf": 0,
+    "intervals": 0,
+    "timeouts": 0,
+    "listeners": 0,
+    "audioContexts": 0,
+    "oscillators": 0
+  },
+  "cleanupCounts": [
+    {
+      "cycle": 1,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 2,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 3,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 4,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    }
+  ],
+  "heapSamples": [
+    {
+      "cycle": 0,
+      "bytes": 11148165
+    },
+    {
+      "cycle": 1,
+      "bytes": 12597473
+    },
+    {
+      "cycle": 2,
+      "bytes": 11929393
+    },
+    {
+      "cycle": 3,
+      "bytes": 12565030
+    },
+    {
+      "cycle": 4,
+      "bytes": 12014727
+    }
+  ],
+  "heapLimit": "Raw usedJSHeapSize includes numeric measurement samples; no forced GC or retained-heap conclusion",
+  "audioLimit": "Short production AudioService cue per lifecycle; no voice/media",
+  "done": true
+}

@@ -1,0 +1,175 @@
+{
+  "baselineCommit": "3079f05",
+  "candidateBase": "c9fdec6 plus Task11 frontend fixes",
+  "method": "Node25.2.1 zlib.gzipSync default; initial includes index.html module scripts and modulepreload imports; bytes/1024=KiB. All JS chunks also totaled once.",
+  "baseline": {
+    "initialGzipBytes": 134744,
+    "allJSGzipBytes": 236375,
+    "chunks": [
+      {
+        "file": "index-BZoEsPTw.js",
+        "bytes": 425447,
+        "gzipBytes": 134744,
+        "initial": true
+      },
+      {
+        "file": "livekit-client.esm-_2wpeQoP.js",
+        "bytes": 398266,
+        "gzipBytes": 101631,
+        "initial": false
+      }
+    ]
+  },
+  "candidate": {
+    "initialGzipBytes": 142037,
+    "allJSGzipBytes": 267556,
+    "chunks": [
+      {
+        "file": "BlasterHUD-KL-QL03G.js",
+        "bytes": 2537,
+        "gzipBytes": 1247,
+        "initial": false
+      },
+      {
+        "file": "BlasterMenu-Y8J0SPVr.js",
+        "bytes": 1214,
+        "gzipBytes": 643,
+        "initial": false
+      },
+      {
+        "file": "Duck-CAzrAmeE.js",
+        "bytes": 13181,
+        "gzipBytes": 5151,
+        "initial": false
+      },
+      {
+        "file": "Duel-Jk1JhqFl.js",
+        "bytes": 1977,
+        "gzipBytes": 955,
+        "initial": false
+      },
+      {
+        "file": "PingpongMenu-DFbcGNz0.js",
+        "bytes": 1239,
+        "gzipBytes": 643,
+        "initial": false
+      },
+      {
+        "file": "Race-BabF540u.js",
+        "bytes": 1969,
+        "gzipBytes": 985,
+        "initial": false
+      },
+      {
+        "file": "activities.v1-DhL1tYir.js",
+        "bytes": 1932,
+        "gzipBytes": 789,
+        "initial": true
+      },
+      {
+        "file": "blaster-Ca6qli6C.js",
+        "bytes": 2324,
+        "gzipBytes": 1121,
+        "initial": false
+      },
+      {
+        "file": "claw-CZFyssWr.js",
+        "bytes": 1703,
+        "gzipBytes": 853,
+        "initial": false
+      },
+      {
+        "file": "completion-VsYYhUSB.js",
+        "bytes": 907,
+        "gzipBytes": 516,
+        "initial": false
+      },
+      {
+        "file": "fishing-B-X7BLsP.js",
+        "bytes": 1180,
+        "gzipBytes": 704,
+        "initial": false
+      },
+      {
+        "file": "football-CoZ5k4YE.js",
+        "bytes": 356,
+        "gzipBytes": 249,
+        "initial": false
+      },
+      {
+        "file": "index-Duq2do7L.js",
+        "bytes": 451930,
+        "gzipBytes": 139607,
+        "initial": true
+      },
+      {
+        "file": "livekit-client.esm-_2wpeQoP.js",
+        "bytes": 398266,
+        "gzipBytes": 101631,
+        "initial": false
+      },
+      {
+        "file": "local-DaDZumNX.js",
+        "bytes": 4946,
+        "gzipBytes": 2208,
+        "initial": false
+      },
+      {
+        "file": "penalty-CRYZPxR1.js",
+        "bytes": 1085,
+        "gzipBytes": 632,
+        "initial": false
+      },
+      {
+        "file": "pingpong-CVOCJBsr.js",
+        "bytes": 690,
+        "gzipBytes": 425,
+        "initial": false
+      },
+      {
+        "file": "race-BxxxOUn-.js",
+        "bytes": 914,
+        "gzipBytes": 565,
+        "initial": false
+      },
+      {
+        "file": "race-track.v1-BunoUM88.js",
+        "bytes": 6081,
+        "gzipBytes": 1641,
+        "initial": true
+      },
+      {
+        "file": "session-BZmkDhdR.js",
+        "bytes": 3387,
+        "gzipBytes": 1357,
+        "initial": false
+      },
+      {
+        "file": "session-Bhy_Swj0.js",
+        "bytes": 1330,
+        "gzipBytes": 675,
+        "initial": false
+      },
+      {
+        "file": "session-CcXTIR_2.js",
+        "bytes": 4854,
+        "gzipBytes": 1931,
+        "initial": false
+      },
+      {
+        "file": "session-DaGNIxnw.js",
+        "bytes": 6077,
+        "gzipBytes": 2549,
+        "initial": false
+      },
+      {
+        "file": "vehicles-DL6V3wE5.js",
+        "bytes": 796,
+        "gzipBytes": 479,
+        "initial": false
+      }
+    ]
+  },
+  "addedInitialKiB": 7.1220703125,
+  "addedAllJSKiB": 30.4501953125
+}

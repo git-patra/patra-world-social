@@ -6,8 +6,11 @@ import (
 )
 
 type GameEvent struct {
-	WorldID, Type string
-	Payload       any
+	WorldID, Type            string
+	Payload                  any
+	AreaID, MatchID          string
+	Participants, Spectators []string
+	Replaceable              bool
 }
 type EventEngine interface {
 	DrainEvents() []GameEvent

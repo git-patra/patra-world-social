@@ -1,0 +1,339 @@
+{
+  "fixture": "combined-public-snapshots-v1",
+  "build": "Vite production fixture (production constructors)",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "dpr": 1,
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "requestedDurationMs": 900000,
+  "elapsedMs": 900006,
+  "cyclesRequested": 20,
+  "cyclesCompleted": 20,
+  "scenario": "B",
+  "entities": {
+    "avatars": 20,
+    "raceKarts": 0,
+    "penaltyPlayers": 0,
+    "freeRiders": 4,
+    "freeBall": 1,
+    "blasterPlayers": 4,
+    "blasterBots": 8,
+    "projectiles": 48,
+    "pingpongPlayers": 2,
+    "clawOperators": 1,
+    "fishingOwners": 4,
+    "footballUsers": 3,
+    "spectators": 2
+  },
+  "renderCallbackCPU": {
+    "samples": 51351,
+    "p50ms": 1.7,
+    "p95ms": 4.4,
+    "p99ms": 4.8,
+    "maxMs": 6.200000002980232
+  },
+  "frameIntervals": {
+    "samples": 51351,
+    "p50ms": 6,
+    "p95ms": 33.8,
+    "p99ms": 34.4,
+    "maxMs": 34.800000000046566
+  },
+  "stallsOver50ms": 0,
+  "setupCPU": {
+    "samples": 20,
+    "p50ms": 14.2,
+    "p95ms": 19.9,
+    "p99ms": 19.9,
+    "maxMs": 19.900000002235174
+  },
+  "snapshotUpdateCPU": {
+    "samples": 8157,
+    "p50ms": 0.3,
+    "p95ms": 0.4,
+    "p99ms": 0.5,
+    "maxMs": 1.699999999254942
+  },
+  "hiddenMs": 0,
+  "counts": {
+    "raf": 0,
+    "intervals": 0,
+    "timeouts": 0,
+    "listeners": 0,
+    "audioContexts": 0,
+    "oscillators": 0
+  },
+  "cleanupCounts": [
+    {
+      "cycle": 1,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 2,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 3,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 4,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 5,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 6,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 7,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 8,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 9,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 10,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 11,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 12,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 13,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 14,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 15,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 16,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 17,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 18,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 19,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    },
+    {
+      "cycle": 20,
+      "raf": 0,
+      "intervals": 0,
+      "timeouts": 0,
+      "listeners": 0,
+      "audioContexts": 0,
+      "oscillators": 0
+    }
+  ],
+  "heapSamples": [
+    {
+      "cycle": 0,
+      "bytes": 12903324
+    },
+    {
+      "cycle": 1,
+      "bytes": 9166676
+    },
+    {
+      "cycle": 2,
+      "bytes": 8681383
+    },
+    {
+      "cycle": 3,
+      "bytes": 17481383
+    },
+    {
+      "cycle": 4,
+      "bytes": 11415100
+    },
+    {
+      "cycle": 5,
+      "bytes": 17212143
+    },
+    {
+      "cycle": 6,
+      "bytes": 20894845
+    },
+    {
+      "cycle": 7,
+      "bytes": 21507809
+    },
+    {
+      "cycle": 8,
+      "bytes": 14899905
+    },
+    {
+      "cycle": 9,
+      "bytes": 9944397
+    },
+    {
+      "cycle": 10,
+      "bytes": 14315584
+    },
+    {
+      "cycle": 11,
+      "bytes": 17954009
+    },
+    {
+      "cycle": 12,
+      "bytes": 26477189
+    },
+    {
+      "cycle": 13,
+      "bytes": 25856125
+    },
+    {
+      "cycle": 14,
+      "bytes": 11955432
+    },
+    {
+      "cycle": 15,
+      "bytes": 11649624
+    },
+    {
+      "cycle": 16,
+      "bytes": 15744604
+    },
+    {
+      "cycle": 17,
+      "bytes": 14279168
+    },
+    {
+      "cycle": 18,
+      "bytes": 21541765
+    },
+    {
+      "cycle": 19,
+      "bytes": 17195704
+    },
+    {
+      "cycle": 20,
+      "bytes": 25772401
+    }
+  ],
+  "heapLimit": "Raw usedJSHeapSize includes numeric measurement samples; no forced GC or retained-heap conclusion",
+  "audioLimit": "Short production AudioService cue per lifecycle; no voice/media",
+  "done": true
+}

@@ -41,3 +41,8 @@ test('casual_scene_uses_world_projection_and_replaces_only_the_current_rider',as
 test('guest_vehicle_catchup_is_capped_at_four_steps',async()=>{
  const {LocalVehicles}=await import('../src/activities/vehicles');const local=new LocalVehicles();local.mount('car-2',{x:43,y:46},1000);local.controls(1,0,1000);local.tick(1250);assert.ok(local.vehicles[2].x<=44.600001,'catch-up cannot simulate five ride steps');const x=local.vehicles[2].x;local.tick(2000);assert.equal(local.vehicles[2].x,x,'expired input cannot resume after a stall');
 });
+
+test('delayed_own_ride_entry_updates_state_without_replaying_audio',async()=>{
+ const {audio}=await import('../src/audio/service');const original=audio.play;const heard:string[]=[];audio.play=e=>{heard.push(e.kind);return true};
+ try {for(const age of [-251,-250,1000,1001]){const store=new ActivityStore();await store.attach({worldId:'world',selfId:'me',status:'online',serverNow:()=>5000,async gameCommand(type:string){return type==='lobby.list'?{lobbies:[]}:{activities:[]}}});store.resync([pool()] as any);const mounted=pool();mounted.generation=2;mounted.serverTimeMs=5000-age;mounted.payload.vehicles[0].riderId='me';mounted.payload.vehicles[0].generation=2;const before=heard.length;store.receive('activity.lifecycle',mounted);assert.equal(store.snapshot().vehicles[0].riderId,'me');assert.equal(heard.length-before,age>=-250&&age<=1000?1:0);store.dispose()}}finally{audio.play=original}
+});

@@ -12,9 +12,9 @@ Ledger aktif eksekusi. Tabel di bawah adalah status terkini; catatan kronologis 
 | `working_branch` | `feat/world-activities`; `main` tracks `origin/main`; inherited `feat/social-world` remains local |
 | `highest_contiguous_passed_checkpoint` | CP1 PASS — 1/8 |
 | `last_verified_task_commit` | d4f60a27bd41048c7ed16a103fbcf4875046ece5 — 2/16 task done |
-| `latest_code_commit` | d4e678f fishing; current commit contains reviewed Blaster (see Git tip) |
-| `current_task` | Activities Tasks0–10 implemented/reviewed; Task11 measurement/regression/final review next |
-| `next_task` | Complete activities Task11; external T15/T16 acceptance remains pending |
+| `latest_code_commit` | c9fdec6 Blaster; current commit contains Task11 regression/optimization (see Git tip) |
+| `current_task` | Activities Tasks0–11 implemented; Task11 scoped and whole-branch final review pending |
+| `next_task` | Finish final review and authorized main publication; external T15/T16 acceptance remains pending |
 | `blockers` | Uji browser akun ditunda pengguna (T3/CP2); LiveKit staging belum tersedia (CP7). Pekerjaan backend dan fitur lain tetap berjalan. |
 | `source_changes` | `.idea/` sudah untracked sebelum perencanaan; jangan dihapus atau dibawa ke repo baru |
 | `planning_files` | Snapshot awal di `/Users/patra/Project/docs/superpowers/`; salinan aktif dan ledger tersimpan dalam Git repo baru di `docs/` |

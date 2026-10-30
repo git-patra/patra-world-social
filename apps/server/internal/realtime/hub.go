@@ -46,7 +46,15 @@ type PublicSnapshot struct {
 	RulesChecksum   string `json:"rulesChecksum"`
 	ProtocolVersion int    `json:"protocolVersion"`
 }
+type snapshotDelivery struct {
+	interested       bool
+	match            string
+	at, seen, refill time.Time
+	tokens           float64
+	spectator        bool
+}
 type seat struct {
+	gameSnapshots          map[string]snapshotDelivery
 	authorizedUntil        time.Time
 	id, user, token, world string
 	epoch                  uint64

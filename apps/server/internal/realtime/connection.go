@@ -1,11 +1,13 @@
 package realtime
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"github.com/coder/websocket"
 	"net/http"
+	"patra-world-social/server/internal/world"
 	"strconv"
 	"strings"
 	"time"
@@ -157,7 +159,9 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 			}
 		}()
 		defer func() { cancel(); c.CloseNow(); <-readDone }()
-		activityTick := time.NewTicker(200 * time.Millisecond)
+		activityCache := map[string][]byte{}
+		activitySent := map[string]time.Time{}
+		activityTick := time.NewTicker(100 * time.Millisecond)
 		defer activityTick.Stop()
 		snapshotTick := time.NewTicker(100 * time.Millisecond)
 		defer snapshotTick.Stop()
@@ -237,6 +241,14 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 					return
 				}
 				for _, a := range activities {
+					key := a.AreaID + ":" + a.Kind
+					if !ownsActivity(a, snap.SelfID) && time.Since(activitySent[key]) < 200*time.Millisecond {
+						continue
+					}
+					if !changedActivity(activityCache, a) {
+						continue
+					}
+					activitySent[key] = time.Now()
 					if h.writeEvent(ctx, c, "activity.snapshot", a.Tick, a) != nil {
 						return
 					}
@@ -285,4 +297,39 @@ func rideDriveCommand(cmd Command) bool {
 		Action string `json:"action"`
 	}
 	return json.Unmarshal(cmd.Payload, &p) == nil && p.Action == "drive"
+}
+
+// The cache is scoped to one connection (eleven fixed public activity slots).
+// Clock/tick-only changes are replaceable; identity, generation and payload are not.
+func changedActivity(cache map[string][]byte, a world.ActivitySnapshot) bool {
+	key := a.AreaID + ":" + a.Kind
+	copy := a
+	copy.Tick = 0
+	copy.ServerTimeMs = 0
+	raw, err := json.Marshal(copy)
+	if err != nil {
+		return true
+	}
+	if bytes.Equal(cache[key], raw) {
+		return false
+	}
+	cache[key] = raw
+	return true
+}
+
+func ownsActivity(a world.ActivitySnapshot, user string) bool {
+	if a.Payload.Claw != nil {
+		return a.Payload.Claw.OperatorID == user
+	}
+	if a.Payload.Fishing != nil {
+		return a.Payload.Fishing.OwnerID == user
+	}
+	if a.Payload.Vehicles != nil {
+		for _, v := range *a.Payload.Vehicles {
+			if v.RiderID == user {
+				return true
+			}
+		}
+	}
+	return false
 }

@@ -106,6 +106,8 @@ type Changes struct {
 	Returns []Return
 }
 type Service struct {
+	observeTick    func(time.Duration)
+	lastObserved   time.Time
 	areas          AreaCoordinator
 	storageBlocked bool
 	store          Store
@@ -240,6 +242,9 @@ func (s *Service) RegisterPrepared(game string, f Factory, prepare Prepare) erro
 }
 func (s *Service) mark(world string) {
 	s.changed[world] = true
+	s.signal()
+}
+func (s *Service) signal() {
 	select {
 	case s.Changed <- struct{}{}:
 	default:
@@ -440,4 +445,10 @@ func (s *Service) MovementBusy(user string) bool {
 	s.busyMu.RLock()
 	defer s.busyMu.RUnlock()
 	return s.movementBusy[user]
+}
+
+// ObserveTicks samples the real game owner at most once per 50ms simulation
+// window. The optional diagnostic callback must be bounded and nonblocking.
+func (s *Service) ObserveTicks(observer func(time.Duration)) error {
+	return s.control(func() { s.observeTick = observer; s.lastObserved = time.Time{} })
 }

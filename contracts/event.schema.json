@@ -162,5 +162,6 @@
         }
       }
     }
-  ]
+  ],
+  "$comment": "Blaster v1 public snapshots project positions/aim to 0.001 precision; projectiles are [id,x,y,owner] tuples (max48). Bot nextFire and projectile vx/vy/ttl are simulation-only. Full actor metadata, IDs, frames, deadlines and result remain present. See blaster-wire.golden.json, Go codec and WorldSocket/ActivityStore roundtrip tests."
 }

@@ -32,3 +32,26 @@ test('blaster mouse fire survives keyboard movement and keyboard fire survives m
   r.blasterAim(0,true);key('keydown','w');r.block('modal',true);r.block('modal',false);key('keydown','w',true);r.blasterAim(.2);assert.equal(frames.at(-1).fire,false);assert.equal(frames.at(-1).y,0,'interruption clears all sources');
  }finally{cleanup();Object.assign(globalThis,old)}
 });
+
+test('compact online projectile tuples hydrate the production scene without physics fields',async()=>{
+ const e=new LocalBlaster('m',actors,1000),publicSnapshot={...e.snapshot(),projectiles:[[1,.123,.456,0],[2,.789,.222,-1]]};
+ const lobby={id:'l',arenaId:'blaster',gameType:'blaster',worldId:'w',state:'running',matchId:'m',players:actors.map(a=>({userId:a.userId,actorId:a.actorId})),spectators:[]};
+ const store=new ActivityStore();await store.attach({worldId:'w',selfId:actors[0].userId,status:'online',serverNow:()=>1000,async gameCommand(kind:string):Promise<any>{return kind==='lobby.list'?{worldId:'w',lobbies:[lobby]}:kind==='blaster.snapshot'?publicSnapshot:{activities:[]}}});
+ const game=store.snapshot().games[0];assert.ok(game);assert.equal(sceneActors(game,1000).filter(a=>a.id.startsWith('blaster:shot:')).length,2);
+ store.receive('blaster.snapshot',{...publicSnapshot,frame:1,projectiles:[[3,.1,.2,0]]});assert.equal(sceneActors(store.snapshot().games[0],1000).filter(a=>a.id==='blaster:shot:3').length,1);store.dispose();
+});
+
+import wireEvent from '../../../contracts/blaster-wire.golden.json';
+test('Go encoded capped event passes WorldSocket validation and hydrates ActivityStore scene',async()=>{
+ const {WorldSocket}=await import('../src/net/socket');const old=globalThis.WebSocket;const sockets:any[]=[];
+ class FakeSocket{readyState=1;bufferedAmount=0;onmessage:any;onclose:any;onopen:any;constructor(){sockets.push(this)}send(){}close(){this.readyState=3}}
+ globalThis.WebSocket=FakeSocket as any;
+ const store=new ActivityStore();const states:string[]=[];const connection=new WorldSocket('w',()=>{},s=>states.push(s),'http://fixture.test');
+ try{
+  const p=wireEvent.payload,lobby={id:'l',arenaId:'blaster',gameType:'blaster',worldId:'w',state:'running',matchId:p.matchId,players:p.actors.map(a=>({userId:a.userId,actorId:a.actorId})),spectators:[]};
+  let full=false;await store.attach({worldId:'w',selfId:p.actors[0].userId,status:'online',serverNow:()=>p.serverTimeMs,async gameCommand(kind:string):Promise<any>{return kind==='lobby.list'?{worldId:'w',lobbies:[lobby]}:kind==='blaster.snapshot'?(full?p:{matchId:'not-current'}):{activities:[]}}});
+  connection.onEvent=(kind,payload)=>store.receive(kind,payload);connection.connect();sockets[0].onmessage({data:JSON.stringify(wireEvent)});
+  assert.ok(!states.includes('incompatible'));assert.equal(sceneActors(store.snapshot().games[0],p.serverTimeMs).length,61);assert.equal((store.snapshot().games[0].snapshot as any).projectiles[0].x,.413);
+  full=true;await store.reload();assert.equal(sceneActors(store.snapshot().games[0],p.serverTimeMs).length,61);
+ }finally{await connection.close();store.dispose();globalThis.WebSocket=old}
+});

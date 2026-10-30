@@ -45,6 +45,7 @@ type request struct {
 
 // Runtime owns simulation state on one goroutine. No database/network work runs here.
 type Runtime struct {
+	observeTick      func(time.Duration)
 	fishing          [4]Fishing
 	claw             Claw
 	clawRevision     uint64
@@ -116,6 +117,10 @@ func (r *Runtime) call(ctx context.Context, fn func()) error {
 func (r *Runtime) Close() { r.once.Do(func() { close(r.stop) }); <-r.done }
 func (r *Runtime) advance() {
 	now := r.clock.Now()
+	if r.observeTick != nil && !now.Before(r.last.Add(50*time.Millisecond)) {
+		started := time.Now()
+		defer func() { r.observeTick(time.Since(started)) }()
+	}
 	r.advanceAreas()
 	r.advanceClaw()
 	r.advanceFishing()
@@ -186,4 +191,10 @@ func (r *Runtime) Snapshot(ctx context.Context) (Snapshot, error) {
 		sort.Slice(s.Avatars, func(i, j int) bool { return s.Avatars[i].ID < s.Avatars[j].ID })
 	})
 	return s, err
+}
+
+// ObserveTicks installs an optional nonblocking diagnostic on the owner. Only
+// advances with a due fixed step are sampled; queue wait is excluded.
+func (r *Runtime) ObserveTicks(ctx context.Context, observer func(time.Duration)) error {
+	return r.call(ctx, func() { r.observeTick = observer })
 }

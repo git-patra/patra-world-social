@@ -1,0 +1,1829 @@
+{
+  "runtime": {
+    "os": "macOS26.5.2 arm64",
+    "go": "1.26.8",
+    "device": "Apple M1 (prior baseline; sysctl not reverified)",
+    "baseCommit": "c9fdec6",
+    "build": "uncommitted Task11 source, final wire projection and casual owner cadence"
+  },
+  "scope": "Actual authenticated test WS and isolated PostgreSQL. Encoded application JSON excluding WS/TCP/TLS overhead.8s measurement windows; no soak. Final activity byte count includes reliable lifecycle and lobby/match events. Initial/resync setup outside measured window.",
+  "runs": [
+    {
+      "baselineDurationSeconds": 2.000167083,
+      "clients": 20,
+      "durationSeconds": 8.109621125,
+      "gameOwnerAdvance": {
+        "p50ms": 0.023,
+        "p95ms": 0.061291,
+        "p99ms": 0.079708,
+        "samples": 113
+      },
+      "idleBaselineClient": {
+        "activitiesKiBps": 0,
+        "eventHz": {
+          "world.delta": 9.999164654785993
+        },
+        "maxCompleteSecondActivitiesKiB": 0,
+        "maxCompleteSecondTotalKiB": 27.05078125,
+        "readError": "<nil>",
+        "totalKiBps": 27.048521575934764
+      },
+      "measurement": "actual authenticated test WS and isolated PostgreSQL schema; application JSON payload bytes exclude websocket/TCP/TLS overhead; owner queue metric is not pure tick CPU",
+      "rows": [
+        {
+          "activitiesKiBps": 33.03837587572872,
+          "client": 0,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.479723875509659,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "race.snapshot": 15.043859401014865,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 36.2333984375,
+          "maxCompleteSecondTotalKiB": 64.8935546875,
+          "readError": "<nil>",
+          "totalKiBps": 61.66876896638004,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 33.03837587572872,
+          "client": 1,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.479723875509659,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "race.snapshot": 15.043859401014865,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 36.2333984375,
+          "maxCompleteSecondTotalKiB": 64.8935546875,
+          "readError": "<nil>",
+          "totalKiBps": 61.66852812590551,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 33.03837587572872,
+          "client": 2,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.479723875509659,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "race.snapshot": 15.043859401014865,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 36.2333984375,
+          "maxCompleteSecondTotalKiB": 64.8935546875,
+          "readError": "<nil>",
+          "totalKiBps": 61.66852812590551,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 33.09401002534505,
+          "client": 3,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.603034198468797,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "race.snapshot": 15.043859401014865,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 36.2333984375,
+          "maxCompleteSecondTotalKiB": 64.8935546875,
+          "readError": "<nil>",
+          "totalKiBps": 61.72416227552184,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 33.09401002534505,
+          "client": 4,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.603034198468797,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "race.snapshot": 15.043859401014865,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 36.2333984375,
+          "maxCompleteSecondTotalKiB": 64.8935546875,
+          "readError": "<nil>",
+          "totalKiBps": 61.72416227552184,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.8684404014003797,
+          "client": 5,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.603034198468797,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 5.017578125,
+          "maxCompleteSecondTotalKiB": 31.833984375,
+          "readError": "<nil>",
+          "totalKiBps": 28.6530320952571,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.8684404014003797,
+          "client": 6,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.603034198468797,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 5.017578125,
+          "maxCompleteSecondTotalKiB": 31.833984375,
+          "readError": "<nil>",
+          "totalKiBps": 28.6530320952571,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 19.12152947527496,
+          "client": 7,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.603034198468797,
+            "blaster.snapshot": 9.988136159690198,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 22.390625,
+          "maxCompleteSecondTotalKiB": 51.05078125,
+          "readError": "<nil>",
+          "totalKiBps": 47.751922565926286,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 19.12152947527496,
+          "client": 8,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.603034198468797,
+            "blaster.snapshot": 9.988136159690198,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 22.390625,
+          "maxCompleteSecondTotalKiB": 51.05078125,
+          "readError": "<nil>",
+          "totalKiBps": 47.75168172545175,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 19.06589532565863,
+          "client": 9,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.479723875509659,
+            "blaster.snapshot": 9.988136159690198,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 22.390625,
+          "maxCompleteSecondTotalKiB": 51.05078125,
+          "readError": "<nil>",
+          "totalKiBps": 47.69604757583542,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 19.177284045128555,
+          "client": 10,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.7263445214279354,
+            "blaster.snapshot": 9.988136159690198,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 22.390625,
+          "maxCompleteSecondTotalKiB": 51.05078125,
+          "readError": "<nil>",
+          "totalKiBps": 47.80743629530535,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 9.16578635940899,
+          "client": 11,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.7263445214279354,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "pingpong.snapshot": 9.988136159690198,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 12.31640625,
+          "maxCompleteSecondTotalKiB": 40.96484375,
+          "readError": "<nil>",
+          "totalKiBps": 37.796179450060315,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 9.16578635940899,
+          "client": 12,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.7263445214279354,
+            "command.ack": 8.015170992343986,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "pingpong.snapshot": 9.988136159690198,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 12.31640625,
+          "maxCompleteSecondTotalKiB": 40.962890625,
+          "readError": "<nil>",
+          "totalKiBps": 37.79593860958578,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9241949712539745,
+          "client": 13,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.7263445214279354,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 5.017578125,
+          "maxCompleteSecondTotalKiB": 31.833984375,
+          "readError": "<nil>",
+          "totalKiBps": 28.708786665110694,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9241949712539745,
+          "client": 14,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.7263445214279354,
+            "command.ack": 0.12331032295913824,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 5.017578125,
+          "maxCompleteSecondTotalKiB": 31.9013671875,
+          "readError": "<nil>",
+          "totalKiBps": 28.727813062598532,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9241949712539745,
+          "client": 15,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.7263445214279354,
+            "command.ack": 0.12331032295913824,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 5.017578125,
+          "maxCompleteSecondTotalKiB": 31.9013671875,
+          "readError": "<nil>",
+          "totalKiBps": 28.727813062598532,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.8128062517840497,
+          "client": 16,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.479723875509659,
+            "command.ack": 0.12331032295913824,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 5.017578125,
+          "maxCompleteSecondTotalKiB": 31.833984375,
+          "readError": "<nil>",
+          "totalKiBps": 28.616424343128607,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.8128062517840497,
+          "client": 17,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.479723875509659,
+            "command.ack": 0.12331032295913824,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 5.017578125,
+          "maxCompleteSecondTotalKiB": 31.833984375,
+          "readError": "<nil>",
+          "totalKiBps": 28.616424343128607,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 4.226750327993899,
+          "client": 18,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.479723875509659,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "pingpong.snapshot": 3.3293787198967326,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 7.3505859375,
+          "maxCompleteSecondTotalKiB": 34.1669921875,
+          "readError": "<nil>",
+          "totalKiBps": 31.01134202185062,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 7.576359647751114,
+          "client": 19,
+          "eventHz": {
+            "activity.lifecycle": 1.479723875509659,
+            "activity.snapshot": 1.479723875509659,
+            "blaster.snapshot": 3.3293787198967326,
+            "penalty.revealed": 0.24662064591827648,
+            "penalty.turn_opened": 0.12331032295913824,
+            "world.delta": 9.988136159690198
+          },
+          "maxCompleteSecondActivitiesKiB": 11.634765625,
+          "maxCompleteSecondTotalKiB": 38.451171875,
+          "readError": "<nil>",
+          "totalKiBps": 34.36095134160784,
+          "world": 0
+        }
+      ],
+      "scenario": "A20",
+      "snapshotOwnerQueueP95ms": 0.032875,
+      "snapshotOwnerQueueSamples": 65,
+      "worldOwnerTick": {
+        "p50ms": 0.005041,
+        "p95ms": 0.010625,
+        "p99ms": 0.027,
+        "samples": 162
+      },
+      "worlds": 1
+    },
+    {
+      "baselineDurationSeconds": 2.000005458,
+      "clients": 20,
+      "durationSeconds": 8.112833084,
+      "gameOwnerAdvance": {
+        "p50ms": 0.013625,
+        "p95ms": 0.032292,
+        "p99ms": 0.05175,
+        "samples": 115
+      },
+      "idleBaselineClient": {
+        "activitiesKiBps": 0,
+        "eventHz": {
+          "world.delta": 9.999972710074475
+        },
+        "maxCompleteSecondActivitiesKiB": 0,
+        "maxCompleteSecondTotalKiB": 27.05078125,
+        "readError": "<nil>",
+        "totalKiBps": 27.05070742861943
+      },
+      "measurement": "actual authenticated test WS and isolated PostgreSQL schema; application JSON payload bytes exclude websocket/TCP/TLS overhead; owner queue metric is not pure tick CPU",
+      "rows": [
+        {
+          "activitiesKiBps": 11.029256327418851,
+          "client": 0,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 12.079627299774481,
+            "command.ack": 8.011997698830013,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 14.4765625,
+          "maxCompleteSecondTotalKiB": 43.3173828125,
+          "readError": "<nil>",
+          "totalKiBps": 39.81623405694858,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 11.082340627076064,
+          "client": 1,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 12.202888802833405,
+            "command.ack": 8.011997698830013,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 14.9072265625,
+          "maxCompleteSecondTotalKiB": 43.748046875,
+          "readError": "<nil>",
+          "totalKiBps": 39.86943872916738,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 11.082340627076064,
+          "client": 2,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 12.202888802833405,
+            "command.ack": 8.011997698830013,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 14.9072265625,
+          "maxCompleteSecondTotalKiB": 43.748046875,
+          "readError": "<nil>",
+          "totalKiBps": 39.86943872916738,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 11.082340627076064,
+          "client": 3,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 12.202888802833405,
+            "command.ack": 8.011997698830013,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 14.9072265625,
+          "maxCompleteSecondTotalKiB": 43.748046875,
+          "readError": "<nil>",
+          "totalKiBps": 39.86943872916738,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 5.768975386330037,
+          "client": 4,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.163075152946164,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 9.626953125,
+          "maxCompleteSecondTotalKiB": 37.2177734375,
+          "readError": "<nil>",
+          "totalKiBps": 33.306124808964455,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 5.552425148045853,
+          "client": 5,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 5.916552146828318,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 9.630859375,
+          "maxCompleteSecondTotalKiB": 37.2216796875,
+          "readError": "<nil>",
+          "totalKiBps": 33.08957457068027,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 5.930033873725387,
+          "client": 6,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.409598159064011,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 8.7451171875,
+          "maxCompleteSecondTotalKiB": 36.3359375,
+          "readError": "<nil>",
+          "totalKiBps": 33.467183296359806,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 22.98032573142485,
+          "client": 7,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.039813649887241,
+            "blaster.snapshot": 9.984181747772785,
+            "command.ack": 8.011997698830013,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 27.2412109375,
+          "maxCompleteSecondTotalKiB": 56.67578125,
+          "readError": "<nil>",
+          "totalKiBps": 52.36254577797252,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 23.19928342094065,
+          "client": 8,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.286336656005087,
+            "blaster.snapshot": 9.984181747772785,
+            "command.ack": 8.011997698830013,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 27.2451171875,
+          "maxCompleteSecondTotalKiB": 56.6796875,
+          "readError": "<nil>",
+          "totalKiBps": 52.58126272236516,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 23.036419345121583,
+          "client": 9,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.039813649887241,
+            "blaster.snapshot": 9.984181747772785,
+            "command.ack": 8.011997698830013,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 27.23828125,
+          "maxCompleteSecondTotalKiB": 56.6728515625,
+          "readError": "<nil>",
+          "totalKiBps": 52.41863939166926,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 23.145115768229207,
+          "client": 10,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.163075152946164,
+            "blaster.snapshot": 9.984181747772785,
+            "command.ack": 8.011997698830013,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 26.3623046875,
+          "maxCompleteSecondTotalKiB": 55.796875,
+          "readError": "<nil>",
+          "totalKiBps": 52.52733581477688,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 12.902734875865221,
+          "client": 11,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.039813649887241,
+            "command.ack": 8.011997698830013,
+            "pingpong.snapshot": 9.984181747772785,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 16.8623046875,
+          "maxCompleteSecondTotalKiB": 46.296875,
+          "readError": "<nil>",
+          "totalKiBps": 42.28531604009764,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 13.065117461437962,
+          "client": 12,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.286336656005087,
+            "command.ack": 8.011997698830013,
+            "pingpong.snapshot": 9.984181747772785,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 15.9794921875,
+          "maxCompleteSecondTotalKiB": 45.4140625,
+          "readError": "<nil>",
+          "totalKiBps": 42.447217135424054,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 5.821939313425667,
+          "client": 13,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.286336656005087,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 9.6240234375,
+          "maxCompleteSecondTotalKiB": 37.2138671875,
+          "readError": "<nil>",
+          "totalKiBps": 33.35908873606009,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 5.662325296769288,
+          "client": 14,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.039813649887241,
+            "command.ack": 0.24652300611784655,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 9.1240234375,
+          "maxCompleteSecondTotalKiB": 36.869140625,
+          "readError": "<nil>",
+          "totalKiBps": 33.237632821424874,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 5.876468083821851,
+          "client": 15,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.286336656005087,
+            "command.ack": 0.24652300611784655,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 8.2392578125,
+          "maxCompleteSecondTotalKiB": 35.830078125,
+          "readError": "<nil>",
+          "totalKiBps": 33.45141449079269,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 5.553749246223244,
+          "client": 16,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 5.916552146828318,
+            "command.ack": 0.24652300611784655,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 8.240234375,
+          "maxCompleteSecondTotalKiB": 35.9833984375,
+          "readError": "<nil>",
+          "totalKiBps": 33.13122347698729,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 5.770179111945846,
+          "client": 17,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.163075152946164,
+            "command.ack": 0.24652300611784655,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 10.0029296875,
+          "maxCompleteSecondTotalKiB": 37.74609375,
+          "readError": "<nil>",
+          "totalKiBps": 33.34765334270989,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 8.18617679543769,
+          "client": 18,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.163075152946164,
+            "pingpong.snapshot": 3.3280605825909286,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 12.1728515625,
+          "maxCompleteSecondTotalKiB": 39.76171875,
+          "readError": "<nil>",
+          "totalKiBps": 35.72561329674215,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 11.746797167003072,
+          "client": 19,
+          "eventHz": {
+            "activity.lifecycle": 2.5884915642373887,
+            "activity.snapshot": 6.532859662122934,
+            "blaster.snapshot": 3.3280605825909286,
+            "world.delta": 9.984181747772785
+          },
+          "maxCompleteSecondActivitiesKiB": 13.9423828125,
+          "maxCompleteSecondTotalKiB": 44.115234375,
+          "readError": "<nil>",
+          "totalKiBps": 39.28623366830753,
+          "world": 0
+        }
+      ],
+      "scenario": "B20",
+      "snapshotOwnerQueueP95ms": 0.042084,
+      "snapshotOwnerQueueSamples": 65,
+      "worldOwnerTick": {
+        "p50ms": 0.007375,
+        "p95ms": 0.013042,
+        "p99ms": 0.025959,
+        "samples": 162
+      },
+      "worlds": 1
+    },
+    {
+      "baselineDurationSeconds": 2.0001895,
+      "clients": 60,
+      "durationSeconds": 8.079138666,
+      "gameOwnerAdvance": {
+        "p50ms": 0.016333,
+        "p95ms": 0.035958,
+        "p99ms": 0.05925,
+        "samples": 142
+      },
+      "idleBaselineClient": {
+        "activitiesKiBps": 0,
+        "eventHz": {
+          "world.delta": 9.999052589767121
+        },
+        "maxCompleteSecondActivitiesKiB": 0,
+        "maxCompleteSecondTotalKiB": 27.05078125,
+        "readError": "<nil>",
+        "totalKiBps": 27.048218431303635
+      },
+      "measurement": "actual authenticated test WS and isolated PostgreSQL schema; application JSON payload bytes exclude websocket/TCP/TLS overhead; owner queue metric is not pure tick CPU",
+      "rows": [
+        {
+          "activitiesKiBps": 33.529883484364,
+          "client": 0,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.224395209062251,
+            "world.delta": 10.149596806041501
+          },
+          "maxCompleteSecondActivitiesKiB": 39.33203125,
+          "maxCompleteSecondTotalKiB": 70.662109375,
+          "readError": "<nil>",
+          "totalKiBps": 62.57169378122418,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 33.78625847037789,
+          "client": 1,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 41.4033203125,
+          "maxCompleteSecondTotalKiB": 70.0498046875,
+          "readError": "<nil>",
+          "totalKiBps": 62.49590541902205,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 33.529883484364,
+          "client": 2,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.224395209062251,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 39.33203125,
+          "maxCompleteSecondTotalKiB": 67.978515625,
+          "readError": "<nil>",
+          "totalKiBps": 62.23953043300816,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 33.529883484364,
+          "client": 3,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.224395209062251,
+            "world.delta": 9.902045664430734
+          },
+          "maxCompleteSecondActivitiesKiB": 39.33203125,
+          "maxCompleteSecondTotalKiB": 67.978515625,
+          "readError": "<nil>",
+          "totalKiBps": 61.90760883395388,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 33.529883484364,
+          "client": 4,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.224395209062251,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 39.33203125,
+          "maxCompleteSecondTotalKiB": 70.66015625,
+          "readError": "<nil>",
+          "totalKiBps": 62.23953043300816,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9301253072464593,
+          "client": 5,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 9.902045664430734
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.84375,
+          "readError": "<nil>",
+          "totalKiBps": 28.48385323158903,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9301253072464593,
+          "client": 6,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 9.902045664430734
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.84375,
+          "readError": "<nil>",
+          "totalKiBps": 28.48385323158903,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 19.882538931842614,
+          "client": 7,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 22.0615234375,
+          "maxCompleteSecondTotalKiB": 53.3916015625,
+          "readError": "<nil>",
+          "totalKiBps": 48.592427629648505,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 19.882538931842614,
+          "client": 8,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 22.0615234375,
+          "maxCompleteSecondTotalKiB": 50.7080078125,
+          "readError": "<nil>",
+          "totalKiBps": 48.59218588048678,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 19.882538931842614,
+          "client": 9,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 22.0615234375,
+          "maxCompleteSecondTotalKiB": 50.7080078125,
+          "readError": "<nil>",
+          "totalKiBps": 48.59218588048678,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 19.882538931842614,
+          "client": 10,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 22.0615234375,
+          "maxCompleteSecondTotalKiB": 50.7080078125,
+          "readError": "<nil>",
+          "totalKiBps": 48.59218588048678,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 9.255124907643218,
+          "client": 11,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.7328579912753783,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 10.025821235236117,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 11.865234375,
+          "maxCompleteSecondTotalKiB": 40.513671875,
+          "readError": "<nil>",
+          "totalKiBps": 37.96501360544911,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 9.311089838583543,
+          "client": 12,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.8566335620807624,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 10.025821235236117,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 12.3173828125,
+          "maxCompleteSecondTotalKiB": 40.9638671875,
+          "readError": "<nil>",
+          "totalKiBps": 38.020736787227705,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9301253072464593,
+          "client": 13,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.84375,
+          "readError": "<nil>",
+          "totalKiBps": 28.815774830643313,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9301253072464593,
+          "client": 14,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.998046875,
+          "readError": "<nil>",
+          "totalKiBps": 28.834873014419923,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9301253072464593,
+          "client": 15,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.998046875,
+          "readError": "<nil>",
+          "totalKiBps": 28.834873014419923,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9301253072464593,
+          "client": 16,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.998046875,
+          "readError": "<nil>",
+          "totalKiBps": 28.834873014419923,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 1.9301253072464593,
+          "client": 17,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.998046875,
+          "readError": "<nil>",
+          "totalKiBps": 28.834873014419923,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 4.352935406097163,
+          "client": 18,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 3.3419404117453726,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 6.9697265625,
+          "maxCompleteSecondTotalKiB": 33.7861328125,
+          "readError": "<nil>",
+          "totalKiBps": 31.238584929494017,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 7.845122921857274,
+          "client": 19,
+          "eventHz": {
+            "activity.lifecycle": 1.609082420469994,
+            "activity.snapshot": 1.609082420469994,
+            "blaster.snapshot": 3.3419404117453726,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 10.6416015625,
+          "maxCompleteSecondTotalKiB": 37.4580078125,
+          "readError": "<nil>",
+          "totalKiBps": 34.730772445254125,
+          "world": 0
+        },
+        {
+          "activitiesKiBps": 34.03066687288617,
+          "client": 20,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.7328579912753783,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 43.7509765625,
+          "maxCompleteSecondTotalKiB": 72.4970703125,
+          "readError": "<nil>",
+          "totalKiBps": 62.83846398119242,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 34.03066687288617,
+          "client": 21,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.7328579912753783,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 43.7509765625,
+          "maxCompleteSecondTotalKiB": 72.4951171875,
+          "readError": "<nil>",
+          "totalKiBps": 62.83822223203069,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 33.918857885586384,
+          "client": 22,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 42.84765625,
+          "maxCompleteSecondTotalKiB": 71.591796875,
+          "readError": "<nil>",
+          "totalKiBps": 62.72641324473091,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 33.918857885586384,
+          "client": 23,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 42.84765625,
+          "maxCompleteSecondTotalKiB": 71.591796875,
+          "readError": "<nil>",
+          "totalKiBps": 62.72641324473091,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 33.918857885586384,
+          "client": 24,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 42.84765625,
+          "maxCompleteSecondTotalKiB": 71.591796875,
+          "readError": "<nil>",
+          "totalKiBps": 62.72641324473091,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 25,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.94140625,
+          "readError": "<nil>",
+          "totalKiBps": 28.80344562339512,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 26,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.94140625,
+          "readError": "<nil>",
+          "totalKiBps": 28.80344562339512,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 18.94322256394355,
+          "client": 27,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 10.025821235236117,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 22.173828125,
+          "maxCompleteSecondTotalKiB": 50.931640625,
+          "readError": "<nil>",
+          "totalKiBps": 47.7510196722498,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 19.13057816428373,
+          "client": 28,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 23.609375,
+          "maxCompleteSecondTotalKiB": 52.353515625,
+          "readError": "<nil>",
+          "totalKiBps": 47.93813352342825,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 19.13057816428373,
+          "client": 29,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 23.609375,
+          "maxCompleteSecondTotalKiB": 52.353515625,
+          "readError": "<nil>",
+          "totalKiBps": 47.93813352342825,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 19.13057816428373,
+          "client": 30,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 23.609375,
+          "maxCompleteSecondTotalKiB": 52.353515625,
+          "readError": "<nil>",
+          "totalKiBps": 47.93813352342825,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 9.181512287896656,
+          "client": 31,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 10.149596806041501,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 12.884765625,
+          "maxCompleteSecondTotalKiB": 41.630859375,
+          "readError": "<nil>",
+          "totalKiBps": 37.989309396202906,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 9.181512287896656,
+          "client": 32,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 7.9216365315445865,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 10.149596806041501,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 12.884765625,
+          "maxCompleteSecondTotalKiB": 41.62890625,
+          "readError": "<nil>",
+          "totalKiBps": 37.989067647041175,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 33,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.94140625,
+          "readError": "<nil>",
+          "totalKiBps": 28.80344562339512,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 34,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 31.095703125,
+          "readError": "<nil>",
+          "totalKiBps": 28.822543807171733,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 35,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 31.095703125,
+          "readError": "<nil>",
+          "totalKiBps": 28.822543807171733,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 36,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 31.095703125,
+          "readError": "<nil>",
+          "totalKiBps": 28.822543807171733,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 37,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 9.902045664430734
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 31.095703125,
+          "readError": "<nil>",
+          "totalKiBps": 28.489413462308804,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 4.243181286672076,
+          "client": 38,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 3.3419404117453726,
+            "world.delta": 9.902045664430734
+          },
+          "maxCompleteSecondActivitiesKiB": 6.9736328125,
+          "maxCompleteSecondTotalKiB": 33.8876953125,
+          "readError": "<nil>",
+          "totalKiBps": 30.893608875706352,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 7.536530116909866,
+          "client": 39,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 3.3419404117453726,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 9.902045664430734
+          },
+          "maxCompleteSecondActivitiesKiB": 10.650390625,
+          "maxCompleteSecondTotalKiB": 37.564453125,
+          "readError": "<nil>",
+          "totalKiBps": 34.186957705944145,
+          "world": 1
+        },
+        {
+          "activitiesKiBps": 33.97446019278412,
+          "client": 40,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 41.2109375,
+          "maxCompleteSecondTotalKiB": 72.6484375,
+          "readError": "<nil>",
+          "totalKiBps": 62.78225730109037,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 34.6392703875396,
+          "client": 41,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "lobby.updated": 0.12377557080538416,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 46.58203125,
+          "maxCompleteSecondTotalKiB": 78.017578125,
+          "readError": "<nil>",
+          "totalKiBps": 63.44682574668412,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 34.63914951295874,
+          "client": 42,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "lobby.updated": 0.12377557080538416,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 46.5810546875,
+          "maxCompleteSecondTotalKiB": 78.0166015625,
+          "readError": "<nil>",
+          "totalKiBps": 63.446704872103254,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 33.91861613642466,
+          "client": 43,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 40.759765625,
+          "maxCompleteSecondTotalKiB": 69.50390625,
+          "readError": "<nil>",
+          "totalKiBps": 62.726171495569176,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 34.63914951295874,
+          "client": 44,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.609082420469994,
+            "command.ack": 7.9216365315445865,
+            "lobby.updated": 0.12377557080538416,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "race.snapshot": 15.348170779867637,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 46.5810546875,
+          "maxCompleteSecondTotalKiB": 75.3251953125,
+          "readError": "<nil>",
+          "totalKiBps": 63.446704872103254,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 45,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.94140625,
+          "readError": "<nil>",
+          "totalKiBps": 28.80344562339512,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 46,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.94140625,
+          "readError": "<nil>",
+          "totalKiBps": 28.80344562339512,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 19.88435205055558,
+          "client": 47,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 23.314453125,
+          "maxCompleteSecondTotalKiB": 52.060546875,
+          "readError": "<nil>",
+          "totalKiBps": 48.69214915886183,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 19.88435205055558,
+          "client": 48,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 23.314453125,
+          "maxCompleteSecondTotalKiB": 52.05859375,
+          "readError": "<nil>",
+          "totalKiBps": 48.6919074097001,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 19.88435205055558,
+          "client": 49,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 23.314453125,
+          "maxCompleteSecondTotalKiB": 52.05859375,
+          "readError": "<nil>",
+          "totalKiBps": 48.6919074097001,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 19.88435205055558,
+          "client": 50,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 10.149596806041501,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 23.314453125,
+          "maxCompleteSecondTotalKiB": 52.05859375,
+          "readError": "<nil>",
+          "totalKiBps": 48.6919074097001,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 9.345539094129963,
+          "client": 51,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 10.149596806041501,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 13.4873046875,
+          "maxCompleteSecondTotalKiB": 42.2333984375,
+          "readError": "<nil>",
+          "totalKiBps": 38.15333620243621,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 9.345539094129963,
+          "client": 52,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 7.9216365315445865,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 10.149596806041501,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 13.4873046875,
+          "maxCompleteSecondTotalKiB": 42.2314453125,
+          "readError": "<nil>",
+          "totalKiBps": 38.15309445327448,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 53,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 30.94140625,
+          "readError": "<nil>",
+          "totalKiBps": 28.80344562339512,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 54,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 31.095703125,
+          "readError": "<nil>",
+          "totalKiBps": 28.822543807171733,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 55,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 31.095703125,
+          "readError": "<nil>",
+          "totalKiBps": 28.822543807171733,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 56,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 31.095703125,
+          "readError": "<nil>",
+          "totalKiBps": 28.822543807171733,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 1.819887689497914,
+          "client": 57,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "command.ack": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 4.02734375,
+          "maxCompleteSecondTotalKiB": 31.095703125,
+          "readError": "<nil>",
+          "totalKiBps": 28.822543807171733,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 4.410592581169593,
+          "client": 58,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "pingpong.snapshot": 3.3419404117453726,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 7.603515625,
+          "maxCompleteSecondTotalKiB": 34.517578125,
+          "readError": "<nil>",
+          "totalKiBps": 31.394150515066798,
+          "world": 2
+        },
+        {
+          "activitiesKiBps": 7.892264008394481,
+          "client": 59,
+          "eventHz": {
+            "activity.lifecycle": 1.48530684966461,
+            "activity.snapshot": 1.48530684966461,
+            "blaster.snapshot": 3.3419404117453726,
+            "match.started": 0.12377557080538416,
+            "penalty.revealed": 0.24755114161076833,
+            "penalty.turn_opened": 0.12377557080538416,
+            "world.delta": 10.025821235236117
+          },
+          "maxCompleteSecondActivitiesKiB": 10.3525390625,
+          "maxCompleteSecondTotalKiB": 37.2666015625,
+          "readError": "<nil>",
+          "totalKiBps": 34.87582194229169,
+          "world": 2
+        }
+      ],
+      "scenario": "A60",
+      "snapshotOwnerQueueP95ms": 0.039167,
+      "snapshotOwnerQueueSamples": 192,
+      "worldOwnerTick": {
+        "p50ms": 0.003083,
+        "p95ms": 0.008375,
+        "p99ms": 0.0205,
+        "samples": 484
+      },
+      "worlds": 3
+    }
+  ]
+}

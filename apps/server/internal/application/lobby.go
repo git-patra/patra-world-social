@@ -338,7 +338,11 @@ func publishLobbies(ctx context.Context, g *lobby.Service, hub *realtime.Hub) {
 			continue
 		}
 		for _, event := range c.Events {
-			hub.Publish(event.WorldID, event.Type, event.Payload)
+			if event.Replaceable {
+				hub.PublishGameSnapshot(ctx, event.WorldID, event.AreaID, event.MatchID, event.Participants, event.Spectators, event.Type, event.Payload)
+			} else {
+				hub.Publish(event.WorldID, event.Type, event.Payload)
+			}
 		}
 		pendingReturns = applyLobbyReturns(ctx, g, hub, c.Returns)
 		for _, w := range c.Worlds {

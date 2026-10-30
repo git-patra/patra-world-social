@@ -73,6 +73,9 @@
     "tests/fishing.test.ts",
     "tests/blaster.test.ts",
     "src/features/blaster/**/*.ts",
-    "src/features/blaster/**/*.tsx"
+    "src/features/blaster/**/*.tsx",
+    "tests/activities-combined.fixture.ts",
+    "tests/activities-combined-data.ts",
+    "tests/activities.e2e.spec.ts"
   ]
 }

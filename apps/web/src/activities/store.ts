@@ -270,6 +270,15 @@ export class ActivityStore {
         }));
     }
     private acceptGame(kind: ActivityKind, snapshot: RaceSnapshot | PublicPenalty | PingpongSnapshot | BlasterSnapshot, live = false) {
+        // Online visual projection uses bounded [id,x,y,owner] projectile tuples.
+        // Local simulation retains its full-precision motion and expiry fields.
+        if(kind==='blaster'&&'projectiles' in snapshot){
+            const shots=snapshot.projectiles as unknown[];
+            if(shots.some(Array.isArray)){
+                if(shots.length>48||shots.some(p=>!Array.isArray(p)||p.length!==4||!p.every(Number.isFinite)))return;
+                snapshot={...snapshot,projectiles:shots.map(p=>{const [id,x,y,owner]=p as number[];return{id,x,y,owner,vx:0,vy:0,ttl:0}})};
+            }
+        }
         if (!snapshot?.matchId || !this.lobbies.some(l => l.matchId === snapshot.matchId && l.gameType === kind))
             return;
         const previous = this.games.get(snapshot.matchId);
@@ -348,7 +357,8 @@ export class ActivityStore {
                 this.mergeVehicles(payload);
                 const oldRide = previous?.payload.vehicles.find(v => v.riderId === this.socket?.selfId);
                 const ownRide = this.vehicleState?.payload.vehicles.find(v => v.riderId === this.socket?.selfId);
-                if (type === 'activity.lifecycle' && previous && this.vehicleState !== previous && ownRide && (!oldRide || oldRide.id !== ownRide.id || oldRide.generation !== ownRide.generation))
+                const age = this.socket.serverNow() - payload.serverTimeMs;
+                if (age >= -250 && age <= 1000 && type === 'activity.lifecycle' && previous && this.vehicleState !== previous && ownRide && (!oldRide || oldRide.id !== ownRide.id || oldRide.generation !== ownRide.generation))
                     audio.play({ kind: 'ride', mode: 'ride', eventId: `ride:${payload.incarnation}:${ownRide.id}:${ownRide.generation}` });
                 this.publish(this.socket.serverNow());
                 return;

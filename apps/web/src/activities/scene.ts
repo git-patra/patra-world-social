@@ -8,6 +8,19 @@ export type SceneActor = {
     label: string;
     draw: (ctx: CanvasRenderingContext2D, at: number) => void;
 };
+// Spectators normally arrive every300ms; shared visual budgets may delay a
+// full capped snapshot beyond one second. Bound smoothing separately from the
+// discontinuity window so delayed updates do not add unbounded visual latency.
+const MAX_CONTINUOUS_GAP_MS = 2000;
+const MAX_BLEND_MS = 600;
+function sceneIdentity(game: ActivityGame, state: ActivityState) {
+    const snapshot = game.snapshot, area = state.areas.find(a => a.areaId === game.kind);
+    const actors = 'karts' in snapshot ? snapshot.karts : snapshot.actors;
+    return JSON.stringify([game.kind, game.matchId, state.online, snapshot.phase,
+        area?.worldId, area?.incarnation, area?.generation, area?.payload.phase, area?.payload.matchId,
+        'wave' in snapshot ? snapshot.wave : null, 'rallyId' in snapshot ? snapshot.rallyId : null,
+        actors.map(actor => [actor.actorId, actor.userId, actor.actorType])]);
+}
 type Adapter = (game: ActivityGame, at: number, previous?: ActivityGame, fraction?: number) => SceneActor[];
 /** Adapters load on first public match; Canvas shares the world's only animation loop. */
 export class ActivityScene {
@@ -27,6 +40,8 @@ export class ActivityScene {
         current: ActivityGame;
         previous: ActivityGame;
         received: number;
+        identity: string;
+        duration: number;
     }>();
     constructor(private changed: () => void) {
     }
@@ -60,9 +75,17 @@ export class ActivityScene {
             if (!state.games.some(g => g.matchId === id))
                 this.samples.delete(id);
         for (const game of state.games) {
-            const sample = this.samples.get(game.matchId);
-            if (sample?.current.snapshot !== game.snapshot)
-                this.samples.set(game.matchId, { current: game, previous: sample?.current ?? game, received: this.received });
+            const sample = this.samples.get(game.matchId), identity = sceneIdentity(game, state);
+            if (sample?.current.snapshot !== game.snapshot || sample.identity !== identity) {
+                const current = game.snapshot, previous = sample?.current.snapshot;
+                const interval = 'serverTimeMs' in current && previous && 'serverTimeMs' in previous
+                    ? current.serverTimeMs - previous.serverTimeMs : 0;
+                const receiptGap = this.received - (sample?.received ?? this.received);
+                const continuous = sample?.identity === identity && interval > 0 && interval <= MAX_CONTINUOUS_GAP_MS
+                    && receiptGap >= 0 && receiptGap <= MAX_CONTINUOUS_GAP_MS;
+                this.samples.set(game.matchId, { current: game, previous: continuous ? sample.current : game,
+                    received: this.received, identity, duration: continuous ? Math.min(interval, MAX_BLEND_MS) : 0 });
+            }
             if (this.adapters.has(game.kind) || this.loading.has(game.kind))
                 continue;
             this.loading.add(game.kind);
@@ -84,9 +107,8 @@ export class ActivityScene {
     actors(_at: number) {
         const at = (this.state?.now ?? 0) + performance.now() - this.received;
         return [...(this.fishingAdapter?.(this.state?.fishing??[],at)??[]),...(this.state?.claw?this.clawAdapter?.(this.state.claw,at)??[]:[]),...(this.state?.football ? this.footballAdapter?.(this.state.football) ?? [] : []), ...(this.visibleVehicles() ? this.vehicleAdapter?.(this.state?.vehicles ?? []) ?? [] : []), ...(this.state?.games.filter(game => this.visible(game)).flatMap(game => {
-                const sample = this.samples.get(game.matchId), current = game.snapshot, previous = sample?.previous.snapshot;
-                const duration = 'serverTimeMs' in current && previous && 'serverTimeMs' in previous ? current.serverTimeMs - previous.serverTimeMs : 0;
-                const fraction = duration <= 0 || duration > 250 ? 1 : Math.min(1, (performance.now() - (sample?.received ?? 0)) / duration);
+                const sample = this.samples.get(game.matchId), duration = sample?.duration ?? 0;
+                const fraction = duration <= 0 ? 1 : Math.max(0, Math.min(1, (performance.now() - sample!.received) / duration));
                 return this.adapters.get(game.kind)?.(game, at, sample?.previous, fraction) ?? [];
             }) ?? [])];
     }

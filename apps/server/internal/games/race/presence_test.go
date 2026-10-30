@@ -178,3 +178,29 @@ func TestLaterDisconnectCannotContaminateEarlierAllFinishedResult(t *testing.T) 
 		t.Fatal("later metadata contaminated earlier all-finished result", got, want)
 	}
 }
+
+func TestPersonalFinishCannotGainAssistanceFromLaterDisconnect(t *testing.T) {
+	for _, offset := range []int64{0, 1, 1000} {
+		e := New(startFixture(2), DefaultTrack(), DefaultRules())
+		elapsed := int64(1000)
+		k := e.karts[0]
+		k.Finished = true
+		k.Laps = 5
+		k.ElapsedMs = &elapsed
+		e.Presence(k.UserID, "disconnect", time.UnixMilli(e.start.StartsAt+elapsed+offset))
+		e.recordAssistance(e.start.StartsAt + elapsed + 2000)
+		if k.BotAssisted {
+			t.Fatalf("personal result gained assistance after finish offset=%d", offset)
+		}
+	}
+	e := New(startFixture(2), DefaultTrack(), DefaultRules())
+	elapsed := int64(1000)
+	k := e.karts[0]
+	k.Finished = true
+	k.ElapsedMs = &elapsed
+	k.disconnectedAt = e.start.StartsAt + 500
+	e.recordAssistance(e.start.StartsAt + 2000)
+	if !k.BotAssisted {
+		t.Fatal("genuine pre-finish takeover lost")
+	}
+}

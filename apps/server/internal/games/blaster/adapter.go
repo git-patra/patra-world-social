@@ -35,7 +35,7 @@ func (a *Adapter) Tick(at time.Time) bool {
 	}
 	a.engine.Tick(at)
 	s := a.engine.Snapshot()
-	if s.Frame != a.last && (a.last < 0 || s.Frame-a.last >= 4 || s.Result != nil) {
+	if s.Frame != a.last && (a.last < 0 || s.Frame-a.last >= 2 || s.Result != nil) {
 		a.last = s.Frame
 		a.events = []lobby.GameEvent{{WorldID: a.start.WorldID, Type: "blaster.snapshot", Payload: s}}
 	}

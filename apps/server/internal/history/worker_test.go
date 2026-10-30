@@ -1,11 +1,14 @@
 package history
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"patra-world-social/server/internal/games/model"
 	"patra-world-social/server/internal/lobby"
+	"strings"
 	"testing"
 	"time"
 )
@@ -101,12 +104,20 @@ func TestWorkerDeadlineReleasesArenaWithoutClaimingCommitOutcome(t *testing.T) {
 	}
 }
 func TestMissingResultCapabilityIsObservableAndNeverEnqueued(t *testing.T) {
+	var diagnostic bytes.Buffer
+	previousLogger := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&diagnostic, nil)))
+	defer slog.SetDefault(previousLogger)
+
 	o := &ownerFixture{refs: []lobby.FinalizingMatch{{MatchID: "missing"}}, copyError: lobby.ErrUnavailable}
 	s := &offlineStore{}
 	w := NewWorker(s, o)
 	var status string
 	w.Notify = func(_ string, _ []string, e StatusEvent) { status = e.Status }
 	w.Step(context.Background(), time.Now())
+	if !strings.Contains(diagnostic.String(), "authoritative result unavailable") || !strings.Contains(diagnostic.String(), "match_id=missing") {
+		t.Fatal("missing expected diagnostic", diagnostic.String())
+	}
 	if s.writes != 0 || status != "unavailable" || !o.blocked {
 		t.Fatal(s, status, o)
 	}

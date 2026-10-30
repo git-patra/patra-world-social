@@ -112,3 +112,40 @@ test('penalty_public_progress_never_rewinds_turn_reveal_or_locked_chosen_flags',
  store.receive('penalty.turn_opened',penalty(2));store.receive('penalty.revealed',penalty(1,'animation',[true,true]));
  assert.equal((store.snapshot().games[0].snapshot as any).turn,2);assert.equal(store.snapshot().games[0].snapshot.phase,'choosing');assert.deepEqual((store.snapshot().games[0].snapshot as any).scores,[1,0]);store.dispose();
 });
+
+import {ActivityScene} from '../src/activities/scene';
+import type {ActivityState} from '../src/activities/store';
+import {racePoint} from '../src/world/scenes/race';
+function interpolationState(at:number,x:number,options:{id?:string;phase?:string;generation?:number;incarnation?:string;actorId?:string}={}):ActivityState{
+ const id=options.id??'interpolated',snapshot={...race(id),phase:options.phase??'racing',serverTimeMs:at,karts:race(id).karts.map(k=>({...k,actorId:options.actorId??k.actorId,x,y:2048}))};
+ return{games:[{kind:'race',matchId:id,snapshot}],areas:[{...area(options.generation??1),incarnation:options.incarnation??'runtime',payload:{phase:'ACTIVE',matchId:id,startsAt:1000,clearAt:0,resetAt:0}}] as any,fishing:[],nearbyFishing:null,claw:null,nearbyClaw:false,football:null,nearbyFootball:false,vehicles:[],nearbyRide:null,active:null,spectating:null,inputMode:'walk',lobbies:[],selfId:'watcher',online:true,connected:true,now:at,message:''};
+}
+for(const cadence of [300,600,1600])test(`production_scene_interpolates_${cadence}ms_spectator_updates`,async t=>{
+ let now=1000;t.mock.method(performance,'now',()=>now);
+ let ready!:()=>void;const loaded=new Promise<void>(resolve=>ready=resolve),scene=new ActivityScene(()=>ready());scene.set(interpolationState(1000,2048));await loaded;
+ now+=cadence;scene.set(interpolationState(now,3048));
+ assert.equal(scene.actors(now)[0].x,racePoint({x:2048,y:2048}).x,'receipt starts from previous public pose');
+ now+=Math.min(cadence,600)/2;assert.equal(scene.actors(now)[0].x,racePoint({x:2548,y:2048}).x,'half interval produces an interpolated pose');
+ now+=Math.min(cadence,600)/2;assert.equal(scene.actors(now)[0].x,racePoint({x:3048,y:2048}).x,'reaches newest public pose without extrapolation');
+ now+=5000;assert.equal(scene.actors(now)[0].x,racePoint({x:3048,y:2048}).x,'stale pose never extrapolates');
+});
+for(const boundary of ['stale-server','stale-receipt','phase','match','actor','generation','incarnation'] as const)test(`production_scene_snaps_${boundary}_boundary`,async t=>{
+ let now=1000;t.mock.method(performance,'now',()=>now);
+ let ready!:()=>void;const loaded=new Promise<void>(resolve=>ready=resolve),scene=new ActivityScene(()=>ready());scene.set(interpolationState(1000,2048));await loaded;
+ now=boundary==='stale-receipt'?3501:1100;
+ const next=interpolationState(boundary==='stale-server'?3501:1100,3048,{phase:boundary==='phase'?'finished':'racing',id:boundary==='match'?'next':'interpolated',actorId:boundary==='actor'?'replacement':'a',generation:boundary==='generation'?2:1,incarnation:boundary==='incarnation'?'new-runtime':'runtime'});
+ scene.set(next);assert.equal(scene.actors(now)[0].x,racePoint({x:3048,y:2048}).x,'identity/phase/stale boundaries must not blend obsolete positions');
+});
+
+test('spectator_quick_B_renders_four_riders_without_changing_historical_fixture_defaults',async()=>{
+ const {combinedFixture}=await import('./activities-combined-data');
+ const historical=combinedFixture('B',1000,1),quick=combinedFixture('B',1000,1,true);
+ assert.deepEqual(historical.state.areas,[],'historical100ms fixture stays unchanged');
+ const scene=new ActivityScene(()=>{});scene.set(quick.state);
+ await new Promise<void>(resolve=>setImmediate(resolve));
+ const vehicles=scene.actors(1000).filter(a=>a.id.startsWith('vehicle:'));
+ assert.equal(vehicles.length,4);assert.deepEqual(vehicles.map(v=>v.userId),['fixture-0','fixture-1','fixture-2','fixture-3']);
+ assert.ok(scene.replaces('fixture-0'),'rider replaces the walking avatar');
+ assert.equal(quick.state.areas.find(a=>a.areaId==='race')?.payload.phase,'OPEN');
+ assert.deepEqual(combinedFixture('A',1000,0,true).state.areas,[],'closed-race workload does not acquire casual OPEN state');
+});

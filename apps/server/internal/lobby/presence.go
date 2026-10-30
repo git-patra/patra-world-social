@@ -151,6 +151,11 @@ func (s *Service) departAt(l *entry, i int, at time.Time, kind string) {
 }
 func (s *Service) advance() {
 	now := s.clock.Now()
+	if s.observeTick != nil && now.Sub(s.lastObserved) >= 50*time.Millisecond {
+		s.lastObserved = now
+		started := time.Now()
+		defer func() { s.observeTick(time.Since(started)) }()
+	}
 	for _, l := range s.entries {
 		if l.State == "starting" && l.start != nil && l.start.err == ErrUnconfirmed && !now.Before(l.start.retryAt) {
 			old := l.start
@@ -178,7 +183,7 @@ func (s *Service) advance() {
 			s.releaseSpatial(l)
 		}
 		if ev, ok := l.engine.(EventEngine); ok && ev.HasEvents() {
-			s.mark(l.WorldID)
+			s.signal()
 		}
 		for i := len(l.Players) - 1; i >= 0; i-- {
 			p := &l.Players[i]
@@ -330,7 +335,20 @@ func (s *Service) DrainChanges(ctx context.Context) (Changes, error) {
 				s.releaseSpatial(l)
 			}
 			if ev, ok := l.engine.(EventEngine); ok {
-				c.Events = append(c.Events, ev.DrainEvents()...)
+				for _, event := range ev.DrainEvents() {
+					if event.Type == "race.snapshot" || event.Type == "blaster.snapshot" || event.Type == "pingpong.snapshot" {
+						event.AreaID = l.Arena.ID
+						event.MatchID = l.MatchID
+						event.Replaceable = l.State == "running" || l.State == "countdown"
+						for _, p := range l.Players {
+							if !p.departed {
+								event.Participants = append(event.Participants, p.UserID)
+							}
+						}
+						event.Spectators = append([]string(nil), l.Spectators...)
+					}
+					c.Events = append(c.Events, event)
+				}
 			}
 		}
 		for w := range s.changed {

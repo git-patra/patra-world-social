@@ -260,7 +260,7 @@ func (e *Engine) cross(k *kart, old Point, at int64) {
 // Call only after advancement determines whether a natural finish shortened it.
 func (e *Engine) recordAssistance(through int64) {
 	for _, k := range e.karts {
-		if k.disconnectedAt > 0 && k.disconnectedAt <= through {
+		if k.disconnectedAt > 0 && k.disconnectedAt <= through && (k.ElapsedMs == nil || k.disconnectedAt < e.start.StartsAt+*k.ElapsedMs) {
 			k.BotAssisted = true
 		}
 	}
