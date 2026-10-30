@@ -1,3 +1,4 @@
+import {activityInput} from '../activities/input-router';
 import {activityContract} from '../activities/contracts';
 import {ActivityScene} from '../activities/scene';
 import {nearFootball} from '../activities/football';
@@ -44,11 +45,12 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
  let localName='Guest',localAvatar='pumpkin',paused=false,motion=true,dead=false,dirty=true,near:string|null=null,facing='down';
  let width=0,height=0,dpr=1,zoom=1,lastTime=0,elapsed=0,raf=0,lastMove='',walking=false;
  let camera={x:0,y:0},pointerStart:{x:number;y:number;id:number}|null=null;
+ let blasterMousePointer:number|null=null;
  let activityOwner=false,lastActivityKind='',displayPlayer:Point|null=null;
  let closedZones:ClosedMapZone[]=[];let onlineSampler:(()=>void)|undefined;
  const previous=new Map<string,Point>();
  const activityScene=new ActivityScene(()=>{dirty=true});
- const positions=[...VILLAGE_DESTINATIONS,{id:"pingpong",name:"Meja Pingpong",x:45,y:25},{id:"claw",name:"Capit Boneka",x:41,y:24}];
+ const positions=[...VILLAGE_DESTINATIONS,{id:"blaster",name:"Arena Blaster",x:47,y:33},{id:"pingpong",name:"Meja Pingpong",x:45,y:25},{id:"claw",name:"Capit Boneka",x:41,y:24}];
  function resize(){const bounds=canvas.getBoundingClientRect();width=bounds.width;height=bounds.height;dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.imageSmoothingEnabled=false;dirty=true;draw()}
  function label(text:string,x:number,y:number,own=false){ctx.font='600 11px "DM Sans",sans-serif';const w=ctx.measureText(text).width+16;ctx.fillStyle=own?'#f5e5bd':'#243b32ed';ctx.beginPath();ctx.roundRect(x-w/2,y-16,w,22,6);ctx.fill();ctx.fillStyle=own?'#304732':'#fcf1d4';ctx.textAlign='center';ctx.fillText(text,x,y-1)}
  function draw(){
@@ -122,9 +124,32 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
   if(stations.some(s=>s.id===near))onSelect(near);
  }
  const pointer=(e:PointerEvent)=>{const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
- function pointerDown(e:PointerEvent){if(e.button!==undefined&&e.button!==0)return;pointerStart={...pointer(e),id:e.pointerId};canvas.setPointerCapture?.(e.pointerId)}
- function pointerUp(e:PointerEvent){const p=pointer(e),start=pointerStart;pointerStart=null;if(!start||start.id!==e.pointerId||Math.hypot(p.x-start.x,p.y-start.y)>10)return;const tile=unprojectVillage({x:(p.x-camera.x)/zoom,y:(p.y-camera.y)/zoom});destination({x:Math.round(tile.x),y:Math.round(tile.y)});canvas.focus?.({preventScroll:true})}
- function cancelPointer(){pointerStart=null}
+ function pointerMove(e:PointerEvent){if(activityInput.mode()!=='blaster'||e.pointerType==='touch')return;const p=pointer(e);activityInput.blasterAim(Math.atan2((p.y-height/2)/5,(p.x-width/2)/7))}
+ function pointerDown(e:PointerEvent){if(activityInput.mode()==='blaster'&&e.pointerType!=='touch'){blasterMousePointer=e.pointerId;pointerMove(e);activityInput.blasterAim(Math.atan2((pointer(e).y-height/2)/5,(pointer(e).x-width/2)/7),true);canvas.setPointerCapture?.(e.pointerId);return;}if(e.button!==undefined&&e.button!==0)return;pointerStart={...pointer(e),id:e.pointerId};canvas.setPointerCapture?.(e.pointerId)}
+ // Normal capture release ends only this mouse hold; keyboard/touch stay active.
+ function releaseBlasterMouse(e:PointerEvent){
+  if(blasterMousePointer!==e.pointerId)return false;
+  blasterMousePointer=null;
+  activityInput.releaseBlasterMouse();
+  return true;
+ }
+ function pointerUp(e:PointerEvent){
+  if(releaseBlasterMouse(e)||activityInput.mode()==='blaster')return;
+  const p=pointer(e),start=pointerStart;
+  pointerStart=null;
+  if(!start||start.id!==e.pointerId||Math.hypot(p.x-start.x,p.y-start.y)>10)return;
+  const tile=unprojectVillage({x:(p.x-camera.x)/zoom,y:(p.y-camera.y)/zoom});
+  destination({x:Math.round(tile.x),y:Math.round(tile.y)});
+  canvas.focus?.({preventScroll:true});
+ }
+ function cancelPointer(e?:PointerEvent){
+  pointerStart=null;
+  if(e){releaseBlasterMouse(e)}else{
+   // Pausing is a global interruption, unlike releasing one pointer.
+   blasterMousePointer=null;
+   if(activityInput.mode()==='blaster')activityInput.release();
+  }
+ }
  function frame(timestamp:number){
   if(dead||document.hidden){raf=0;return}onlineSampler?.();const dt=Math.min((timestamp-(lastTime||timestamp))/1000,.05);lastTime=timestamp;
   if(!paused){if(motion)elapsed+=dt;if(!online&&!activityOwner){const before={...player};if(direction.x||direction.y)player=freeMovement(player,direction,dt);else if(route.length){player=advanceMovement(player,route[0],dt);if(Math.hypot(player.x-route[0].x,player.y-route[0].y)<.0001){route.shift();if(!route.length)target=null}}
@@ -135,7 +160,7 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
  function visibility(){stopDirection();lastTime=0;if(document.hidden){cancelAnimationFrame(raf);raf=0}else if(!dead&&!raf){dirty=true;raf=requestAnimationFrame(frame)}}
  document.addEventListener?.('visibilitychange',visibility);
  const observer=new ResizeObserver(resize);observer.observe(canvas);
- canvas.addEventListener('pointerdown',pointerDown);canvas.addEventListener('pointerup',pointerUp);canvas.addEventListener('pointercancel',cancelPointer);
+ canvas.addEventListener('pointermove',pointerMove);canvas.addEventListener('lostpointercapture',cancelPointer);canvas.addEventListener('pointerdown',pointerDown);canvas.addEventListener('pointerup',pointerUp);canvas.addEventListener('pointercancel',cancelPointer);
  resize();notifyPosition();if(!document.hidden)raf=requestAnimationFrame(frame);
  return {
   travelTo,travelToLocation:travelTo,move,interact,
@@ -159,6 +184,6 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
   setPaused(value:boolean){paused=Boolean(value);if(paused){stopDirection();cancelPointer()}dirty=true},
   setMotion(value:boolean){motion=Boolean(value);dirty=true},
   reset(){stopDirection();route=[];target=null;if(!online)player={...MAP.spawn};dirty=true;notifyPosition()},
-  destroy(){dead=true;stopDirection();cancelAnimationFrame(raf);document.removeEventListener?.('visibilitychange',visibility);observer.disconnect();canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointerup',pointerUp);canvas.removeEventListener('pointercancel',cancelPointer)},
+  destroy(){dead=true;stopDirection();cancelAnimationFrame(raf);document.removeEventListener?.('visibilitychange',visibility);observer.disconnect();canvas.removeEventListener('pointermove',pointerMove);canvas.removeEventListener('lostpointercapture',cancelPointer);canvas.removeEventListener('pointerdown',pointerDown);canvas.removeEventListener('pointerup',pointerUp);canvas.removeEventListener('pointercancel',cancelPointer)},
  };
 }

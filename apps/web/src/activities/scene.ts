@@ -66,7 +66,7 @@ export class ActivityScene {
             if (this.adapters.has(game.kind) || this.loading.has(game.kind))
                 continue;
             this.loading.add(game.kind);
-            void (game.kind === 'pingpong' ? import('../world/scenes/pingpong') : game.kind === 'race' ? import('../world/scenes/race') : import('../world/scenes/penalty')).then(module => {
+            void (game.kind === 'blaster' ? import('../world/scenes/blaster') : game.kind === 'pingpong' ? import('../world/scenes/pingpong') : game.kind === 'race' ? import('../world/scenes/race') : import('../world/scenes/penalty')).then(module => {
                 this.adapters.set(game.kind, module.sceneActors);
                 this.changed();
             }).catch(() => {

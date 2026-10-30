@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"patra-world-social/server/internal/games/blaster"
 	"patra-world-social/server/internal/games/duck"
 	"patra-world-social/server/internal/games/model"
 	"patra-world-social/server/internal/games/penalty"
@@ -27,6 +28,9 @@ func wireLobbiesClock(pool *pgxpool.Pool, hub *realtime.Hub, m world.MapDefiniti
 	g := lobby.New(&lobby.PGStore{Pool: pool}, clock, model.Version{MapID: m.ID, MapVersion: m.V, MapChecksum: m.Checksum, RulesID: rules.ID, RulesVersion: rules.V, RulesChecksum: rules.Checksum, ProtocolVersion: 2})
 	g.SetAreaCoordinator(areaCoordinator{hub})
 	g.Register("penalty", penalty.Factory(clock))
+	if err := g.RegisterVersioned("blaster", blaster.Factory(clock), lobby.RulesMetadata{ID: "blaster-v1", Version: 1, Checksum: blaster.RulesChecksum()}); err != nil {
+		panic(err)
+	}
 	if err := g.RegisterVersioned("pingpong", pingpong.Factory(clock), lobby.RulesMetadata{ID: "pingpong-v1", Version: 1, Checksum: pingpong.RulesChecksum()}); err != nil {
 		panic(err)
 	}
@@ -43,11 +47,42 @@ func wireLobbiesClock(pool *pgxpool.Pool, hub *realtime.Hub, m world.MapDefiniti
 	hub.Games = func(ctx context.Context, j realtime.JoinContext, c realtime.Command) (any, error) {
 		var result any
 		admission := hub.WithJoined
-		if c.Type == "pingpong.input" || c.Type == "pingpong.serve" || c.Type == "penalty.choose" || c.Type == "race.input" || c.Type == "duck.shoot" || c.Type == "duck.clock" || c.Type == "duck.clock_reply" {
+		if c.Type == "blaster.input" || c.Type == "pingpong.input" || c.Type == "pingpong.serve" || c.Type == "penalty.choose" || c.Type == "race.input" || c.Type == "duck.shoot" || c.Type == "duck.clock" || c.Type == "duck.clock_reply" {
 			admission = hub.WithAdmitted
 		}
 		e := admission(ctx, j, func(ctx context.Context, user string) error {
 
+			if c.Type == "blaster.snapshot" || c.Type == "blaster.input" {
+				var p struct {
+					MatchID string `json:"matchId"`
+					blaster.Controls
+				}
+				if err := json.Unmarshal(c.Payload, &p); err != nil {
+					return err
+				}
+				if c.Type == "blaster.snapshot" {
+					return g.ReadEngine(ctx, j.WorldID, p.MatchID, func(engine lobby.Engine) error {
+						a, ok := engine.(*blaster.Adapter)
+						if !ok {
+							return lobby.ErrUnavailable
+						}
+						result = a.Snapshot()
+						return nil
+					})
+				}
+				return g.InputEngine(ctx, j.WorldID, p.MatchID, user, func(engine lobby.Engine, at time.Time) error {
+					if err := realtime.CheckAdmissionTime(ctx, at); err != nil {
+						return err
+					}
+					a, ok := engine.(*blaster.Adapter)
+					if !ok {
+						return lobby.ErrUnavailable
+					}
+					err := a.Input(user, c.Seq, p.Controls, at)
+					result = map[string]any{"matchId": p.MatchID, "accepted": err == nil}
+					return err
+				})
+			}
 			if c.Type == "pingpong.snapshot" || c.Type == "pingpong.input" || c.Type == "pingpong.serve" {
 				var p struct {
 					MatchID string  `json:"matchId"`
@@ -163,7 +198,7 @@ func wireLobbiesClock(pool *pgxpool.Pool, hub *realtime.Hub, m world.MapDefiniti
 					return nil
 				})
 			}
-			if c.Type == "pingpong.input" || c.Type == "pingpong.serve" || c.Type == "penalty.choose" || c.Type == "penalty.snapshot" || c.Type == "match.return" || c.Type == "match.rematch" {
+			if c.Type == "blaster.input" || c.Type == "pingpong.input" || c.Type == "pingpong.serve" || c.Type == "penalty.choose" || c.Type == "penalty.snapshot" || c.Type == "match.return" || c.Type == "match.rematch" {
 				var p struct {
 					MatchID string `json:"matchId"`
 					TurnID  string `json:"turnId"`

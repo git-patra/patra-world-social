@@ -2,6 +2,7 @@ import React, {lazy,Suspense,useEffect,useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import {WorldSocket} from '../../net/socket';
 import './lobby.css';
+const BlasterMenu=lazy(()=>import('../blaster/BlasterMenu').then(m=>({default:m.BlasterMenu})));
 const PingpongMenu=lazy(()=>import('../pingpong/PingpongMenu').then(m=>({default:m.PingpongMenu})));
 const PenaltyDuel=lazy(()=>import('../penalty/Duel').then(m=>({default:m.PenaltyDuel})));
 const RaceGame=lazy(()=>import('../race/Race').then(m=>({default:m.RaceGame})));
@@ -10,7 +11,7 @@ const DuckGame=lazy(()=>import('../duck/Duck').then(m=>({default:m.DuckGame})));
 interface Player {actorId:string;userId:string;displayName:string;ready:boolean;connected:boolean;botAssisted?:boolean}
 interface Lobby {id:string;arenaId:string;worldId:string;hostId:string;state:string;gameType:string;capacity:number;engineAvailable:boolean;botChosen:boolean;players:Player[];spectators:string[];matchId?:string;startsAt?:number}
 interface Props {lobbies:Lobby[];arenaId:string;selfId:string;online:boolean;pending:boolean;message:string;act:(type:string,payload:Record<string,unknown>)=>void}
-const names:Record<string,string>={pingpong:'Meja Pingpong',race:'Race Park',penalty:'Lapangan Penalti','duck-1':'Kabinet 1','duck-2':'Kabinet 2','duck-3':'Kabinet 3','duck-4':'Kabinet 4'};
+const names:Record<string,string>={blaster:'Arena Blaster',pingpong:'Meja Pingpong',race:'Race Park',penalty:'Lapangan Penalti','duck-1':'Kabinet 1','duck-2':'Kabinet 2','duck-3':'Kabinet 3','duck-4':'Kabinet 4'};
 export function LobbyView({lobbies,arenaId,selfId,online,pending,message,act}:Props){
  const choices=arenaId==='duck'?['duck-1','duck-2','duck-3','duck-4']:[arenaId];
  return <section className="lobby-panel" aria-label="Lobby permainan online">
@@ -26,6 +27,7 @@ export function LobbyView({lobbies,arenaId,selfId,online,pending,message,act}:Pr
     <p>{l?`${l.players.length}/${l.capacity} pemain · ${l.state}`:online?'Memuat ketersediaan…':'Offline · masuk dunia privat untuk melihat lobby'}</p>
     {l&&!l.engineAvailable&&<p>Mesin permainan belum tersedia. Lobby dapat dipakai; pertandingan belum dapat dimulai.</p>}
     {l?.players.map(p=><p key={p.actorId}>{p.displayName}{p.userId===l.hostId?' · Host':''} · {p.connected?(p.ready?'Ready':'Belum ready'):'Terputus · kursi 15 detik'}{p.botAssisted?' · Bot assistance':''}</p>)}
+    {l?.gameType==='blaster'&&<p>1–4 manusia · solo boleh · 3 wave / 180 detik · 3 HP. Musuh hanya bot; tanpa friendly fire.</p>}
     {l?.gameType==='race'&&<p>5 lap · 5 peserta termasuk bot. Slot kosong diisi BOT saat Start.</p>}
     {online&&l&&!mine&&<button type="button" disabled={pending||!l.engineAvailable||(!active&&l.players.length>=l.capacity)} onClick={()=>act('lobby.join',{arenaId:id})}>{active?'Tonton':'Ikut '+(id==='race'?'balapan':'permainan')}</button>}
     {online&&mine&&<><button type="button" disabled={pending||active} onClick={()=>act('lobby.ready',{lobbyId:l.id,ready:!mine.ready})}>{mine.ready?'Batalkan ready':'Ready'}</button>
@@ -51,6 +53,6 @@ function LobbyPanel({arenaId}:{arenaId:string}){
   window.addEventListener('patra-world-event',event);window.addEventListener('patra-world-status',status);load();return()=>{live=false;window.removeEventListener('patra-world-event',event);window.removeEventListener('patra-world-status',status)};
  },[socket]);
  const act=async(type:string,payload:Record<string,unknown>)=>{if(!socket||pending||socket.status!=='online')return;const active=socket;setPending(true);setMessage('');try{await active.gameCommand(type,payload);if(attached===active){const v=await active.gameCommand('lobby.list',{}) as {lobbies:Lobby[]};if(attached===active)setLobbies(v.lobbies)}}catch(e){if(attached===active)setMessage((e as Error).message)}finally{if(attached===active)setPending(false)}};
- return <Suspense fallback={<p>Memuat aktivitas…</p>}><LobbyView lobbies={lobbies} arenaId={arenaId} selfId={socket?.selfId??''} online={online} pending={pending} message={message} act={act}/>{arenaId==='pingpong'&&<PingpongMenu online={Boolean(socket)}/>} {arenaId==='race'&&<RaceGame socket={socket} lobby={lobbies.find(l=>l.arenaId==='race')}/>} {arenaId==='duck'&&(!socket?<DuckGame/>:lobbies.filter(l=>l.gameType==='duck'&&l.matchId&&(l.players.some(p=>p.userId===socket.selfId)||l.spectators.includes(socket.selfId))).map(l=><div key={l.matchId}><DuckGame socket={socket} lobby={l}/></div>))} {arenaId==='penalty'&&<PenaltyDuel socket={socket} lobby={lobbies.find(l=>l.arenaId==='penalty')}/>}</Suspense>;
+ return <Suspense fallback={<p>Memuat aktivitas…</p>}><LobbyView lobbies={lobbies} arenaId={arenaId} selfId={socket?.selfId??''} online={online} pending={pending} message={message} act={act}/>{arenaId==='blaster'&&<BlasterMenu online={Boolean(socket)}/>} {arenaId==='pingpong'&&<PingpongMenu online={Boolean(socket)}/>} {arenaId==='race'&&<RaceGame socket={socket} lobby={lobbies.find(l=>l.arenaId==='race')}/>} {arenaId==='duck'&&(!socket?<DuckGame/>:lobbies.filter(l=>l.gameType==='duck'&&l.matchId&&(l.players.some(p=>p.userId===socket.selfId)||l.spectators.includes(socket.selfId))).map(l=><div key={l.matchId}><DuckGame socket={socket} lobby={l}/></div>))} {arenaId==='penalty'&&<PenaltyDuel socket={socket} lobby={lobbies.find(l=>l.arenaId==='penalty')}/>}</Suspense>;
 }
 export function mountLobbyPanel(container:Element,arenaId:string){const root=createRoot(container);root.render(<LobbyPanel arenaId={arenaId}/>);return()=>root.unmount()}

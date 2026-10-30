@@ -59,7 +59,9 @@
         "pingpong.input",
         "pingpong.serve",
         "activity.claw",
-        "activity.fishing"
+        "activity.fishing",
+        "blaster.snapshot",
+        "blaster.input"
       ]
     },
     "payload": {
@@ -1289,6 +1291,82 @@
                   "fishing.reel",
                   "fishing.leave"
                 ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "blaster.snapshot"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "matchId"
+            ],
+            "properties": {
+              "matchId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "blaster.input"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "matchId",
+              "dx",
+              "dy",
+              "aim",
+              "fire"
+            ],
+            "properties": {
+              "matchId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "dx": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "dy": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "aim": {
+                "type": "number",
+                "minimum": -3.141592653589793,
+                "maximum": 3.141592653589793
+              },
+              "fire": {
+                "type": "boolean"
               }
             }
           }

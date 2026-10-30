@@ -7,7 +7,13 @@ type PingpongResult struct {
 	Rallies int      `json:"rallies"`
 	Reason  string   `json:"reason"`
 }
+type BlasterResult struct {
+	Waves  int    `json:"waves"`
+	Kills  int    `json:"kills"`
+	Reason string `json:"reason"`
+}
 type MatchResult struct {
+	Blaster  *BlasterResult  `json:"blaster,omitempty"`
 	Pingpong *PingpongResult `json:"pingpong,omitempty"`
 	Version
 	MatchID      string              `json:"matchId"`

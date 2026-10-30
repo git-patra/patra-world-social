@@ -1,0 +1,268 @@
+{
+  "started": 1000,
+  "cases": [
+    {
+      "name": "diagonal-expiry",
+      "count": 1,
+      "steps": 10,
+      "auto": false,
+      "dx": 1,
+      "dy": 1,
+      "fire": true,
+      "expected": {
+        "phase": "playing",
+        "frame": 10,
+        "wave": 1,
+        "players": [
+          {
+            "actorId": "a",
+            "x": 0.4631370849898476,
+            "y": 0.6131370849898476,
+            "aim": 0,
+            "hp": 3,
+            "kills": 0,
+            "hitAt": 0
+          }
+        ],
+        "bots": [
+          {
+            "id": 0,
+            "x": 0.9094696411515698,
+            "y": 0.09411457939940693,
+            "nextFire": 2500
+          },
+          {
+            "id": 1,
+            "x": 0.9008609771103596,
+            "y": 0.9155770473041193,
+            "nextFire": 2600
+          },
+          {
+            "id": 2,
+            "x": 0.08521717182573954,
+            "y": 0.09857306593962566,
+            "nextFire": 2700
+          },
+          {
+            "id": 3,
+            "x": 0.09476990314633221,
+            "y": 0.910332306283782,
+            "nextFire": 2800
+          }
+        ],
+        "projectiles": [
+          {
+            "id": 1,
+            "x": 0.9782842712474622,
+            "y": 0.5282842712474619,
+            "vx": 1.2,
+            "vy": 0,
+            "owner": 0,
+            "ttl": 1000
+          }
+        ],
+        "result": null
+      }
+    },
+    {
+      "name": "idle-all-down",
+      "count": 4,
+      "steps": 500,
+      "auto": false,
+      "dx": 0,
+      "dy": 0,
+      "fire": false,
+      "expected": {
+        "phase": "results",
+        "frame": 123,
+        "wave": 1,
+        "players": [
+          {
+            "actorId": "a",
+            "x": 0.35,
+            "y": 0.5,
+            "aim": 0,
+            "hp": 0,
+            "kills": 0,
+            "hitAt": 4100
+          },
+          {
+            "actorId": "b",
+            "x": 0.44999999999999996,
+            "y": 0.5,
+            "aim": 0,
+            "hp": 0,
+            "kills": 0,
+            "hitAt": 5900
+          },
+          {
+            "actorId": "c",
+            "x": 0.55,
+            "y": 0.5,
+            "aim": 0,
+            "hp": 0,
+            "kills": 0,
+            "hitAt": 7100
+          },
+          {
+            "actorId": "d",
+            "x": 0.65,
+            "y": 0.5,
+            "aim": 0,
+            "hp": 0,
+            "kills": 0,
+            "hitAt": 4200
+          }
+        ],
+        "bots": [
+          {
+            "id": 0,
+            "x": 0.37212269285207855,
+            "y": 0.4152200874843072,
+            "nextFire": 8500
+          },
+          {
+            "id": 1,
+            "x": 0.703704938440156,
+            "y": 0.3790791089058436,
+            "nextFire": 8600
+          },
+          {
+            "id": 2,
+            "x": 0.7037049384401561,
+            "y": 0.6209208910941573,
+            "nextFire": 7200
+          },
+          {
+            "id": 3,
+            "x": 0.37212269285207794,
+            "y": 0.584779912515693,
+            "nextFire": 7300
+          }
+        ],
+        "projectiles": [],
+        "result": {
+          "waves": 0,
+          "kills": 0,
+          "reason": "all_down"
+        }
+      }
+    },
+    {
+      "name": "four-human-three-waves",
+      "count": 4,
+      "steps": 1000,
+      "auto": true,
+      "dx": 0,
+      "dy": 0,
+      "fire": true,
+      "expected": {
+        "phase": "results",
+        "frame": 82,
+        "wave": 3,
+        "players": [
+          {
+            "actorId": "a",
+            "x": 0.35,
+            "y": 0.5,
+            "aim": 2.1587989303424635,
+            "hp": 3,
+            "kills": 9,
+            "hitAt": 0
+          },
+          {
+            "actorId": "b",
+            "x": 0.44999999999999996,
+            "y": 0.5,
+            "aim": 2.367795779550355,
+            "hp": 3,
+            "kills": 0,
+            "hitAt": 0
+          },
+          {
+            "actorId": "c",
+            "x": 0.55,
+            "y": 0.5,
+            "aim": 0.7737968740394362,
+            "hp": 3,
+            "kills": 2,
+            "hitAt": 0
+          },
+          {
+            "actorId": "d",
+            "x": 0.65,
+            "y": 0.5,
+            "aim": 0.9827937232473268,
+            "hp": 3,
+            "kills": 7,
+            "hitAt": 0
+          }
+        ],
+        "bots": [],
+        "projectiles": [],
+        "result": {
+          "waves": 3,
+          "kills": 18,
+          "reason": "cleared"
+        }
+      }
+    },
+    {
+      "name": "bounded-catchup-timeout",
+      "count": 1,
+      "steps": 0,
+      "auto": false,
+      "dx": 0,
+      "dy": 0,
+      "fire": false,
+      "expected": {
+        "phase": "results",
+        "frame": 3601,
+        "wave": 1,
+        "players": [
+          {
+            "actorId": "a",
+            "x": 0.35,
+            "y": 0.5,
+            "aim": 0,
+            "hp": 3,
+            "kills": 0,
+            "hitAt": 0
+          }
+        ],
+        "bots": [
+          {
+            "id": 0,
+            "x": 0.9308,
+            "y": 0.0644,
+            "nextFire": 2500
+          },
+          {
+            "id": 1,
+            "x": 0.9307999999999998,
+            "y": 0.9355999999999999,
+            "nextFire": 2600
+          },
+          {
+            "id": 2,
+            "x": 0.06331280470940549,
+            "y": 0.06996920706410827,
+            "nextFire": 2700
+          },
+          {
+            "id": 3,
+            "x": 0.06331280470940549,
+            "y": 0.9300307929358919,
+            "nextFire": 2800
+          }
+        ],
+        "projectiles": [],
+        "result": {
+          "waves": 0,
+          "kills": 0,
+          "reason": "timeout"
+        }
+      }
+    }
+  ]
+}

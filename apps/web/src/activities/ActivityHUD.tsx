@@ -1,3 +1,6 @@
+import {lazy,Suspense} from 'react';
+import type {BlasterSnapshot} from '../features/blaster/local';
+const BlasterHUD=lazy(()=>import('../features/blaster/BlasterHUD').then(m=>({default:m.BlasterHUD})));
 import React, { useSyncExternalStore, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { activities, type ActivityStore } from './store';
@@ -12,6 +15,7 @@ export function ActivityHUD({ store = activities }: {
     store?: ActivityStore;
 }) {
     const state = useSyncExternalStore(store.subscribe, store.snapshot, store.snapshot), [collapsed, setCollapsed] = useState(false), game = state.active;
+    if(game?.kind==='blaster'||!game&&state.spectating?.kind==='blaster')return <Suspense fallback={null}><BlasterHUD store={store} snapshot={(game??state.spectating)!.snapshot as BlasterSnapshot} spectator={!game}/></Suspense>;
     if (game?.kind === 'pingpong' || !game && state.spectating?.kind === 'pingpong') return <PingpongHUD store={store} snapshot={(game??state.spectating)!.snapshot as PingpongSnapshot} spectator={!game}/>;
     if (!game && state.spectating?.kind === 'penalty') {
         const penalty = state.spectating.snapshot as PublicPenalty;

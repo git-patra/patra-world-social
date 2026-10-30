@@ -10,7 +10,7 @@
 
 **Spec:** [World activities design](../specs/2026-10-28-world-activities-design.md).
 
-**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–9 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
+**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–10 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
 
 ## Ringkasan tahap dan cakupan
 
@@ -173,11 +173,13 @@ Evidence: [implementation and seeded-history tests](../../checkpoints/evidence/C
 
 **Files:** create `contracts/blaster-rules.v1.json`, `blaster.golden.json`, `apps/server/internal/games/blaster/{engine,adapter,bots}.go`, `apps/web/src/features/blaster/local.ts`, `apps/web/src/features/blaster/session.ts`, `apps/web/src/features/blaster/BlasterHUD.tsx`, `world/scenes/blaster.ts`; modify lobby/protocol/rate budget/history details/guest completion, map area + asset generation, activities store/input router; tests new model/transport/DB/touch scenarios.
 
-- [ ] RED kesetaraan fixed tick, speed/fire cooldown/TTL/collision, maksimum 4 manusia / 8 bot / 48 projectile, tanpa damage di luar arena/friendly fire, 3 HP + revive saat wave / kalah bila semua down / timeout 180 s, maksimum 3 wave, seq replay ditolak.
-- [ ] Implementasi engine wave terbatas dengan authority server pada 20 Hz; input dx/dy/aim/fire+seq, bukan posisi/hit/kills. AI sederhana dan dibatasi; spawn tidak overlap pemain. Satu senjata dan outcome history, tanpa PvP/progression/toko senjata.
-- [ ] Implementasi scene world dan HUD yang terbaca, aim/crosshair/hit flash pendek/effect pool; pointer touch kiri/kanan independen + keyboard-only. Input release ≤250 ms saat disconnect/hidden; tidak ada tembakan tak sengaja setelah modal ditutup.
-- [ ] Integrasi batas participant/spectator, activity lease, result serializer/history/guest completion. Duck lama tetap tersedia di popup terpusat dan podiumnya tidak berubah.
-- [ ] Test authority/co-op 4 client melalui WS+DB aktual, guest golden, reconnect/all-down/host leave, modal/lost capture, tanpa replay SFX. Benchmark jumlah entitas terburuk sebelum review/commit.
+- [x] RED kesetaraan fixed tick, speed/fire cooldown/TTL/collision, maksimum 4 manusia / 8 bot / 48 projectile, tanpa damage di luar arena/friendly fire, 3 HP + revive saat wave / kalah bila semua down / timeout 180 s, maksimum 3 wave, seq replay ditolak.
+- [x] Implementasi engine wave terbatas dengan authority server pada 20 Hz; input dx/dy/aim/fire+seq, bukan posisi/hit/kills. AI sederhana dan dibatasi; spawn tidak overlap pemain. Satu senjata dan outcome history, tanpa PvP/progression/toko senjata.
+- [x] Implementasi scene world dan HUD yang terbaca, aim/crosshair/hit flash pendek/effect pool; pointer touch kiri/kanan independen + keyboard-only. Input release ≤250 ms saat disconnect/hidden; tidak ada tembakan tak sengaja setelah modal ditutup.
+- [x] Integrasi batas participant/spectator, activity lease, result serializer/history/guest completion. Duck lama tetap tersedia di popup terpusat dan podiumnya tidak berubah.
+- [x] Test authority/co-op 4 client melalui WS+DB aktual, guest golden, reconnect/all-down/host leave, modal/lost capture, tanpa replay SFX. Benchmark jumlah entitas terburuk sebelum review/commit.
+
+Task10 evidence: [implementation](../../checkpoints/evidence/CP8/activities-task10.md), [review](../../checkpoints/evidence/CP8/activities-task10-review.md), [guest browser](../../checkpoints/evidence/CP8/activities-blaster-browser.md). Original inherited feature RED unavailable; fresh HUD/input RED→GREEN and final GREEN recorded. Physical touch/auth/LiveKit remain deferred.
 
 ### Task 11: Verifikasi gabungan dan bukti optimasi
 

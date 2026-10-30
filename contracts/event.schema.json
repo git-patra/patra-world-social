@@ -56,7 +56,8 @@
         "leaderboard.changed",
         "activity.snapshot",
         "activity.lifecycle",
-        "pingpong.snapshot"
+        "pingpong.snapshot",
+        "blaster.snapshot"
       ]
     },
     "payload": {

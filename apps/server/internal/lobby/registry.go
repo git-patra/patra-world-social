@@ -68,7 +68,7 @@ type Arena struct {
 	countdown time.Duration
 }
 
-var arenas = []Arena{{"race", "race", 5, 30, 14, 3 * time.Second}, {"penalty", "penalty", 2, 50, 32, 0}, {"duck-1", "duck", 1, 30, 53, 3 * time.Second}, {"duck-2", "duck", 1, 30, 53, 3 * time.Second}, {"duck-3", "duck", 1, 30, 53, 3 * time.Second}, {"duck-4", "duck", 1, 30, 53, 3 * time.Second}, {"pingpong", "pingpong", 2, 0, 0, 0}}
+var arenas = []Arena{{"race", "race", 5, 30, 14, 3 * time.Second}, {"penalty", "penalty", 2, 50, 32, 0}, {"duck-1", "duck", 1, 30, 53, 3 * time.Second}, {"duck-2", "duck", 1, 30, 53, 3 * time.Second}, {"duck-3", "duck", 1, 30, 53, 3 * time.Second}, {"duck-4", "duck", 1, 30, 53, 3 * time.Second}, {"pingpong", "pingpong", 2, 0, 0, 0}, {"blaster", "blaster", 4, 0, 0, 0}}
 
 func init() {
 	for i := range arenas {

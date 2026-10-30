@@ -100,7 +100,7 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 		go func() {
 			defer close(readDone)
 			window := time.Now()
-			movement, control := 0, 0
+			movement, control, blasterInputs := 0, 0, 0
 			for {
 				kind, raw, e := c.Read(ctx)
 				if e != nil {
@@ -125,9 +125,17 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 				if now.Sub(window) >= time.Second {
 					window = now
 					movement = 0
+					blasterInputs = 0
 					control = 0
 				}
-				if cmd.Type == "player.input" || cmd.Type == "player.destination" || cmd.Type == "race.input" || cmd.Type == "pingpong.input" || rideDriveCommand(cmd) {
+				if cmd.Type == "blaster.input" {
+					blasterInputs++
+					if blasterInputs > 20 {
+						reason = "blaster input rate exceeded"
+						return
+					}
+				}
+				if cmd.Type == "player.input" || cmd.Type == "player.destination" || cmd.Type == "race.input" || cmd.Type == "blaster.input" || cmd.Type == "pingpong.input" || rideDriveCommand(cmd) {
 					movement++
 					if movement > 60 {
 						reason = "movement rate exceeded"

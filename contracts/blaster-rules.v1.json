@@ -1,0 +1,27 @@
+{
+  "id": "blaster-v1",
+  "version": 1,
+  "tickMs": 50,
+  "maxCatchupSteps": 4,
+  "deadlineMs": 180000,
+  "inputExpiryMs": 250,
+  "disconnectGraceMs": 15000,
+  "maxPlayers": 4,
+  "maxBots": 8,
+  "maxProjectiles": 48,
+  "hp": 3,
+  "waves": [
+    4,
+    6,
+    8
+  ],
+  "playerSpeed": 0.8,
+  "botSpeed": 0.12,
+  "projectileSpeed": 1.2,
+  "fireCooldownMs": 250,
+  "botCooldownMs": 1500,
+  "projectileTTL": 1500,
+  "playerRadius": 0.025,
+  "botRadius": 0.025,
+  "projectileRadius": 0.008
+}

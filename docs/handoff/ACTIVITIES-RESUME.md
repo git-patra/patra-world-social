@@ -19,9 +19,9 @@ Task8 claw has completed independent review and fix round1 on 30 October 2026. C
 
 Task9 fishing complete after independent review: four exclusive visual spots, Cast/wait/Bite/Reel, transient3s result, no history/inventory. Existing anchor53,33 remains; standing54,33 is reachable within1.25. Automated4JS+206frontend/typecheck/lint/build/fullGo PASS; actualDB40cycles preserves seededDuck/history7tables and accountListHistory. Browserdesktop/390×844proxy Cast/Bite/Reel/expiry/movementcancel/Eresult/historyunchanged PASS. See activities-task9.md, activities-task9-review.md and activities-fishing-browser.md.
 
-Remaining in order:
-1. Task10 Blaster:1–4humans solo/co-op vsbots,3waves/180s/3HP,≤8bots/48projectiles,noPvP/nofriendlyBOTroster.
-2. Task11 combined regression/optimization:20clientA/B,60clients3worlds,15minuteprofile+20lifecycles,frame/tick/traffic/chunk/heap/counters,fullpinnedGo integration-race/vet/build+frontendchecks,wholebranchreview. Then localcommits/mainpublication/showlatest.
+Task10 Blaster complete after independent fix-round review:1–4humans solo/co-op vsbots,3waves/180s/3HP,4/8/48caps, typed history. FourJS+216TS baseline; final frontend-only fix93focusedGREEN after4RED, typecheck/buildPASS. FullGo integration actualDB/WS4humans+spectatorPASS; exactcapstep10.579µs/0allocs. Browser desktop/390×844proxy gameplay/result/history/return and combinedW+mousefirePASS. See activities-task10.md, activities-task10-review.md and activities-blaster-browser.md. Included in current commit; use git log for SHA.
+
+Remaining: Task11 combined regression/optimization:20clientA/B,60clients3worlds,15minuteprofile+20lifecycles,frame/tick/traffic/chunk/heap/counters,fullpinnedGo integration-race/vet/build+frontendchecks,wholebranchreview. Then localcommits/mainpublication/showlatest.
 
 ## Runtime and safeguards
 
@@ -33,4 +33,4 @@ Remaining in order:
 - Performance risks forTask11: broadcastspectatorengine snapshots currentlyneedmeasurement/ratebudget; minor delayedownrideSFXneeds1sfreshness; Go pingpongJSON/constantscurrentlyagreebutdriftguardmissing. More detail in task-11-context.md.
 - OnlyCP1officialPASS. Authenticatedbrowser,LiveKitstaging,physicalmobileacceptanceremaindeferred. Task11's15minprofiledoesnotcompleteolderT16's60minsoak/backuprestore/readiness/voiceacceptance.
 
-This handoff file is new and uncommitted; include it with the next reviewed Task8 documentation commit.
+This handoff is committed with each reviewed activity stage; continue Task11 from the ledger.

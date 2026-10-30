@@ -203,6 +203,20 @@
         "matchId": "m",
         "rallyId": 1
       }
+    },
+    {
+      "v": 2,
+      "commandId": "blaster",
+      "worldId": "w",
+      "seq": 1,
+      "type": "blaster.input",
+      "payload": {
+        "matchId": "m",
+        "dx": 0,
+        "dy": 0,
+        "aim": 0,
+        "fire": false
+      }
     }
   ],
   "invalid": [
@@ -574,6 +588,78 @@
       "payload": {
         "matchId": "m",
         "rallyId": 0
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "blaster",
+      "worldId": "w",
+      "seq": 1,
+      "type": "blaster.input",
+      "payload": {
+        "matchId": "m",
+        "dx": 0,
+        "dy": 0,
+        "aim": 0,
+        "fire": false,
+        "x": 0.3
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "blaster",
+      "worldId": "w",
+      "seq": 1,
+      "type": "blaster.input",
+      "payload": {
+        "matchId": "m",
+        "dx": 0,
+        "dy": 0,
+        "aim": 0,
+        "fire": false,
+        "kills": 1
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "blaster",
+      "worldId": "w",
+      "seq": 1,
+      "type": "blaster.input",
+      "payload": {
+        "matchId": "m",
+        "dx": 2,
+        "dy": 0,
+        "aim": 0,
+        "fire": false
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "blaster",
+      "worldId": "w",
+      "seq": 1,
+      "type": "blaster.input",
+      "payload": {
+        "matchId": "m",
+        "dx": 0,
+        "dy": 0,
+        "aim": 4,
+        "fire": false
+      }
+    },
+    {
+      "v": 2,
+      "commandId": "blaster",
+      "worldId": "w",
+      "seq": 1,
+      "type": "blaster.input",
+      "payload": {
+        "matchId": "m",
+        "dx": 0,
+        "dy": 0,
+        "aim": 0,
+        "fire": 1
       }
     }
   ]

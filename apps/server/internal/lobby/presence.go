@@ -222,7 +222,7 @@ func (s *Service) advance() {
 				}
 			}
 		}
-		if (l.GameType == "pingpong" || l.GameType == "penalty" || l.GameType == "race" || l.GameType == "duck") && l.State == "results" && !l.releasing && !now.Before(l.releaseAt) {
+		if (l.GameType == "blaster" || l.GameType == "pingpong" || l.GameType == "penalty" || l.GameType == "race" || l.GameType == "duck") && l.State == "results" && !l.releasing && !now.Before(l.releaseAt) {
 			allGone := true
 			for _, p := range l.Players {
 				if !p.departed {

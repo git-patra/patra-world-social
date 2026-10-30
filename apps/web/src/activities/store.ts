@@ -1,3 +1,4 @@
+import type {BlasterSnapshot,BlasterControls} from '../features/blaster/local';
 import { activityContract } from './contracts';
 import type { ActivitySnapshot, AreaSnapshot, VehiclesSnapshot, Vehicle, FootballSnapshot, Football } from './contracts';
 import { LocalVehicles, nearbyVehicle } from './vehicles';
@@ -11,7 +12,7 @@ import type { RaceSnapshot, Controls } from '../features/race/local';
 import type { PingpongSnapshot } from '../features/pingpong/local';
 import type { PublicPenalty } from '../features/penalty/local';
 import { activityInput } from './input-router';
-export type ActivityKind = 'race' | 'penalty' | 'pingpong';
+export type ActivityKind = 'race' | 'penalty' | 'pingpong' | 'blaster';
 export type ActivityLobby = {
     id: string;
     arenaId: string;
@@ -28,7 +29,7 @@ export type ActivityLobby = {
 export type ActivityGame = {
     kind: ActivityKind;
     matchId: string;
-    snapshot: RaceSnapshot | PublicPenalty | PingpongSnapshot;
+    snapshot: RaceSnapshot | PublicPenalty | PingpongSnapshot | BlasterSnapshot;
 };
 type Transport = {
     worldId: string;
@@ -39,8 +40,9 @@ type Transport = {
     gameCommand: (type: string, payload: Record<string, unknown>) => Promise<unknown>;
 };
 type LocalSession = {
-    snapshot: (at: number) => RaceSnapshot | PublicPenalty | PingpongSnapshot | null;
+    snapshot: (at: number) => RaceSnapshot | PublicPenalty | PingpongSnapshot | BlasterSnapshot | null;
     clear: () => void;
+    blast?: (controls:BlasterControls,at:number)=>boolean;
     paddle?: (axis:number,at:number)=>boolean;
     serve?: (rally:number,at:number)=>boolean;
     input?: (controls: Controls, at: number) => boolean;
@@ -138,7 +140,7 @@ export class ActivityStore {
         const games = [...this.games.values()], selfId = this.socket?.selfId ?? 'guest';
         const active = games.find(g => this.localKind === g.kind && !this.socket || this.lobbies.some(l => l.matchId === g.matchId && l.players.some(p => p.userId === selfId))) ?? null;
         const spectating = active ? null : games.find(g => {
-            if (g.kind !== 'penalty' && g.kind !== 'pingpong')
+            if (g.kind !== 'penalty' && g.kind !== 'pingpong' && g.kind !== 'blaster')
                 return false;
             const area = this.areas.get(g.kind);
             if (area && (area.payload.phase === 'OPEN' || area.payload.matchId !== g.matchId))
@@ -170,6 +172,7 @@ export class ActivityStore {
     }
     async attach(socket: Transport | null) {
         this.controls(neutral());
+        this.blasterHeld={dx:0,dy:0,aim:0,fire:false};this.blasterLast=-Infinity;audio.stopMode('blaster');
         this.paddleAxis = 0;
         audio.stopMode('pingpong');
         this.epoch++;
@@ -252,25 +255,25 @@ export class ActivityStore {
         const socket = this.socket, epoch = this.epoch, resync = this.resyncRequest;
         if (!socket || socket.status !== 'online')
             return;
-        const lobbies = this.lobbies.filter(l => (l.gameType === 'race' || l.gameType === 'penalty' || l.gameType === 'pingpong') && l.matchId);
+        const lobbies = this.lobbies.filter(l => (l.gameType === 'race' || l.gameType === 'penalty' || l.gameType === 'pingpong' || l.gameType === 'blaster') && l.matchId);
         await Promise.all(lobbies.map(async (lobby) => {
             const read = ++this.readSerial;
             this.gameReads.set(lobby.matchId!, read);
             try {
                 const snapshot = await socket.gameCommand(`${lobby.gameType}.snapshot`, { matchId: lobby.matchId });
                 if (epoch === this.epoch && socket === this.socket && resync === this.resyncRequest && this.gameReads.get(lobby.matchId!) === read) {
-                    this.acceptGame(lobby.gameType as ActivityKind, snapshot as RaceSnapshot | PublicPenalty | PingpongSnapshot);
+                    this.acceptGame(lobby.gameType as ActivityKind, snapshot as RaceSnapshot | PublicPenalty | PingpongSnapshot | BlasterSnapshot);
                 }
             }
             catch {
             }
         }));
     }
-    private acceptGame(kind: ActivityKind, snapshot: RaceSnapshot | PublicPenalty | PingpongSnapshot, live = false) {
+    private acceptGame(kind: ActivityKind, snapshot: RaceSnapshot | PublicPenalty | PingpongSnapshot | BlasterSnapshot, live = false) {
         if (!snapshot?.matchId || !this.lobbies.some(l => l.matchId === snapshot.matchId && l.gameType === kind))
             return;
         const previous = this.games.get(snapshot.matchId);
-        if ((kind === 'race' || kind === 'pingpong') && previous && 'frame' in previous.snapshot && 'frame' in snapshot && (snapshot.frame < previous.snapshot.frame || kind === 'pingpong' && snapshot.frame === previous.snapshot.frame))
+        if ((kind === 'race' || kind === 'pingpong' || kind === 'blaster') && previous && 'frame' in previous.snapshot && 'frame' in snapshot && (snapshot.frame < previous.snapshot.frame || (kind === 'pingpong' || kind === 'blaster') && snapshot.frame === previous.snapshot.frame))
             return;
         if (kind === 'penalty' && previous && 'turn' in previous.snapshot && 'turn' in snapshot) {
             const old = previous.snapshot;
@@ -282,6 +285,7 @@ export class ActivityStore {
                 snapshot = { ...snapshot, chosen: snapshot.chosen.map((chosen, index) => chosen || old.chosen[index]) };
             }
         }
+        if(kind==='blaster'&&live&&previous)this.blasterCue(previous.snapshot as BlasterSnapshot,snapshot as BlasterSnapshot,this.socket?.serverNow()??this.state.now);
         if (kind === 'pingpong' && live && previous) this.pingpongCue(previous.snapshot as PingpongSnapshot,snapshot as PingpongSnapshot,this.socket?.serverNow()??this.state.now);
         this.games.set(snapshot.matchId, { kind, matchId: snapshot.matchId, snapshot });
         this.publish(this.socket?.serverNow());
@@ -364,6 +368,7 @@ export class ActivityStore {
         }
         if (type.startsWith('race.') && payload?.karts)
             this.acceptGame('race', payload);
+        if(type === 'blaster.snapshot' && payload?.players)this.acceptGame('blaster',payload,true);
         if (type === 'pingpong.snapshot' && payload?.actors)
             this.acceptGame('pingpong', payload, true);
         if (type.startsWith('penalty.') && payload?.actors)
@@ -654,10 +659,10 @@ export class ActivityStore {
         this.games.clear();
         this.local = null;
         this.localKind = null;
-        const session = kind === 'pingpong' ? (await import('../features/pingpong/session')).guestPingpong : kind === 'race' ? (await import('../features/race/session')).guestRace : (await import('../features/penalty/session')).guestSession;
+        const session = kind === 'blaster' ? (await import('../features/blaster/session')).guestBlaster : kind === 'pingpong' ? (await import('../features/pingpong/session')).guestPingpong : kind === 'race' ? (await import('../features/race/session')).guestRace : (await import('../features/penalty/session')).guestSession;
         if (epoch !== this.epoch || this.socket)
             return;
-        const snapshot = kind === 'pingpong' ? (session as typeof import('../features/pingpong/session').guestPingpong).start(at, seed, id) : kind === 'race' ? (session as typeof import('../features/race/session').guestRace).start(at, seed, id) : (session as typeof import('../features/penalty/session').guestSession).start(at, undefined, id);
+        const snapshot = kind === 'blaster' ? (session as typeof import('../features/blaster/session').guestBlaster).start(at,seed,id) : kind === 'pingpong' ? (session as typeof import('../features/pingpong/session').guestPingpong).start(at, seed, id) : kind === 'race' ? (session as typeof import('../features/race/session').guestRace).start(at, seed, id) : (session as typeof import('../features/penalty/session').guestSession).start(at, undefined, id);
         this.localStarting = false;
         this.penaltyStarting = false;
         this.local = session;
@@ -669,6 +674,22 @@ export class ActivityStore {
         if(next.frame<=old.frame||at-next.serverTimeMs>1000||at<next.serverTimeMs-250)return;
         const kind=next.phase==='results'&&old.phase!=='results'?'finish':next.scores.some((n,i)=>n!==old.scores[i])?'goal':next.phase==='rally'&&old.phase==='rally'&&next.ball.vx*old.ball.vx<0?'paddle':null;
         if(kind)audio.play({kind,mode:'pingpong',eventId:`pingpong:${next.matchId}:${next.frame}:${kind}`,distance:Math.hypot(this.position.x-45,this.position.y-23)});
+    }
+    private blasterHeld:BlasterControls={dx:0,dy:0,aim:0,fire:false};
+    private blasterLast=-Infinity;
+    blast(controls:BlasterControls){this.blasterHeld={...controls};}
+    private sendBlaster(){
+        const active=this.state.active,at=this.state.now;
+        if(active?.kind!=='blaster'||this.state.inputMode!=='blaster'||active.snapshot.phase==='results'||!this.state.connected||at-this.blasterLast<50)return;
+        if(this.local){this.blasterLast=at;this.local.blast?.(this.blasterHeld,at);return}
+        if(!this.socket||this.socket.status!=='online'||this.sending)return;
+        this.blasterLast=at;this.sending=true;const epoch=this.epoch;
+        void this.socket.gameCommand('blaster.input',{matchId:active.matchId,...this.blasterHeld}).catch(()=>{}).finally(()=>{if(epoch===this.epoch)this.sending=false});
+    }
+    private blasterCue(old:BlasterSnapshot,next:BlasterSnapshot,at:number){
+        if(next.frame<=old.frame||at-next.serverTimeMs>1000||at<next.serverTimeMs-250)return;
+        const kind=next.phase==='results'&&old.phase!=='results'?'finish':next.players.some((p,i)=>p.hitAt> (old.players[i]?.hitAt??0))?'hit':next.projectiles.some(p=>p.owner>=0&&!old.projectiles.some(o=>o.id===p.id))?'fire':null;
+        if(kind)audio.play({kind,mode:'blaster',eventId:`blaster:${next.matchId}:${next.frame}:${kind}`,distance:Math.hypot(this.position.x-43,this.position.y-30)});
     }
     private paddleAxis = 0;
     paddle(axis:number) {
@@ -727,12 +748,14 @@ export class ActivityStore {
         }
         this.sendClawInput();
         this.sendRideInput();
+        this.sendBlaster();
         this.sendPaddle();
         this.sendInput();
         if (this.local && this.localKind) {
             const snapshot = this.local.snapshot(at);
             if (snapshot) {
                 const previous=this.games.get(snapshot.matchId);
+                if(this.localKind==='blaster'&&previous)this.blasterCue(previous.snapshot as BlasterSnapshot,snapshot as BlasterSnapshot,at);
                 if(this.localKind==='pingpong'&&previous)this.pingpongCue(previous.snapshot as PingpongSnapshot,snapshot as PingpongSnapshot,at);
                 this.games.set(snapshot.matchId, { kind: this.localKind, matchId: snapshot.matchId, snapshot });
             }
@@ -795,6 +818,7 @@ export class ActivityStore {
         this.penaltyStarting = false;
         this.localStarting = false;
         this.rideHeld = { x: 0, y: 0 };
+        this.blasterHeld={dx:0,dy:0,aim:0,fire:false};this.blasterLast=-Infinity;audio.stopMode('blaster');
         this.paddleAxis = 0;
         audio.stopMode('pingpong');
         this.epoch++;
@@ -821,6 +845,7 @@ export class ActivityStore {
         this.controls(neutral());
         this.local?.clear();
         this.local = null;
+        this.blasterHeld={dx:0,dy:0,aim:0,fire:false};this.blasterLast=-Infinity;audio.stopMode('blaster');
         this.paddleAxis = 0;
         audio.stopMode('pingpong');
         this.epoch++;
@@ -844,6 +869,7 @@ export function mountActivities(world: {
         activityInput.block('disconnected', !state.connected);
     });
     const raceInput = activityInput.register('race', input => activities.controls(input));
+    const blasterInput=activityInput.register('blaster',input=>activities.blast({dx:input.x,dy:input.y,aim:input.aim??0,fire:input.fire??false}));
     const pingpongInput=activityInput.register('pingpong',input=>activities.paddle(input.steer));
     const fishingInput=activityInput.register('fishing',input=>activities.fishingControls(input));
     const clawInput=activityInput.register('claw',input=>activities.clawControls(input));
@@ -909,6 +935,7 @@ export function mountActivities(world: {
         closures();
         raceInput();
         rideInput();
+        blasterInput();
         pingpongInput();
         clawInput();
         fishingInput();

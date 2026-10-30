@@ -48,6 +48,24 @@ func encodeResult(r model.MatchResult) ([]byte, [32]byte, error) {
 	} else if r.GameType == "pingpong" {
 		return nil, [32]byte{}, ErrInvalid
 	}
+	if r.Blaster != nil {
+		b := r.Blaster
+		if r.GameType != "blaster" || len(r.Participants) > 4 || b.Waves < 0 || b.Waves > 3 || b.Kills < 0 || b.Kills > 18 || (b.Reason != "cleared" && b.Reason != "all_down" && b.Reason != "timeout") || (b.Reason == "cleared") != (b.Waves == 3) {
+			return nil, [32]byte{}, ErrInvalid
+		}
+		kills := int64(0)
+		for _, p := range r.Participants {
+			if p.ActorType != "human" || p.Score == nil || p.BotAssisted {
+				return nil, [32]byte{}, ErrInvalid
+			}
+			kills += *p.Score
+		}
+		if kills != int64(b.Kills) {
+			return nil, [32]byte{}, ErrInvalid
+		}
+	} else if r.GameType == "blaster" {
+		return nil, [32]byte{}, ErrInvalid
+	}
 	actors, users := map[string]bool{}, map[string]bool{}
 	for _, p := range r.Participants {
 		if p.ActorID == "" || actors[p.ActorID] || (p.ActorType != "human" && p.ActorType != "bot") || (p.ActorType == "human") != (p.UserID != "") || (p.UserID != "" && users[p.UserID]) || (!validOutcome(r.GameType, p.Outcome)) || (p.Position != nil && (*p.Position < 1 || *p.Position > len(r.Participants))) || (p.Score != nil && (*p.Score < 0 || *p.Score > 9007199254740991)) {
@@ -106,11 +124,14 @@ func bindResult(r model.MatchResult, m model.MatchStart, scheduled *int64) bool 
 }
 
 func validOutcome(game, outcome string) bool {
+	if game == "blaster" {
+		return outcome == "win" || outcome == "loss" || outcome == "forfeit"
+	}
 	if outcome == "finished" || outcome == "dnf" {
 		return true
 	}
 	if game == "duck" && outcome == "incomplete" {
 		return true
 	}
-	return (game == "penalty" || game == "pingpong") && (outcome == "win" || outcome == "loss" || outcome == "draw" || outcome == "forfeit" || outcome == "abandoned")
+	return (game == "penalty" || game == "pingpong" || game == "blaster") && (outcome == "win" || outcome == "loss" || outcome == "draw" || outcome == "forfeit" || outcome == "abandoned")
 }

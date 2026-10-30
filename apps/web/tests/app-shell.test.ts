@@ -5,7 +5,7 @@ import {resolve} from 'node:path';
 import vm from 'node:vm';
 import {createWorld} from '../src/world/controller';
 import {activities} from '../src/activities/store';
-import {InputRouter} from '../src/activities/input-router';
+import {InputRouter,activityInput} from '../src/activities/input-router';
 import {PointerHold,acceptsMovement} from '../src/world/input';
 import {createWorldArt} from '../src/world/village-art';
 import {projectVillage,unprojectVillage,villageLocation} from '../src/world/village';
@@ -264,4 +264,22 @@ test('football_cooldown_does_not_fall_through_to_opening_the_penalty_menu', () =
 test('claw_map_destination_walks_to_cabinet_entrance_after_close',async()=>{
  assert.ok(stations.some(s=>s.id==='claw'),'map must list Capit Boneka');
  const shell=shellFixture();try{const commands:unknown[][]=[];shell.world.setOnline({input:(...a)=>commands.push(['input',...a]),destination:(...p)=>commands.push(['destination',...p])});shell.get('#list-button').click();await Promise.resolve();commands.length=0;shell.choose('claw');await Promise.resolve();shell.tick();assert.deepEqual(commands.at(-1),['destination',41,24]);assert.equal(shell.get('#map-dialog').open,false)}finally{shell.restore()}
+});
+
+for(const end of ['pointerup','lostpointercapture','pointercancel'])test(`blaster controller ${end} only releases mouse intent`,()=>{
+ const shell=shellFixture(),inputs:any[]=[];
+ activityInput.setOwner('blaster');const unregister=activityInput.register('blaster',input=>inputs.push(input));const uninstall=activityInput.install();
+ const canvas=shell.get('#world');
+ const pointer=(type:string,pointerId=7)=>canvas.listeners.get(type)?.forEach(fn=>fn({pointerType:'mouse',button:0,pointerId,clientX:650,clientY:350}));
+ try{
+  shell.routerKey('keydown','w');pointer('pointerdown');assert.equal(inputs.at(-1).fire,true);assert.equal(inputs.at(-1).y,-1);
+  pointer(end,99);assert.equal(inputs.at(-1).fire,true,'unrelated pointer does not cancel this hold');
+  pointer(end);assert.equal(inputs.at(-1).fire,false);assert.equal(inputs.at(-1).y,-1,'held W survives mouse release');
+  pointer('lostpointercapture');assert.equal(inputs.at(-1).y,-1,'implicit capture loss after release preserves W');
+  activityInput.repeat();assert.equal(inputs.at(-1).y,-1,'movement continues without a fresh key press');
+  shell.routerKey('keydown',' ');pointer('pointerdown');pointer(end);assert.equal(inputs.at(-1).fire,true,'Space remains held');
+  shell.routerKey('keyup',' ');assert.equal(inputs.at(-1).fire,false);
+  pointer('pointerdown');shell.routerKey('keydown','d');assert.equal(inputs.at(-1).fire,true,'movement event preserves mouse fire');
+  shell.world.setPaused(true);assert.equal(inputs.at(-1).fire,false);assert.equal(inputs.at(-1).x,0);assert.equal(inputs.at(-1).y,0);
+ }finally{uninstall();unregister();activityInput.setOwner('walk');shell.restore()}
 });

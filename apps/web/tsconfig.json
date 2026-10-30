@@ -70,6 +70,9 @@
     "tests/activity-contract.test.ts",
     "src/guest/lifecycle.ts",
     "tests/claw.test.ts",
-    "tests/fishing.test.ts"
+    "tests/fishing.test.ts",
+    "tests/blaster.test.ts",
+    "src/features/blaster/**/*.ts",
+    "src/features/blaster/**/*.tsx"
   ]
 }
