@@ -9,12 +9,12 @@ Ledger aktif eksekusi. Tabel di bawah adalah status terkini; catatan kronologis 
 | `source_repo` | `/Users/patra/Project/patra-world` |
 | `source_commit` | `8d969212d91804e06225f5b1a75eed49e8c25307` |
 | `target_repo` | `/Users/patra/Project/patra-world-social` — public remote git-patra/patra-world-social |
-| `working_branch` | `main` is final integration target; reviewed `feat/world-activities` and inherited `feat/social-world` remain local |
+| `working_branch` | `main` is published; reviewed `feat/world-activities` and inherited `feat/social-world` remain local |
 | `highest_contiguous_passed_checkpoint` | CP1 PASS — 1/8 |
 | `last_verified_task_commit` | d4f60a27bd41048c7ed16a103fbcf4875046ece5 — 2/16 task done |
 | `latest_code_commit` | e5909fe Task11; current commit contains approved whole-branch fixes (see Git tip) |
 | `current_task` | Activities Tasks0–11 implemented and independently reviewed; final fixes approved |
-| `next_task` | Verify publication tip; external T15/T16 acceptance remains pending |
+| `next_task` | External T15/T16 acceptance remains pending; reviewed activity code is published |
 | `blockers` | Uji browser akun ditunda pengguna (T3/CP2); LiveKit staging belum tersedia (CP7). Pekerjaan backend dan fitur lain tetap berjalan. |
 | `source_changes` | `.idea/` sudah untracked sebelum perencanaan; jangan dihapus atau dibawa ke repo baru |
 | `planning_files` | Snapshot awal di `/Users/patra/Project/docs/superpowers/`; salinan aktif dan ledger tersimpan dalam Git repo baru di `docs/` |

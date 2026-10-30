@@ -1,6 +1,6 @@
 # Whole-branch review and publication — 30 October 2026
 
-Range: `a71fd85..e5909fe`, ten activity commits. Fresh independent gpt-6-astra/high reviewer reads the full1.55MB extended-context package, plan/spec and named surrounding paths. No implementation authorship, mutation or delegated review. Initial verdict: **With fixes**. No Critical; three Important and one Minor. The single scoped re-review approves all four fixes; publication follows final regression.
+Range: `a71fd85..e5909fe`, ten activity commits. Fresh independent gpt-6-astra/high reviewer reads the full1.55MB extended-context package, plan/spec and named surrounding paths. No implementation authorship, mutation or delegated review. Initial verdict: **With fixes**. No Critical; three Important and one Minor. The single scoped re-review approves all four fixes; final regression and main publication are complete.
 
 ## Final local runtime
 
@@ -95,4 +95,6 @@ ok  	patra-world-social/server/internal/world	31.687s
 ok  	patra-world-social/server/internal/worlds	7.822s
 ```
 
-Final integration uses the reviewed code tree without a merge commit: local main and public origin/main are to fast-forward to this final commit. The remote tip is verified after push and reported to the user. No public deployment. OnlyCP1officialPASS; the explicitly open external/performance/T16 gates are unchanged. Raw ignored logs remain available for continuity.
+Final integration fast-forwarded local main and public origin/main to reviewed code commit `4c91a4e3521b7bad2b6bd79342df8ecec96f6f3f`. Post-push git ls-remote returned that exact SHA; local main and retained feat/world-activities had identical tree `8d0d151d208436641a9a06fe1eba9a376d75d42f`, with clean status. This documentation receipt changes no code. The final receipt commit is also pushed and its SHA reported to the user. No public deployment. OnlyCP1officialPASS; the explicitly open external/performance/T16 gates are unchanged. Raw ignored logs remain available for continuity.
+
+Post-publication checks: API liveness200/statusok; preview HTML references `index-minbxZXK.js`; latest CUA village tab marked as deliverable and shown. Source still`8d969212d91804e06225f5b1a75eed49e8c25307`, only pre-existing untracked`.idea/`. No force push, branch deletion or public deployment.
