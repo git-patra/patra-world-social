@@ -1,4 +1,4 @@
-import type { Vehicle, Football } from './contracts';
+import type { Vehicle, Football, Claw } from './contracts';
 import type { ActivityState, ActivityGame } from './store';
 export type SceneActor = {
     id: string;
@@ -11,6 +11,8 @@ export type SceneActor = {
 type Adapter = (game: ActivityGame, at: number, previous?: ActivityGame, fraction?: number) => SceneActor[];
 /** Adapters load on first public match; Canvas shares the world's only animation loop. */
 export class ActivityScene {
+    private clawAdapter:((claw:Claw,at:number)=>SceneActor[])|null=null;
+    private loadingClaw=false;
     private footballAdapter: ((ball: Football) => SceneActor[]) | null = null;
     private loadingFootball = false;
     private vehicleAdapter: ((vehicles: Vehicle[]) => SceneActor[]) | null = null;
@@ -28,6 +30,10 @@ export class ActivityScene {
     }
     set(state: ActivityState) {
         this.state = state;
+        if(state.claw&&!this.clawAdapter&&!this.loadingClaw){
+            this.loadingClaw=true;
+            void import('../world/scenes/claw').then(module=>{this.clawAdapter=module.clawActors;this.changed()}).catch(()=>{this.loadingClaw=false});
+        }
         if (state.football && !this.footballAdapter && !this.loadingFootball) {
             this.loadingFootball = true;
             void import('../world/scenes/football').then(module => {
@@ -74,7 +80,7 @@ export class ActivityScene {
     }
     actors(_at: number) {
         const at = (this.state?.now ?? 0) + performance.now() - this.received;
-        return [...(this.state?.football ? this.footballAdapter?.(this.state.football) ?? [] : []), ...(this.visibleVehicles() ? this.vehicleAdapter?.(this.state?.vehicles ?? []) ?? [] : []), ...(this.state?.games.filter(game => this.visible(game)).flatMap(game => {
+        return [...(this.state?.claw?this.clawAdapter?.(this.state.claw,at)??[]:[]),...(this.state?.football ? this.footballAdapter?.(this.state.football) ?? [] : []), ...(this.visibleVehicles() ? this.vehicleAdapter?.(this.state?.vehicles ?? []) ?? [] : []), ...(this.state?.games.filter(game => this.visible(game)).flatMap(game => {
                 const sample = this.samples.get(game.matchId), current = game.snapshot, previous = sample?.previous.snapshot;
                 const duration = 'serverTimeMs' in current && previous && 'serverTimeMs' in previous ? current.serverTimeMs - previous.serverTimeMs : 0;
                 const fraction = duration <= 0 || duration > 250 ? 1 : Math.min(1, (performance.now() - (sample?.received ?? 0)) / duration);

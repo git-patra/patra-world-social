@@ -40,7 +40,7 @@ func (r *Runtime) kickFootball(id string, epoch, seq uint64, i CasualIntent) err
 	if s != nil {
 		generation = s.lease.Generation
 	}
-	if p == nil || p.epoch != epoch || p.Status == "playing" || r.riding(id) != nil || seq <= p.Seq || i.Incarnation != r.incarnation || i.AreaGeneration != generation || i.Generation != r.footballRevision || !r.football.Visible || s != nil && s.payload.Phase != "OPEN" {
+	if p == nil || p.epoch != epoch || p.Status == "playing" || r.claw.OperatorID == id || r.riding(id) != nil || seq <= p.Seq || i.Incarnation != r.incarnation || i.AreaGeneration != generation || i.Generation != r.footballRevision || !r.football.Visible || s != nil && s.payload.Phase != "OPEN" {
 		return ErrActivitySuperseded
 	}
 	length := math.Hypot(i.DX, i.DY)

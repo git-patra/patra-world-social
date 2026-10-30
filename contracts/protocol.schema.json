@@ -57,7 +57,8 @@
         "activity.kick",
         "pingpong.snapshot",
         "pingpong.input",
-        "pingpong.serve"
+        "pingpong.serve",
+        "activity.claw"
       ]
     },
     "payload": {
@@ -1142,6 +1143,99 @@
               "rallyId"
             ],
             "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "activity.claw"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "incarnation",
+              "areaGeneration",
+              "machineId",
+              "generation",
+              "action"
+            ],
+            "properties": {
+              "incarnation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "areaGeneration": {
+                "const": 0
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "action": {
+                "enum": [
+                  "claw.enter",
+                  "claw.leave",
+                  "claw.move",
+                  "claw.drop"
+                ]
+              },
+              "dx": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "dy": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "machineId": {
+                "const": "claw-1"
+              }
+            },
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "action": {
+                      "const": "claw.move"
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "dx",
+                    "dy"
+                  ]
+                },
+                "else": {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "dx"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "dy"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
           }
         }
       }

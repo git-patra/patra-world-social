@@ -2,6 +2,8 @@ import { activityContract } from './contracts';
 import type { ActivitySnapshot, AreaSnapshot, VehiclesSnapshot, Vehicle, FootballSnapshot, Football } from './contracts';
 import { LocalVehicles, nearbyVehicle } from './vehicles';
 import { LocalFootball, nearFootball } from './football';
+import { LocalClaw, nearClaw } from './claw';
+import type {Claw,ClawSnapshot,ClawAction} from './contracts';
 import { audio } from '../audio/service';
 import type { RaceSnapshot, Controls } from '../features/race/local';
 import type { PingpongSnapshot } from '../features/pingpong/local';
@@ -45,13 +47,15 @@ type LocalSession = {
 export type ActivityState = {
     games: ActivityGame[];
     areas: AreaSnapshot[];
+    claw: Claw | null;
+    nearbyClaw:boolean;
     football: Football | null;
     nearbyFootball: boolean;
     vehicles: Vehicle[];
     nearbyRide: Vehicle | null;
     active: ActivityGame | null;
     spectating: ActivityGame | null;
-    inputMode: 'walk' | 'ride' | ActivityKind;
+    inputMode: 'walk' | 'ride' | 'claw' | ActivityKind;
     lobbies: ActivityLobby[];
     selfId: string;
     online: boolean;
@@ -71,6 +75,11 @@ function newerArea(next: AreaSnapshot, previous: AreaSnapshot) {
 }
 const penaltyPhase = { choosing: 0, animation: 1, results: 2 };
 export class ActivityStore {
+    private localClaw=new LocalClaw();
+    private clawState:ClawSnapshot|null=null;
+    private clawHeld={x:0,y:0};
+    private clawPending=false;
+    private clawSending=false;
     private localFootball = new LocalFootball();
     private footballState: FootballSnapshot | null = null;
     private kickPending = false;
@@ -101,7 +110,7 @@ export class ActivityStore {
     private sending = false;
     private lastNotify = -Infinity;
     private timer: ReturnType<typeof setInterval> | null = null;
-    private state: ActivityState = { games: [], areas: [], football: this.localFootball.ball, nearbyFootball: false, vehicles: this.localVehicles.vehicles, nearbyRide: null, lobbies: [], active: null, spectating: null, inputMode: 'walk', selfId: 'guest', online: false, connected: true, now: 0, message: '' };
+    private state: ActivityState = { claw:this.localClaw.claw,nearbyClaw:false,games: [], areas: [], football: this.localFootball.ball, nearbyFootball: false, vehicles: this.localVehicles.vehicles, nearbyRide: null, lobbies: [], active: null, spectating: null, inputMode: 'walk', selfId: 'guest', online: false, connected: true, now: 0, message: '' };
     constructor(private effect: (snapshot: ActivitySnapshot) => void = () => {
     }) {
     }
@@ -135,11 +144,13 @@ export class ActivityStore {
         const penaltyClosed = this.socket ? this.areas.get('penalty')?.payload.phase !== 'OPEN' : this.penaltyStarting || this.localKind === 'penalty';
         const ball = this.socket ? this.footballState?.payload.ball ?? null : this.localFootball.ball;
         const football = ball && penaltyClosed ? { ...ball, visible: false } : ball;
-        const inputMode = gameMode !== 'walk' ? gameMode : !raceClosed && vehicles.some(v => v.riderId === selfId) ? 'ride' : 'walk';
+        const claw=this.socket?this.clawState?.payload.claw??null:this.localClaw.claw;
+        const inputMode = gameMode !== 'walk' ? gameMode : claw?.operatorId===selfId ? 'claw' : !raceClosed && vehicles.some(v => v.riderId === selfId) ? 'ride' : 'walk';
+        if(this.state.inputMode==='claw'&&inputMode!=='claw')this.clawHeld={x:0,y:0};
         if (this.state.inputMode === 'ride' && inputMode !== 'ride')
             this.rideHeld = { x: 0, y: 0 };
         const nearbyRide = gameMode === 'walk' && !raceClosed ? nearbyVehicle(vehicles, this.position) ?? null : null;
-        this.state = { ...this.state, football, nearbyFootball: inputMode === 'walk' && nearFootball(football, this.position), vehicles, nearbyRide, games, areas: [...this.areas.values()], lobbies: this.lobbies, active, spectating, inputMode, selfId, online: Boolean(this.socket), connected: !this.socket || this.socket.status === 'online', now: at };
+        this.state = { ...this.state, claw,nearbyClaw:!active&&nearClaw(this.position),football, nearbyFootball: inputMode === 'walk' && nearFootball(football, this.position), vehicles, nearbyRide, games, areas: [...this.areas.values()], lobbies: this.lobbies, active, spectating, inputMode, selfId, online: Boolean(this.socket), connected: !this.socket || this.socket.status === 'online', now: at };
         for (const fn of this.sceneListeners)
             fn();
         if (force || at - this.lastNotify >= 100) {
@@ -161,6 +172,10 @@ export class ActivityStore {
         this.games.clear();
         this.localVehicles.reset();
         this.localFootball.reset();
+        this.localClaw.reset();
+        this.clawState=null;
+        this.clawHeld={x:0,y:0};
+        this.clawPending=this.clawSending=false;
         this.footballState = null;
         this.kickPending = false;
         this.penaltyStarting = false;
@@ -291,6 +306,15 @@ export class ActivityStore {
         if (type === 'activity.snapshot' || type === 'activity.lifecycle') {
             if (!this.socket || payload.worldId !== this.socket.worldId)
                 return;
+            if(payload.kind==='claw') {
+                const previous=this.clawState;
+                if(previous&&payload.incarnation!==previous.incarnation)return;
+                this.mergeClaw(payload);
+                const age=this.socket.serverNow()-payload.serverTimeMs;
+                if(type==='activity.lifecycle'&&previous&&this.clawState!==previous&&payload.payload.claw.dropId>previous.payload.claw.dropId&&age>=-250&&age<=1000)
+                    audio.play({kind:'grab',mode:'claw',eventId:`claw:${payload.incarnation}:${payload.payload.claw.dropId}`,distance:Math.hypot(this.position.x-41,this.position.y-22)});
+                this.publish(this.socket.serverNow());return;
+            }
             if (payload.kind === 'football') {
                 const previous = this.footballState;
                 if (previous && payload.incarnation !== previous.incarnation)
@@ -346,12 +370,30 @@ export class ActivityStore {
                 continue;
             if (area.kind === 'area')
                 this.mergeArea(area, revisions);
+            else if(area.kind==='claw')this.mergeClaw(area,revisions);
             else if (area.kind === 'football')
                 this.mergeFootball(area, revisions);
             else if (area.kind === 'vehicles')
                 this.mergeVehicles(area, revisions);
         }
         this.publish(this.socket?.serverNow());
+    }
+    private mergeClaw(snapshot: ClawSnapshot, revisions?: Map<string, number>) {
+        const previous = this.clawState, key = 'claw';
+        if (previous) {
+            if (snapshot.incarnation === previous.incarnation) {
+                if (snapshot.generation < previous.generation || snapshot.generation === previous.generation && snapshot.tick <= previous.tick)
+                    return;
+            } else {
+                if (this.retiredIncarnations.get(key)?.has(snapshot.incarnation) || revisions && (revisions.get(key) ?? 0) !== (this.areaRevisions.get(key) ?? 0))
+                    return;
+                const retired = this.retiredIncarnations.get(key) ?? new Set<string>();
+                retired.add(previous.incarnation);
+                this.retiredIncarnations.set(key, retired);
+            }
+        }
+        this.clawState = snapshot;
+        this.areaRevisions.set(key, (this.areaRevisions.get(key) ?? 0) + 1);
     }
     private mergeFootball(snapshot: FootballSnapshot, revisions?: Map<string, number>) {
         const previous = this.footballState, key = 'football';
@@ -369,6 +411,43 @@ export class ActivityStore {
         }
         this.footballState = snapshot;
         this.areaRevisions.set(key, (this.areaRevisions.get(key) ?? 0) + 1);
+    }
+    interactClaw(position=this.position) {
+        this.position={...position};
+        if(this.state.inputMode==='claw'){void this.clawAction('claw.leave');return true}
+        if(this.state.inputMode!=='walk'||this.state.active||this.localStarting||!this.state.connected||this.clawPending||!nearClaw(position)||!this.state.claw||this.state.claw.operatorId)return false;
+        void this.clawAction('claw.enter');return true;
+    }
+    dropClaw() {
+        if(this.state.inputMode!=='claw'||!this.state.connected||this.state.claw?.phase!=='aiming'||this.clawPending)return false;
+        void this.clawAction('claw.drop');return true;
+    }
+    private async clawAction(action:ClawAction) {
+        this.clawHeld={x:0,y:0};
+        if(!this.socket) {
+            if(action==='claw.enter')this.localClaw.enter(this.position,this.state.now);
+            else if(action==='claw.leave')this.localClaw.reset(this.state.now);
+            else if(action==='claw.drop'&&this.localClaw.drop(this.state.now))audio.play({kind:'grab',mode:'claw',eventId:`claw:local:${this.localClaw.claw.dropId}`});
+            this.publish(undefined,true);return;
+        }
+        if(!this.clawState||this.socket.status!=='online'||this.clawPending)return;
+        this.clawPending=true;const epoch=this.epoch;
+        try{await this.socket.gameCommand('activity.claw',this.clawIntent(action));if(epoch===this.epoch)await this.reload()}
+        catch(e){if(epoch===this.epoch){this.state={...this.state,message:(e as Error).message};this.publish(undefined,true)}}
+        finally{if(epoch===this.epoch)this.clawPending=false}
+    }
+    private clawIntent(action:ClawAction):Record<string,unknown> {return {incarnation:this.clawState!.incarnation,areaGeneration:0,generation:this.clawState!.generation,machineId:'claw-1',action,...(action==='claw.move'?{dx:this.clawHeld.x,dy:this.clawHeld.y}:{})}}
+    clawControls(input:{x:number;y:number;steer?:number;throttle?:number;brake?:number}) {
+        this.clawHeld={x:input.x||input.steer||0,y:input.y||(input.brake??0)-(input.throttle??0)};
+        if(!this.clawHeld.x&&!this.clawHeld.y)this.sendClawInput();
+        else if(!this.socket)this.localClaw.controls(this.clawHeld.x,this.clawHeld.y,this.state.now);
+    }
+    private sendClawInput() {
+        if(this.state.inputMode!=='claw'||this.clawPending||this.state.claw?.phase!=='aiming')return;
+        if(!this.socket){this.localClaw.controls(this.clawHeld.x,this.clawHeld.y,this.state.now);return}
+        if(!this.clawState||this.socket.status!=='online'||this.clawSending)return;
+        this.clawSending=true;const epoch=this.epoch;
+        void this.socket.gameCommand('activity.claw',this.clawIntent('claw.move')).catch(()=>{if(epoch===this.epoch)this.clawHeld={x:0,y:0}}).finally(()=>{if(epoch===this.epoch)this.clawSending=false});
     }
     interactFootball(position = this.position) {
         this.position = { ...position };
@@ -527,6 +606,8 @@ export class ActivityStore {
             return;
         this.localVehicles.reset();
         this.localFootball.reset(kind !== 'penalty', at);
+        this.localClaw.reset(at);
+        this.clawHeld={x:0,y:0};
         this.penaltyStarting = kind === 'penalty';
         this.rideHeld = { x: 0, y: 0 };
         this.localStarting = kind === 'race';
@@ -602,9 +683,11 @@ export class ActivityStore {
     tick(at = this.socket?.serverNow() ?? performance.now()) {
         this.state = { ...this.state, now: at };
         if (!this.socket) {
+            this.localClaw.tick(at);
             this.localVehicles.tick(at);
             this.localFootball.tick(at);
         }
+        this.sendClawInput();
         this.sendRideInput();
         this.sendPaddle();
         this.sendInput();
@@ -664,6 +747,10 @@ export class ActivityStore {
         }
     }
     clearLocal() {
+        this.clawHeld={x:0,y:0};
+        this.sendClawInput();
+        this.localClaw.reset();
+        audio.stopMode('claw');
         this.localVehicles.reset();
         this.localFootball.reset();
         this.penaltyStarting = false;
@@ -687,6 +774,7 @@ export class ActivityStore {
             }, 50);
     }
     dispose() {
+        this.clawHeld={x:0,y:0};this.sendClawInput();audio.stopMode('claw');
         if (this.timer)
             clearInterval(this.timer);
         this.timer = null;
@@ -717,6 +805,7 @@ export function mountActivities(world: {
     });
     const raceInput = activityInput.register('race', input => activities.controls(input));
     const pingpongInput=activityInput.register('pingpong',input=>activities.paddle(input.steer));
+    const clawInput=activityInput.register('claw',input=>activities.clawControls(input));
     const rideInput = activityInput.register('ride', input => activities.rideControls(input));
     const attachment = (e: Event) => {
         world.stopInput();
@@ -749,6 +838,8 @@ export function mountActivities(world: {
         wasOnline = online;
         activities.tick();
     };
+    const drop=(e:KeyboardEvent)=>{if(e.code==='Space'&&!e.repeat&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&activityInput.mode()==='claw'&&!(e.target instanceof Element&&e.target.closest('button,input,textarea,select,[contenteditable="true"]'))){e.preventDefault();activities.dropClaw()}};
+    window.addEventListener('keydown',drop);
     const reset = () => {
         activityInput.release();
         activities.clearLocal();
@@ -772,11 +863,13 @@ export function mountActivities(world: {
     activities.start();
     world.setActivityState(activities.snapshot());
     return () => {
+        window.removeEventListener('keydown',drop);
         scene();
         closures();
         raceInput();
         rideInput();
         pingpongInput();
+        clawInput();
         activities.dispose();
         window.removeEventListener('patra-world-attachment', attachment);
         window.removeEventListener('patra-world-event', event);

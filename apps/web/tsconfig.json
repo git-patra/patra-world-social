@@ -68,6 +68,7 @@
     "src/features/pingpong/**/*.ts",
     "src/features/pingpong/**/*.tsx",
     "tests/activity-contract.test.ts",
-    "src/guest/lifecycle.ts"
+    "src/guest/lifecycle.ts",
+    "tests/claw.test.ts"
   ]
 }

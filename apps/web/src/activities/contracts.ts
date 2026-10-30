@@ -50,7 +50,7 @@ export const footballInside = (x: number, y: number) => {
     const b = contract.areas.find(a => a.id === 'penalty')!.bounds, r = footballRules.radius;
     return x >= b.x + r && x <= b.x + b.width - r && y >= b.y + r && y <= b.y + b.height - r;
 };
-export type ActivitySnapshot = AreaSnapshot | VehiclesSnapshot | FootballSnapshot;
+export type ActivitySnapshot = AreaSnapshot | VehiclesSnapshot | FootballSnapshot | ClawSnapshot;
 export type RideIntent = {
     incarnation: string;
     areaGeneration: number;
@@ -85,6 +85,9 @@ export function validateKickIntent(raw: unknown): KickIntent {
     return structuredClone(raw) as KickIntent;
 }
 export type ActivityIntent = {
+    type: 'activity.claw';
+    payload: ClawIntent;
+} | {
     type: 'activity.kick';
     payload: KickIntent;
 } | {
@@ -100,8 +103,12 @@ const number = (v: unknown, min: number, max: number) => typeof v === 'number' &
 const int = (v: unknown) => Number.isSafeInteger(v) && Number(v) >= 0;
 const text = (v: unknown) => typeof v === 'string' && v.length > 0 && v.length <= 128;
 export function validateActivitySnapshot(raw: unknown, worldId?: string): ActivitySnapshot {
-    if (!keys(raw, ['worldId', 'areaId', 'incarnation', 'generation', 'serverTimeMs', 'tick', 'kind', 'payload']) || !text(raw.worldId) || (worldId !== undefined && raw.worldId !== worldId) || !text(raw.incarnation) || !contract.areas.some(a => a.id === raw.areaId) || !['area', 'vehicles', 'football'].includes(String(raw.kind)) || ![raw.generation, raw.serverTimeMs, raw.tick].every(int))
+    if (!keys(raw, ['worldId', 'areaId', 'incarnation', 'generation', 'serverTimeMs', 'tick', 'kind', 'payload']) || !text(raw.worldId) || (worldId !== undefined && raw.worldId !== worldId) || !text(raw.incarnation) || !contract.areas.some(a => a.id === raw.areaId) && !(raw.kind === 'claw' && raw.areaId === 'claw-1') || !['area', 'vehicles', 'football', 'claw'].includes(String(raw.kind)) || ![raw.generation, raw.serverTimeMs, raw.tick].every(int))
         throw Error('Invalid activity snapshot');
+    if (raw.kind === 'claw') {
+        if (Number(raw.generation)<1 || !keys(raw.payload,['claw']) || !validClaw(raw.payload.claw)) throw Error('Invalid claw snapshot');
+        return structuredClone(raw) as ClawSnapshot;
+    }
     if (raw.kind === 'football') {
         if (raw.areaId !== 'penalty' || Number(raw.generation) < 1 || !keys(raw.payload, ['ball']))
             throw Error('Invalid football snapshot');
@@ -128,4 +135,20 @@ export function validateActivitySnapshot(raw: unknown, worldId?: string): Activi
     if (!['OPEN', 'CLEARING', 'RESERVED', 'ACTIVE', 'RESETTING'].includes(String(p.phase)) || typeof p.matchId !== 'string' || p.matchId.length > 128 || ![p.startsAt, p.clearAt, p.resetAt].every(int) || (p.phase !== 'OPEN' && (!text(p.matchId) || raw.generation === 0)) || (p.phase === 'OPEN' && p.matchId !== '') || (p.phase === 'CLEARING' && p.clearAt === 0) || (p.phase === 'ACTIVE' && p.startsAt === 0) || (p.phase === 'RESETTING' && p.resetAt === 0))
         throw Error('Invalid area phase');
     return structuredClone(raw) as unknown as ActivitySnapshot;
+}
+
+export const clawRules = contract.clawRules;
+export type Claw = {operatorId:string;operatorName:string;leaseUntil:number;x:number;y:number;phase:'idle'|'aiming'|'dropping'|'lifting'|'releasing';phaseAt:number;dropId:number;prizeId:string};
+export type ClawSnapshot=Omit<AreaSnapshot,'kind'|'payload'> & {kind:'claw';payload:{claw:Claw}};
+export type ClawAction='claw.enter'|'claw.leave'|'claw.move'|'claw.drop';
+export type ClawIntent={incarnation:string;areaGeneration:0;generation:number;machineId:'claw-1';action:ClawAction;dx?:number;dy?:number};
+export function validateClawIntent(raw:unknown):ClawIntent {
+ const p=raw as Record<string,unknown>,move=p?.action==='claw.move';
+ if(!keys(raw,['incarnation','areaGeneration','generation','machineId','action',...(move?['dx','dy']:[])])||!text(p.incarnation)||p.areaGeneration!==0||!int(p.generation)||Number(p.generation)<1||p.machineId!=='claw-1'||!['claw.enter','claw.leave','claw.move','claw.drop'].includes(String(p.action))||move&&(!number(p.dx,-1,1)||!number(p.dy,-1,1)))throw Error('Invalid claw intent');
+ return structuredClone(raw) as ClawIntent;
+}
+function validClaw(raw:unknown) {
+ if(!keys(raw,['operatorId','operatorName','leaseUntil','x','y','phase','phaseAt','dropId','prizeId']))return false;
+ const p=raw;
+ return [p.leaseUntil,p.phaseAt,p.dropId].every(int)&&number(p.x,0,1)&&number(p.y,0,1)&&['idle','aiming','dropping','lifting','releasing'].includes(String(p.phase))&&typeof p.operatorId==='string'&&p.operatorId.length<=128&&typeof p.operatorName==='string'&&p.operatorName.length<=128&&(p.prizeId===''||clawRules.presets.some(v=>v.id===p.prizeId))&&(p.phase==='idle'?p.operatorId===''&&p.operatorName===''&&p.leaseUntil===0&&p.prizeId==='':text(p.operatorId)&&text(p.operatorName)&&Number(p.leaseUntil)>0&&(p.phase!=='aiming'||p.prizeId===''));
 }

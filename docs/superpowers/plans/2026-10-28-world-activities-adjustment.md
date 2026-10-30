@@ -10,7 +10,7 @@
 
 **Spec:** [World activities design](../specs/2026-10-28-world-activities-design.md).
 
-**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–6 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
+**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–8 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
 
 ## Ringkasan tahap dan cakupan
 
@@ -153,9 +153,11 @@ Evidence: [implementation](../../checkpoints/evidence/CP8/activities-task7.md), 
 
 **Files:** create `apps/server/internal/world/claw.go`, `apps/web/src/activities/claw.ts`, `world/scenes/claw.ts`; extend activities asset/schema; new claw owner/client tests.
 
-- [ ] RED `single_operator_twenty_second_lease`, `drop_outcome_uses_server_grip_position`, `duplicate_drop_does_not_duplicate_reward`, `disconnect_or_match_join_resets_operator`.
-- [ ] Implementasi kabinet kinematik 2D, preset layout boneka, gerakan arah + Drop, grip tolerance dari kontrak, animasi pickup/release yang sama untuk penonton. Occupied state memberi info siapa memakai; tanpa antrean otomatis, pembayaran atau inventory.
-- [ ] Uji lease expiry/drop pada tick terakhir, logout/reconnect, batas input, dedup audio event dan query assertion bahwa tidak ada penulisan match/result/history. Review dan commit.
+- [x] RED `single_operator_twenty_second_lease`, `drop_outcome_uses_server_grip_position`, `duplicate_drop_does_not_duplicate_reward`, `disconnect_or_match_join_resets_operator`.
+- [x] Implementasi kabinet kinematik 2D, preset layout boneka, gerakan arah + Drop, grip tolerance dari kontrak, animasi pickup/release yang sama untuk penonton. Occupied state memberi info siapa memakai; tanpa antrean otomatis, pembayaran atau inventory.
+- [x] Uji lease expiry/drop pada tick terakhir, logout/reconnect, batas input, dedup audio event dan query assertion bahwa tidak ada penulisan match/result/history. Review dan commit.
+
+Evidence: [implementation and fixes](../../checkpoints/evidence/CP8/activities-task8.md), [independent review](../../checkpoints/evidence/CP8/activities-task8-review.md), [desktop/responsive browser](../../checkpoints/evidence/CP8/activities-claw-browser.md). Physical mobile/authenticated browser/LiveKit remain deferred.
 
 ### Task 9: Fishing tanpa history
 

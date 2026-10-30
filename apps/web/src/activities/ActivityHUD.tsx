@@ -20,6 +20,12 @@ export function ActivityHUD({ store = activities }: {
             <span>Menonton dari luar · jalan untuk pergi</span>
         </section>;
     }
+    if(!game&&(state.inputMode==='claw'||state.inputMode==='walk'&&state.nearbyClaw)&&state.claw) {
+        const b=state.claw,own=b.operatorId===state.selfId,occupied=Boolean(b.operatorId);
+        const blocked=!state.connected||Boolean(typeof document!=='undefined'&&document.querySelector('dialog[open]'));
+        const control=(label:string,key:'steer'|'throttle'|'brake',value:number)=><button type="button" aria-label={label} disabled={blocked||b.phase!=='aiming'} onPointerDown={e=>{e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);activityInput.pointerControl(e.pointerId,key,value)}} onPointerUp={e=>activityInput.releasePointer(e.pointerId)} onPointerCancel={e=>activityInput.releasePointer(e.pointerId)} onLostPointerCapture={e=>activityInput.releasePointer(e.pointerId)} onKeyDown={e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();activityInput.control(key,value)}}} onKeyUp={()=>activityInput.control(key,0)} onBlur={()=>activityInput.control(key,0)}>{label}</button>;
+        return <section className="activity-hud" aria-label="Capit boneka"><strong>Claw · {own?`${Math.max(0,Math.ceil((b.leaseUntil-state.now)/1000))}s`:occupied?`Dipakai ${b.operatorName}`:'Ready'}</strong><span>{own?b.phase==='aiming'?'WASD / arrows · Drop / Space · E keluar':b.phase==='dropping'?'Turun…':b.phase==='lifting'?'Angkat…':b.prizeId?'Dapat boneka! · kembali ke kabinet':'Belum kena · coba lagi':'Satu operator · lease 20s · boneka kosmetik sementara'}</span>{own&&<div className="activity-hud-controls">{control('←','steer',-1)}{control('→','steer',1)}{control('↑','throttle',1)}{control('↓','brake',1)}<button type="button" disabled={blocked||b.phase!=='aiming'} onClick={()=>store.dropClaw()}>Drop</button></div>}{(!occupied||own)&&<button type="button" disabled={blocked} onClick={()=>store.interactClaw()}>{own?'Keluar · E':'Capit · E'}</button>}{state.message&&<span role="status">{state.message}</span>}</section>;
+    }
     if (!game && state.nearbyFootball) {
         return <section className="activity-hud" aria-label="Bola bebas">
             <strong>Free ball · Kick</strong>

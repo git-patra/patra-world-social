@@ -520,6 +520,169 @@
           }
         }
       }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "worldId",
+        "areaId",
+        "incarnation",
+        "generation",
+        "serverTimeMs",
+        "tick",
+        "kind",
+        "payload"
+      ],
+      "properties": {
+        "worldId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "areaId": {
+          "const": "claw-1"
+        },
+        "incarnation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "serverTimeMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tick": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "kind": {
+          "const": "claw"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "claw"
+          ],
+          "properties": {
+            "claw": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "operatorId",
+                "operatorName",
+                "leaseUntil",
+                "x",
+                "y",
+                "phase",
+                "phaseAt",
+                "dropId",
+                "prizeId"
+              ],
+              "properties": {
+                "operatorId": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "operatorName": {
+                  "type": "string",
+                  "maxLength": 128
+                },
+                "leaseUntil": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "x": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "y": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "phase": {
+                  "enum": [
+                    "idle",
+                    "aiming",
+                    "dropping",
+                    "lifting",
+                    "releasing"
+                  ]
+                },
+                "phaseAt": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "dropId": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "prizeId": {
+                  "enum": [
+                    "",
+                    "bear",
+                    "bunny",
+                    "fox"
+                  ]
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "phase": {
+                        "const": "idle"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "operatorId": {
+                        "const": ""
+                      },
+                      "operatorName": {
+                        "const": ""
+                      },
+                      "leaseUntil": {
+                        "const": 0
+                      },
+                      "prizeId": {
+                        "const": ""
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "operatorId": {
+                        "minLength": 1
+                      },
+                      "operatorName": {
+                        "minLength": 1
+                      },
+                      "leaseUntil": {
+                        "minimum": 1
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
     }
   ]
 }

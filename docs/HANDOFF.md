@@ -2,6 +2,8 @@
 
 Updated 28 October 2026. User resumed with an approved Gather-like outdoor village redesign, then authorized implementation, tests, local commit including the plan, and a public personal GitHub repository on `main`. This document records context and remaining acceptance limits.
 
+Current continuation: [Activities resume](handoff/ACTIVITIES-RESUME.md) — Task7 committed, Task8 uncommitted/in review preparation, Task9–11 pending. Read this before older snapshots.
+
 ## Project and non-negotiable scope
 
 - Repo `/Users/patra/Project/patra-world-social`, active implementation branch `feat/world-activities`; `main` tracks `origin/main`. Public repository: https://github.com/git-patra/patra-world-social. Public history starts from clean game snapshot `0adf204`; inherited development/CV history remains only on local `feat/social-world`.
@@ -101,3 +103,5 @@ User mengizinkan seluruh enam tahap adjustment aktivitas. Baca plan docs/superpo
 
 Fullscreen kampung outdoor, semi-English, tanpa CV/sidebar. Pertahankan game/multiplayer/history. Uji browser akun tetap ditunda; LiveKit staging dan perangkat mobile fisik belum tersedia. Jangan menganggap unit/integration/proxy browser sebagai acceptance eksternal. Simpan plan dan hasil testing dalam commit lokal; public GitHub main publication telah diizinkan, tidak ada izin public deployment. CP1 tetap satu-satunya PASS sampai acceptance wajib lengkap.
 ```
+
+30 October resume: Task8 claw independently reviewed and fixed (vertical aim + schema); 4JS+193frontend/fullGo/actualDB PASS, desktop+390×844proxy browser evidence recorded. Next Task9→10→11; only CP1 official PASS. See docs/handoff/ACTIVITIES-RESUME.md.

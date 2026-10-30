@@ -57,7 +57,8 @@ type ActivityContract struct {
 		Entrance Point  `json:"entrance"`
 		Capacity int    `json:"capacity"`
 	} `json:"clawMachines"`
-	Caps map[string]float64 `json:"caps"`
+	ClawRules ClawRules          `json:"clawRules"`
+	Caps      map[string]float64 `json:"caps"`
 }
 
 func LoadActivities(raw []byte, m MapDefinition) (ActivityContract, error) {
@@ -70,6 +71,21 @@ func LoadActivities(raw []byte, m MapDefinition) (ActivityContract, error) {
 	bad := errors.New("invalid activity contract")
 	if c.V != 1 || c.MapID != m.ID || c.ClearMs != 3000 || c.ResetMs < 0 || c.ResetMs > 2000 || len(c.Areas) != 4 {
 		return c, bad
+	}
+	rules := c.ClawRules
+	if rules.LeaseMs != 20000 || rules.InputExpiryMs != 250 || rules.StepMs != 50 || rules.MaxCatchupSteps != 4 || !valid(rules.Speed, .1, 2) || !valid(rules.GripTolerance, .01, .15) || rules.PhaseMs != 500 || len(rules.Presets) != 3 || len(c.ClawMachines) != 1 {
+		return c, bad
+	}
+	machine := c.ClawMachines[0]
+	if machine.ID != "claw-1" || machine.Capacity != 1 || m.Blocked(machine.Entrance) || !m.Reachable(m.Spawn, machine.Entrance) {
+		return c, bad
+	}
+	seenPresets := map[string]bool{}
+	for _, p := range rules.Presets {
+		if (p.ID != "bear" && p.ID != "bunny" && p.ID != "fox") || seenPresets[p.ID] || !valid(p.X, 0, 1) || !valid(p.Y, 0, 1) {
+			return c, bad
+		}
+		seenPresets[p.ID] = true
 	}
 	ids := map[string]bool{}
 	for _, a := range c.Areas {

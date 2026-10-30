@@ -226,5 +226,31 @@
       },
       "capacity": 1
     }
-  ]
+  ],
+  "clawRules": {
+    "leaseMs": 20000,
+    "inputExpiryMs": 250,
+    "stepMs": 50,
+    "maxCatchupSteps": 4,
+    "speed": 1,
+    "gripTolerance": 0.08,
+    "phaseMs": 500,
+    "presets": [
+      {
+        "id": "bear",
+        "x": 0.28,
+        "y": 0.28
+      },
+      {
+        "id": "bunny",
+        "x": 0.72,
+        "y": 0.3
+      },
+      {
+        "id": "fox",
+        "x": 0.5,
+        "y": 0.75
+      }
+    ]
+  }
 }

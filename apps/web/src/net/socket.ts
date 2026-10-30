@@ -165,10 +165,10 @@ export class WorldSocket {
     }
     async activitySnapshots(): Promise<ActivitySnapshot[]> {
         const result = await this.gameCommand('activity.snapshot', {}) as { activities: unknown[] };
-        if (!Array.isArray(result?.activities) || result.activities.length !== 6)
+        if (!Array.isArray(result?.activities) || result.activities.length !== 7)
             throw Error('Invalid activity resync');
         const snapshots = result.activities.map(a => validateActivitySnapshot(a, this.worldId));
-        if (new Set(snapshots.filter(a => a.kind === 'area').map(a => a.areaId)).size !== 4 || snapshots.filter(a => a.kind === 'vehicles').length !== 1 || snapshots.filter(a => a.kind === 'football').length !== 1)
+        if (new Set(snapshots.filter(a => a.kind === 'area').map(a => a.areaId)).size !== 4 || snapshots.filter(a => a.kind === 'vehicles').length !== 1 || snapshots.filter(a => a.kind === 'football').length !== 1 || snapshots.filter(a => a.kind === 'claw').length !== 1)
             throw Error('Invalid activity resync');
         return snapshots;
     }

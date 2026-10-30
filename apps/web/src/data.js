@@ -1,5 +1,6 @@
 // Game IDs are stable; destinations describe the approved open village.
 export const stations=[
+ {id:"claw",name:"Capit Boneka",label:"Capit Boneka",short:"Claw · 20s / kosmetik sementara",icon:"♧",color:"#ba795f",title:"Arahkan capit, lalu Drop",description:"Satu operator selama 20 detik. Dekati kabinet, tekan E, lalu WASD / arrows dan Drop. Boneka tampil sementara di kabinet; tanpa pembayaran, inventory atau history.",status:"Dunia privat / solo"},
  {id:"pingpong",name:"Meja Pingpong",label:"Meja Pingpong",short:"7 poin · 1v1 / BOT",icon:"◉",color:"#6e9682",title:"Rally di meja pingpong",description:"Main di meja halaman arcade. Dua pemain Ready atau pilih BOT; hasil masuk History.",status:"Dunia privat / practice"},
   {
     "id": "arcade",

@@ -39,6 +39,8 @@ func ValidateCommand(raw []byte) (Command, error) {
 	}
 	switch v["type"] {
 	case "activity.snapshot", "world.join", "world.leave", "lobby.list", "lobby.leave", "voice.leave", "voice.state", "voice.token", "voice.unmute", "session.resume":
+	case "activity.claw":
+		ok = validateClawIntent(p)
 	case "activity.kick":
 		ok = validateKickIntent(p)
 	case "activity.ride":

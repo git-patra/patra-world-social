@@ -10,17 +10,20 @@ import (
 func validateActivityPayload(raw any) error {
 	bad := errors.New("invalid activity snapshot")
 	p, ok := raw.(map[string]any)
-	if !ok || len(p) != 8 || !c.Keys(p, "worldId", "areaId", "incarnation", "generation", "serverTimeMs", "tick", "kind", "payload") || !c.Text(p["worldId"], 128) || !c.Text(p["incarnation"], 128) || (p["kind"] != "area" && p["kind"] != "vehicles" && p["kind"] != "football") {
+	if !ok || len(p) != 8 || !c.Keys(p, "worldId", "areaId", "incarnation", "generation", "serverTimeMs", "tick", "kind", "payload") || !c.Text(p["worldId"], 128) || !c.Text(p["incarnation"], 128) || (p["kind"] != "area" && p["kind"] != "vehicles" && p["kind"] != "football" && p["kind"] != "claw") {
 		return bad
 	}
 	id, _ := p["areaId"].(string)
-	if _, ok := world.ActivityArea(id); !ok {
+	if _, ok := world.ActivityArea(id); !ok && !(p["kind"] == "claw" && id == "claw-1") {
 		return bad
 	}
 	for _, k := range []string{"generation", "serverTimeMs", "tick"} {
 		if !c.Integer(p[k], 0, 9007199254740991) {
 			return bad
 		}
+	}
+	if p["kind"] == "claw" {
+		return validateClawPayload(p)
 	}
 	if p["kind"] == "football" {
 		return validateFootballPayload(p)
@@ -125,6 +128,64 @@ func validateFootballPayload(p map[string]any) error {
 	}
 	visible, ok := b["visible"].(bool)
 	if !ok || !world.FootballInside(b["x"].(float64), b["y"].(float64)) || math.Hypot(b["vx"].(float64), b["vy"].(float64)) > 8.000000001 || !visible && (b["vx"] != float64(0) || b["vy"] != float64(0)) {
+		return bad
+	}
+	return nil
+}
+
+func validateClawIntent(p map[string]any) bool {
+	fields := []string{"incarnation", "areaGeneration", "generation", "machineId", "action"}
+	if p["action"] == "claw.move" {
+		fields = append(fields, "dx", "dy")
+	} else if p["action"] != "claw.enter" && p["action"] != "claw.leave" && p["action"] != "claw.drop" {
+		return false
+	}
+	return len(p) == len(fields) && c.Keys(p, fields...) && c.Text(p["incarnation"], 128) && p["areaGeneration"] == float64(0) && c.Integer(p["generation"], 1, 9007199254740991) && p["machineId"] == "claw-1" && (p["action"] != "claw.move" || c.Number(p["dx"], -1, 1) && c.Number(p["dy"], -1, 1))
+}
+func validateClawPayload(p map[string]any) error {
+	bad := errors.New("invalid claw snapshot")
+	s, ok := p["payload"].(map[string]any)
+	if !ok || len(s) != 1 || !c.Keys(s, "claw") || p["areaId"] != "claw-1" || !c.Integer(p["generation"], 1, 9007199254740991) {
+		return bad
+	}
+	b, ok := s["claw"].(map[string]any)
+	if !ok || len(b) != 9 || !c.Keys(b, "operatorId", "operatorName", "leaseUntil", "x", "y", "phase", "phaseAt", "dropId", "prizeId") || !c.Number(b["x"], 0, 1) || !c.Number(b["y"], 0, 1) {
+		return bad
+	}
+	for _, k := range []string{"leaseUntil", "phaseAt", "dropId"} {
+		if !c.Integer(b[k], 0, 9007199254740991) {
+			return bad
+		}
+	}
+	for _, k := range []string{"operatorId", "operatorName"} {
+		v, ok := b[k].(string)
+		if !ok || len(v) > 128 {
+			return bad
+		}
+	}
+	prize, ok := b["prizeId"].(string)
+	if !ok {
+		return bad
+	}
+	validPrize := prize == ""
+	for _, v := range world.ClawConfig.Presets {
+		if v.ID == prize {
+			validPrize = true
+		}
+	}
+	if !validPrize {
+		return bad
+	}
+	switch b["phase"] {
+	case "idle":
+		if b["operatorId"] != "" || b["operatorName"] != "" || b["leaseUntil"] != float64(0) || prize != "" {
+			return bad
+		}
+	case "aiming", "dropping", "lifting", "releasing":
+		if !c.Text(b["operatorId"], 128) || !c.Text(b["operatorName"], 128) || b["leaseUntil"] == float64(0) || b["phase"] == "aiming" && prize != "" {
+			return bad
+		}
+	default:
 		return bad
 	}
 	return nil

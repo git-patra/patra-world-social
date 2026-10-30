@@ -21,6 +21,7 @@ type AreaLease struct {
 	Generation  uint64 `json:"generation"`
 }
 type AreaPayload struct {
+	Claw     *Claw       `json:"-"`
 	Ball     *Football   `json:"-"`
 	Vehicles *[4]Vehicle `json:"-"`
 	Phase    string      `json:"phase"`
@@ -31,6 +32,11 @@ type AreaPayload struct {
 }
 
 func (p AreaPayload) MarshalJSON() ([]byte, error) {
+	if p.Claw != nil {
+		return json.Marshal(struct {
+			Claw *Claw `json:"claw"`
+		}{p.Claw})
+	}
 	if p.Ball != nil {
 		return json.Marshal(struct {
 			Ball *Football `json:"ball"`
@@ -203,6 +209,8 @@ func (r *Runtime) HasAreaLeases(ctx context.Context) (bool, error) {
 func (r *Runtime) ActivitySnapshots(ctx context.Context, worldID string) ([]ActivitySnapshot, error) {
 	out := []ActivitySnapshot{}
 	err := r.call(ctx, func() {
+		claw := r.claw
+		out = append(out, ActivitySnapshot{worldID, "claw-1", r.incarnation, r.clawRevision, r.clock.Now().UnixMilli(), r.tick, "claw", AreaPayload{Claw: &claw}})
 		ball := r.football
 		out = append(out, ActivitySnapshot{worldID, "penalty", r.incarnation, r.footballRevision, r.clock.Now().UnixMilli(), r.tick, "football", AreaPayload{Ball: &ball}})
 		vehicles := r.vehicleSnapshot()

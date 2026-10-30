@@ -134,6 +134,28 @@
           "visible": false
         }
       }
+    },
+    {
+      "worldId": "world",
+      "areaId": "claw-1",
+      "incarnation": "runtime",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "claw",
+      "payload": {
+        "claw": {
+          "operatorId": "",
+          "operatorName": "",
+          "leaseUntil": 0,
+          "x": 0.5,
+          "y": 0.5,
+          "phase": "idle",
+          "phaseAt": 0,
+          "dropId": 0,
+          "prizeId": ""
+        }
+      }
     }
   ],
   "invalid": [
@@ -684,6 +706,117 @@
             "visible": true
           }
         ]
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "claw-1",
+      "incarnation": "runtime",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "claw",
+      "payload": {
+        "claw": {
+          "operatorId": "",
+          "operatorName": "",
+          "leaseUntil": 0,
+          "x": 1.01,
+          "y": 0.5,
+          "phase": "idle",
+          "phaseAt": 0,
+          "dropId": 0,
+          "prizeId": ""
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "claw-1",
+      "incarnation": "runtime",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "claw",
+      "payload": {
+        "claw": {
+          "operatorId": "",
+          "operatorName": "",
+          "leaseUntil": 0,
+          "x": 0.5,
+          "y": 0.5,
+          "phase": "idle",
+          "phaseAt": 0,
+          "dropId": 0,
+          "prizeId": "invented"
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "claw-1",
+      "incarnation": "runtime",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "claw",
+      "payload": {
+        "claw": {
+          "operatorId": "me",
+          "operatorName": "",
+          "leaseUntil": 0,
+          "x": 0.5,
+          "y": 0.5,
+          "phase": "idle",
+          "phaseAt": 0,
+          "dropId": 0,
+          "prizeId": ""
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "claw-1",
+      "incarnation": "runtime",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "claw",
+      "payload": {
+        "claw": {
+          "operatorId": "",
+          "operatorName": "",
+          "leaseUntil": 0,
+          "x": 0.5,
+          "y": 0.5,
+          "phase": "flying",
+          "phaseAt": 0,
+          "dropId": 0,
+          "prizeId": ""
+        }
+      }
+    },
+    {
+      "worldId": "world",
+      "areaId": "claw-1",
+      "incarnation": "runtime",
+      "generation": 1,
+      "serverTimeMs": 1000,
+      "tick": 20,
+      "kind": "claw",
+      "payload": {
+        "claw": {
+          "operatorId": "",
+          "operatorName": "",
+          "leaseUntil": 0,
+          "x": 0.5,
+          "y": 0.5,
+          "phase": "idle",
+          "phaseAt": 0,
+          "dropId": 0,
+          "prizeId": "",
+          "inventory": []
+        }
       }
     }
   ]

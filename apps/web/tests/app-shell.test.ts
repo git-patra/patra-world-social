@@ -259,3 +259,8 @@ test('football_cooldown_does_not_fall_through_to_opening_the_penalty_menu', () =
   assert.equal(shell.get('#project-dialog').open,false,'cooldown is still the ball context');
  } finally {shell.restore()}
 });
+
+test('claw_map_destination_walks_to_cabinet_entrance_after_close',async()=>{
+ assert.ok(stations.some(s=>s.id==='claw'),'map must list Capit Boneka');
+ const shell=shellFixture();try{const commands:unknown[][]=[];shell.world.setOnline({input:(...a)=>commands.push(['input',...a]),destination:(...p)=>commands.push(['destination',...p])});shell.get('#list-button').click();await Promise.resolve();commands.length=0;shell.choose('claw');await Promise.resolve();shell.tick();assert.deepEqual(commands.at(-1),['destination',41,24]);assert.equal(shell.get('#map-dialog').open,false)}finally{shell.restore()}
+});

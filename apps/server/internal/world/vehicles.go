@@ -25,6 +25,7 @@ type CasualIntent struct {
 	Incarnation    string  `json:"incarnation"`
 	AreaGeneration uint64  `json:"areaGeneration"`
 	VehicleID      string  `json:"vehicleId"`
+	MachineID      string  `json:"machineId,omitempty"`
 	Generation     uint64  `json:"generation"`
 	Action         string  `json:"action"`
 	DX             float64 `json:"dx,omitempty"`
@@ -37,7 +38,11 @@ func (i CasualIntent) MarshalJSON() ([]byte, error) {
 	if i.Action == "kick" {
 		delete(payload, "vehicleId")
 	}
-	if i.Action == "drive" || i.Action == "kick" {
+	if i.Action == "claw.enter" || i.Action == "claw.move" || i.Action == "claw.drop" || i.Action == "claw.leave" {
+		delete(payload, "vehicleId")
+		payload["machineId"] = i.MachineID
+	}
+	if i.Action == "drive" || i.Action == "kick" || i.Action == "claw.move" {
 		payload["dx"] = i.DX
 		payload["dy"] = i.DY
 	}
@@ -109,6 +114,10 @@ func (r *Runtime) ApplyCasualIntent(ctx context.Context, id string, epoch, seq u
 			result = ctx.Err()
 			return
 		}
+		if intent.Action == "claw.enter" || intent.Action == "claw.move" || intent.Action == "claw.drop" || intent.Action == "claw.leave" {
+			result = r.applyClaw(id, epoch, seq, intent)
+			return
+		}
 		if intent.Action == "kick" {
 			result = r.kickFootball(id, epoch, seq, intent)
 			return
@@ -119,7 +128,7 @@ func (r *Runtime) ApplyCasualIntent(ctx context.Context, id string, epoch, seq u
 		if s != nil {
 			areaGeneration = s.lease.Generation
 		}
-		if p == nil || p.epoch != epoch || p.Status == "playing" || seq <= p.Seq || intent.Incarnation != r.incarnation || intent.AreaGeneration != areaGeneration || s != nil && s.payload.Phase != "OPEN" {
+		if p == nil || p.epoch != epoch || p.Status == "playing" || r.claw.OperatorID == id || seq <= p.Seq || intent.Incarnation != r.incarnation || intent.AreaGeneration != areaGeneration || s != nil && s.payload.Phase != "OPEN" {
 			result = ErrActivitySuperseded
 			return
 		}
