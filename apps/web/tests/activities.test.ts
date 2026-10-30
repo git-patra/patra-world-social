@@ -149,3 +149,41 @@ test('spectator_quick_B_renders_four_riders_without_changing_historical_fixture_
  assert.equal(quick.state.areas.find(a=>a.areaId==='race')?.payload.phase,'OPEN');
  assert.deepEqual(combinedFixture('A',1000,0,true).state.areas,[],'closed-race workload does not acquire casual OPEN state');
 });
+
+const flushReads=()=>new Promise<void>(resolve=>setImmediate(resolve));
+test('lobby_metadata_reads_only_missing_matches_and_explicit_resync_refreshes_all',async()=>{
+ const store=new ActivityStore(),commands:{type:string;matchId?:string}[]=[];
+ let lobbies=['race','penalty','pingpong','blaster'].map(kind=>lobby(kind,kind));
+ const s={worldId:'world',selfId:'observer',status:'online',serverNow:()=>1000,async gameCommand(type:string,payload:any){commands.push({type,matchId:payload.matchId});if(type==='activity.snapshot')return{activities:[]};if(type==='lobby.list')return{worldId:'world',lobbies};return{...race(payload.matchId),actors:[],chosen:[],turn:1}}};
+ try{
+  await store.attach(s);assert.equal(store.snapshot().games.length,4);commands.length=0;
+  for(let i=0;i<3;i++){store.receive('lobby.updated',{worldId:'world',lobbies:lobbies.map(l=>({...l,spectators:[`watcher-${i}`]}))});await flushReads()}
+  assert.equal(commands.length,0,'three ordinary updates must not produce 12 snapshot control reads');
+  lobbies=lobbies.map(l=>l.gameType==='race'?{...l,matchId:'new-race'}:l);store.receive('lobby.updated',{worldId:'world',lobbies});await flushReads();
+  assert.deepEqual(commands,[{type:'race.snapshot',matchId:'new-race'}]);assert.ok(store.snapshot().games.some(g=>g.matchId==='new-race'));
+  commands.length=0;await store.reload();assert.equal(commands.length,6,'explicit reconnect/resync reads metadata, lobbies and every match');
+ }finally{store.dispose()}
+});
+test('lobby_missing_reads_deduplicate_pending_retry_failure_and_fence_old_identity',async(t)=>{
+ let now=1000;t.mock.method(performance,'now',()=>now);
+ const store=new ActivityStore(),reads:{id:string;resolve:(value:any)=>void;reject:(error:Error)=>void}[]=[];
+ const s={worldId:'world',selfId:'observer',status:'online',serverNow:()=>1000,async gameCommand(type:string,payload:any):Promise<any>{if(type==='activity.snapshot')return{activities:[]};if(type==='lobby.list')return{lobbies:[]};return new Promise((resolve,reject)=>reads.push({id:payload.matchId,resolve,reject}))}};
+ const update=(id:string)=>store.receive('lobby.updated',{worldId:'world',lobbies:[lobby(id)]});
+ try{
+  await store.attach(s);update('old');update('old');update('old');assert.equal(reads.length,1,'in-flight missing match is read once');
+  reads[0].reject(new Error('transient'));await flushReads();for(let i=0;i<20;i++)update('old');assert.equal(reads.length,1,'failed-read storm is bounded by retry cooldown');
+  now+=1000;update('old');assert.equal(reads.length,2,'metadata retries a failed read after cooldown');
+  update('new');assert.equal(reads.length,3);reads[1].resolve(race('old'));reads[2].resolve(race('new'));await flushReads();assert.deepEqual(store.snapshot().games.map(g=>g.matchId),['new']);
+ }finally{store.dispose()}
+});
+test('explicit_resync_supersedes_pending_reads_and_bypasses_failure_cooldown',async()=>{
+ const store=new ActivityStore(),reads:{resolve:(value:any)=>void;reject:(error:Error)=>void}[]=[];
+ let lobbies:ReturnType<typeof lobby>[]=[];
+ const s={worldId:'world',selfId:'observer',status:'online',serverNow:()=>1000,async gameCommand(type:string):Promise<any>{if(type==='activity.snapshot')return{activities:[]};if(type==='lobby.list')return{lobbies};return new Promise((resolve,reject)=>reads.push({resolve,reject}))}};
+ try{
+  await store.attach(s);lobbies=[lobby('same')];store.receive('lobby.updated',{worldId:'world',lobbies});
+  const resync=store.reload();await flushReads();assert.equal(reads.length,2,'full resync supersedes pending missing read');
+  reads[0].resolve({...race('same'),frame:100});reads[1].reject(new Error('transient'));await resync;assert.equal(store.snapshot().games.length,0,'old read remains fenced');
+  const retry=store.reload();await flushReads();assert.equal(reads.length,3,'explicit resync bypasses ordinary failure cooldown');reads[2].resolve(race('same'));await retry;assert.equal(store.snapshot().games.length,1);
+ }finally{store.dispose()}
+});

@@ -488,6 +488,11 @@ func (h *Hub) closeEmptyRoom(worldID string) {
 		}
 		r.Close()
 		delete(h.rooms, worldID)
+		for key, state := range h.areaStates {
+			if state.WorldID == worldID {
+				delete(h.areaStates, key)
+			}
+		}
 	}
 }
 func (h *Hub) expire() {

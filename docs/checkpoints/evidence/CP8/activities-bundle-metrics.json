@@ -1,6 +1,6 @@
 {
   "baselineCommit": "3079f05",
-  "candidateBase": "c9fdec6 plus Task11 frontend fixes",
+  "candidateBase": "e5909fe plus final reviewed fixes",
   "method": "Node25.2.1 zlib.gzipSync default; initial includes index.html module scripts and modulepreload imports; bytes/1024=KiB. All JS chunks also totaled once.",
   "baseline": {
     "initialGzipBytes": 134744,
@@ -21,41 +21,41 @@
     ]
   },
   "candidate": {
-    "initialGzipBytes": 142037,
-    "allJSGzipBytes": 267556,
+    "initialGzipBytes": 142173,
+    "allJSGzipBytes": 267686,
     "chunks": [
       {
-        "file": "BlasterHUD-KL-QL03G.js",
+        "file": "BlasterHUD-DqAWav0E.js",
         "bytes": 2537,
-        "gzipBytes": 1247,
+        "gzipBytes": 1246,
         "initial": false
       },
       {
-        "file": "BlasterMenu-Y8J0SPVr.js",
+        "file": "BlasterMenu-wqUEKELV.js",
         "bytes": 1214,
-        "gzipBytes": 643,
+        "gzipBytes": 642,
         "initial": false
       },
       {
-        "file": "Duck-CAzrAmeE.js",
+        "file": "Duck-sgUq5wn7.js",
         "bytes": 13181,
-        "gzipBytes": 5151,
+        "gzipBytes": 5150,
         "initial": false
       },
       {
-        "file": "Duel-Jk1JhqFl.js",
+        "file": "Duel-u50g60Tc.js",
         "bytes": 1977,
         "gzipBytes": 955,
         "initial": false
       },
       {
-        "file": "PingpongMenu-DFbcGNz0.js",
+        "file": "PingpongMenu-CZDyElbg.js",
         "bytes": 1239,
-        "gzipBytes": 643,
+        "gzipBytes": 644,
         "initial": false
       },
       {
-        "file": "Race-BabF540u.js",
+        "file": "Race-DXYONsP6.js",
         "bytes": 1969,
         "gzipBytes": 985,
         "initial": false
@@ -67,25 +67,25 @@
         "initial": true
       },
       {
-        "file": "blaster-Ca6qli6C.js",
+        "file": "blaster-CgUoG0fF.js",
         "bytes": 2324,
-        "gzipBytes": 1121,
+        "gzipBytes": 1119,
         "initial": false
       },
       {
-        "file": "claw-CZFyssWr.js",
+        "file": "claw-DPDsHneW.js",
         "bytes": 1703,
-        "gzipBytes": 853,
+        "gzipBytes": 852,
         "initial": false
       },
       {
-        "file": "completion-VsYYhUSB.js",
+        "file": "completion-0X61p6y8.js",
         "bytes": 907,
-        "gzipBytes": 516,
+        "gzipBytes": 515,
         "initial": false
       },
       {
-        "file": "fishing-B-X7BLsP.js",
+        "file": "fishing-Bq2jWITu.js",
         "bytes": 1180,
         "gzipBytes": 704,
         "initial": false
@@ -97,9 +97,9 @@
         "initial": false
       },
       {
-        "file": "index-Duq2do7L.js",
-        "bytes": 451930,
-        "gzipBytes": 139607,
+        "file": "index-minbxZXK.js",
+        "bytes": 452531,
+        "gzipBytes": 139743,
         "initial": true
       },
       {
@@ -109,7 +109,7 @@
         "initial": false
       },
       {
-        "file": "local-DaDZumNX.js",
+        "file": "local-Czp4grHY.js",
         "bytes": 4946,
         "gzipBytes": 2208,
         "initial": false
@@ -139,37 +139,37 @@
         "initial": true
       },
       {
-        "file": "session-BZmkDhdR.js",
-        "bytes": 3387,
-        "gzipBytes": 1357,
-        "initial": false
-      },
-      {
-        "file": "session-Bhy_Swj0.js",
-        "bytes": 1330,
-        "gzipBytes": 675,
-        "initial": false
-      },
-      {
-        "file": "session-CcXTIR_2.js",
+        "file": "session-BGGttU7q.js",
         "bytes": 4854,
-        "gzipBytes": 1931,
+        "gzipBytes": 1929,
         "initial": false
       },
       {
-        "file": "session-DaGNIxnw.js",
+        "file": "session-DzA9o-9J.js",
         "bytes": 6077,
         "gzipBytes": 2549,
         "initial": false
       },
       {
-        "file": "vehicles-DL6V3wE5.js",
+        "file": "session-DzcZuIcj.js",
+        "bytes": 1330,
+        "gzipBytes": 677,
+        "initial": false
+      },
+      {
+        "file": "session-qcEFXHqu.js",
+        "bytes": 3387,
+        "gzipBytes": 1356,
+        "initial": false
+      },
+      {
+        "file": "vehicles-TdWI6jg8.js",
         "bytes": 796,
-        "gzipBytes": 479,
+        "gzipBytes": 480,
         "initial": false
       }
     ]
   },
-  "addedInitialKiB": 7.1220703125,
-  "addedAllJSKiB": 30.4501953125
+  "addedInitialKiB": 7.2548828125,
+  "addedAllJSKiB": 30.5771484375
 }

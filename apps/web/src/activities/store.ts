@@ -110,6 +110,7 @@ export class ActivityStore {
     private areaRevisions = new Map<string, number>();
     private retiredIncarnations = new Map<string, Set<string>>();
     private gameReads = new Map<string, number>();
+    private gameRetryAt = new Map<string, number>();
     private games = new Map<string, ActivityGame>();
     private areas = new Map<string, AreaSnapshot>();
     private lobbies: ActivityLobby[] = [];
@@ -201,6 +202,7 @@ export class ActivityStore {
         this.areaRevisions.clear();
         this.retiredIncarnations.clear();
         this.gameReads.clear();
+        this.gameRetryAt.clear();
         this.lobbies = [];
         this.sending = false;
         this.state = { ...this.state, message: '' };
@@ -229,7 +231,7 @@ export class ActivityStore {
                     worldId: string;
                     lobbies: ActivityLobby[];
                 });
-            await this.loadGames();
+            await this.loadGames(true);
         }
         catch (e) {
             if (epoch === this.epoch && request === this.resyncRequest) {
@@ -246,26 +248,38 @@ export class ActivityStore {
             return;
         this.lobbyRevision++;
         this.lobbies = payload.lobbies;
+        for (const id of this.gameRetryAt.keys())
+            if (!this.lobbies.some(l => l.matchId === id))
+                this.gameRetryAt.delete(id);
         for (const [id] of this.games)
             if (!this.lobbies.some(l => l.matchId === id))
                 this.games.delete(id);
         this.publish();
     }
-    private async loadGames() {
+    private async loadGames(force = false) {
         const socket = this.socket, epoch = this.epoch, resync = this.resyncRequest;
         if (!socket || socket.status !== 'online')
             return;
         const lobbies = this.lobbies.filter(l => (l.gameType === 'race' || l.gameType === 'penalty' || l.gameType === 'pingpong' || l.gameType === 'blaster') && l.matchId);
         await Promise.all(lobbies.map(async (lobby) => {
+            if (!force && (this.games.has(lobby.matchId!) || this.gameReads.has(lobby.matchId!) || performance.now() < (this.gameRetryAt.get(lobby.matchId!) ?? 0)))
+                return;
             const read = ++this.readSerial;
             this.gameReads.set(lobby.matchId!, read);
             try {
                 const snapshot = await socket.gameCommand(`${lobby.gameType}.snapshot`, { matchId: lobby.matchId });
                 if (epoch === this.epoch && socket === this.socket && resync === this.resyncRequest && this.gameReads.get(lobby.matchId!) === read) {
+                    this.gameRetryAt.delete(lobby.matchId!);
                     this.acceptGame(lobby.gameType as ActivityKind, snapshot as RaceSnapshot | PublicPenalty | PingpongSnapshot | BlasterSnapshot);
                 }
             }
             catch {
+                if (epoch === this.epoch && socket === this.socket && resync === this.resyncRequest && this.gameReads.get(lobby.matchId!) === read && this.lobbies.some(l => l.matchId === lobby.matchId))
+                    this.gameRetryAt.set(lobby.matchId!, performance.now() + 1000);
+            }
+            finally {
+                if (this.gameReads.get(lobby.matchId!) === read)
+                    this.gameReads.delete(lobby.matchId!);
             }
         }));
     }

@@ -2,7 +2,7 @@
 
 Updated 28 October 2026. User resumed with an approved Gather-like outdoor village redesign, then authorized implementation, tests, local commit including the plan, and a public personal GitHub repository on `main`. This document records context and remaining acceptance limits.
 
-Current continuation: [Activities resume](handoff/ACTIVITIES-RESUME.md) — Tasks0–11 implemented, regression/performance recorded; final review/publication pending. Read this before older snapshots.
+Current continuation: [Activities resume](handoff/ACTIVITIES-RESUME.md) — Tasks0–11 implemented and reviewed; whole-branch fixes approved, regression/performance and remaining gaps recorded. Read this before older snapshots.
 
 ## Project and non-negotiable scope
 
@@ -20,12 +20,12 @@ Historical T14 snapshot: `67371621b1d650fcd16533a179993905bd7da79c`. Active acti
 - Approved outdoor Kampung Senja, fullscreen canvas without the legacy sidebar, semi-English HUD, Map and activity menu. Existing game, account, social, history and voice mounts remain.
 - Original village integration used `kampung-senja-v1` navigation and voice geometry are mirrored into Go; private-world movement stays server-authoritative.
 - Plan: [Kampung Senja integration](superpowers/plans/2026-10-28-kampung-senja-integration.md). Evidence/review: [integration verification](checkpoints/evidence/CP8/kampung-senja-integration.md), [fresh review](checkpoints/evidence/CP8/kampung-review.md).
-- Latest local frontend is `http://127.0.0.1:4176/`; API `127.0.0.1:8080`, dedicated PostgreSQL `127.0.0.1:55432`. Design-only prototype remains on4180 for reference.
+- Latest local production preview is `http://127.0.0.1:4181/`; API `127.0.0.1:8080`, dedicated PostgreSQL `127.0.0.1:55432`. Design-only prototype remains on4180 for reference.
 - The following T14 snapshot history is retained. Activities Task0 completed the pending scoped R1/R2 review; external browser/LiveKit and T16 acceptance remain pending.
 
 ## Adjustment aktivitas — implementasi berjalan
 
-28 Oktober 2026, setelah publikasi GitHub: user meminta **plan dulu** untuk pingpong, capit boneka, free ride mobil/sepeda, area steril saat race/penalti, bola bebas dan penonton, Blaster top-down, fishing tanpa history, minimap interaktif, SFX, dan popup terpusat. User memilih shooting solo/co-op melawan bot. User kemudian mengizinkan implementasi seluruh enam tahap. Tahap awal UI/minimap/SFX dan prasyarat reconnect/startup telah diimplementasikan serta direview; lihat [evidence tahap 1](checkpoints/evidence/CP8/activities-stage1.md). Task3 area authority dan Task4 scene race/penalti/input telah lolos review, termasuk perbaikan urutan snapshot dan multi-pointer. Task5 free ride mobil/sepeda juga selesai dan direview, termasuk browser lokal serta race detector; Task6 bola bebas/penalti/penonton selesai dan direview, termasuk perbaikan tendangan tanpa membatalkan rute jalan. Task7 pingpong selesai dan review approved: Go/TS goldens, WS+DB BOT/dua manusia, serta guest browser completion/history lulus. Task8 claw,Task9 fishing danTask10Blaster selesai/direview; Task11 regression/load/optimasi selesai diimplementasikan; final review/publication masih berjalan. Asset sekarang `kampung-senja-v2`, wire protocol2; metadata hasil historis protocol1 dipertahankan.
+28 Oktober 2026, setelah publikasi GitHub: user meminta **plan dulu** untuk pingpong, capit boneka, free ride mobil/sepeda, area steril saat race/penalti, bola bebas dan penonton, Blaster top-down, fishing tanpa history, minimap interaktif, SFX, dan popup terpusat. User memilih shooting solo/co-op melawan bot. User kemudian mengizinkan implementasi seluruh enam tahap. Tahap awal UI/minimap/SFX dan prasyarat reconnect/startup telah diimplementasikan serta direview; lihat [evidence tahap 1](checkpoints/evidence/CP8/activities-stage1.md). Task3 area authority dan Task4 scene race/penalti/input telah lolos review, termasuk perbaikan urutan snapshot dan multi-pointer. Task5 free ride mobil/sepeda juga selesai dan direview, termasuk browser lokal serta race detector; Task6 bola bebas/penalti/penonton selesai dan direview, termasuk perbaikan tendangan tanpa membatalkan rute jalan. Task7 pingpong selesai dan review approved: Go/TS goldens, WS+DB BOT/dua manusia, serta guest browser completion/history lulus. Task8 claw,Task9 fishing danTask10Blaster selesai/direview; Task11 regression/load/optimasi selesai diimplementasikan; whole-branch review dan satu putaran perbaikan telah approved. Asset sekarang `kampung-senja-v2`, wire protocol2; metadata hasil historis protocol1 dipertahankan.
 
 - [Design proposal](superpowers/specs/2026-10-28-world-activities-design.md)
 - [Implementation plan](superpowers/plans/2026-10-28-world-activities-adjustment.md)

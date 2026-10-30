@@ -4,7 +4,7 @@ This is the current handoff; older T14-only summaries and README acceptance word
 
 ## State
 
-Repo `/Users/patra/Project/patra-world-social`, branch `feat/world-activities`, Task8 `4aba8fc`, Task9 `d4e678f`, Task10 `c9fdec6`; Task11 is included with this handoff (inspect Git tip). Public repo `git-patra/patra-world-social` already exists; locally tracked `origin/main` is `a71fd85`. New activity commits have not been pushed. User authorized local commits including plan/evidence and eventual push to main; no deployment. Source repo `/Users/patra/Project/patra-world` must stay untouched.
+Repo `/Users/patra/Project/patra-world-social`, implementation branch `feat/world-activities` (retained), final integration target `main`, Task8 `4aba8fc`, Task9 `d4e678f`, Task10 `c9fdec6`; Task11 `e5909fe`; final review fixes are included with this handoff (inspect Git tip). Public repo `git-patra/patra-world-social` already exists; the activity range starts at `a71fd85`. Final fast-forward main publication is authorized; verify the final remote tip with Git. User authorized local commits including plan/evidence and eventual push to main; no deployment. Source repo `/Users/patra/Project/patra-world` must stay untouched.
 
 Plan: `docs/superpowers/plans/2026-10-28-world-activities-adjustment.md`; spec: `docs/superpowers/specs/2026-10-28-world-activities-design.md`. Follow existing six-stage order (expanded into Tasks0–11). Ledger: `.superpowers/sdd/2026-10-28-world-activities-adjustment/progress.md`; reports/briefs in same ignored directory. Portable evidence: `docs/checkpoints/evidence/CP8/activities-*.md`.
 
@@ -23,11 +23,11 @@ Task10 Blaster complete after independent fix-round review:1–4humans solo/co-o
 
 Task11 implemented: final full Go race/integration (22 test-bearing packages), vet/build, frontend regression, actual WS+DB A20/B20/A60, capped Blaster wire, owner timing hooks and transport coalescing/interest budgets. A 15-minute synthetic browser profile completed20 lifecycles with zero tracked resources after cleanup. Render p95=4.4ms; raw heap is not post-GC acceptance. Historical B render omitted free vehicles; corrected quick spectator fixture covers them. Normal spectator cadence interpolation corrected after independent review. See [combined evidence](../checkpoints/evidence/CP8/activities-verification.md), [server](../checkpoints/evidence/CP8/activities-server.md), [runbook](../runbooks/activities-verification.md).
 
-Remaining before publication: scoped Task11 re-review, fresh whole-branch review, final local runtime verification and authorized fast-forward push to main. No public deployment. External acceptance stays pending.
+Tasks0–11 implementation and independent reviews are complete. Whole-branch review found three Important issues (claw transport quota, reactive snapshot bursts, world cache cleanup) and one Minor E-control issue; one combined correction wave and scoped re-review resolved all four. Final frontend4JS+239TS/typecheck/lint/build pass; full Go race/integration, runtime and publication evidence are in activities-final-review.md. No public deployment. External acceptance stays pending.
 
 ## Runtime and safeguards
 
-- Frontend dev4176, stable production preview4181, old designreference4180. Preview4181 restarted with latest production build on30October; API8080 started fromTask8 build and healthPASS: rebuild/restart latest at final; don't claim live new multiplayer until done.
+- Frontend dev4176, stable production preview4181, old designreference4180. Preview4181 restarted with latest production build on30October; API8080 rebuilt from final fixes and healthPASS. After interruption, the dedicated VM/SSH forward were recovered preserving PostgreSQL volume; no other profile was changed.
 - Pinned Go `.cache/toolchains/golang.org/toolchain@v0.0.1-go1.26.8.darwin-arm64/bin/go`, `GOTOOLCHAIN=local`, `GOCACHE=$PWD/.cache/go-build`. Export ignored `.cache/database.env` quietly. Never print/commit credentials.
 - DB dedicated Colima profile `patra-world-social`, Docker context `colima-patra-world-social`, container `patra-world-social-postgres`,127.0.0.1:55432. Root recovered broken VM and stale SSH forward preserving volume; hostPGhandshakeN andTask7/8actualtestsPASS. Never touch default/other profiles.
 - Browser through CUA only; no shell browser automation or injected authentication. Current4181history contains priorrace5/5,penalty3:5,pingpong0:1; preserveuser/testdata. Viewportoverride nowapplies: Task8verified390×844proxy; physicalmobile remainsdeferred.
@@ -35,4 +35,4 @@ Remaining before publication: scoped Task11 re-review, fresh whole-branch review
 - Task11 resolves delayed ride SFX, Pingpong rule drift guard, finished-racer bot attribution and capped Blaster wire. Average traffic budgets pass in measured windows; complete-second peaks exceed participant40KiB and spectator12KiB. Physical60fps and post-GC retained heap remain unverified.
 - OnlyCP1officialPASS. Authenticatedbrowser,LiveKitstaging,physicalmobileacceptanceremaindeferred. Task11's15minprofiledoesnotcompleteolderT16's60minsoak/backuprestore/readiness/voiceacceptance.
 
-This handoff is committed with each reviewed activity stage; continue from the latest review/publication status in Git and the ledger.
+Next work is the explicitly open acceptance/T16 list, not a restart of activities implementation. See activities-final-review.md for the carried guest timestamp, unavailable Duck detail and chat-test reliability items.

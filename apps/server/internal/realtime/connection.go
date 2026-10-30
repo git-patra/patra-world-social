@@ -137,7 +137,7 @@ func NewHandler(h *Hub, origin string, development bool) http.Handler {
 						return
 					}
 				}
-				if cmd.Type == "player.input" || cmd.Type == "player.destination" || cmd.Type == "race.input" || cmd.Type == "blaster.input" || cmd.Type == "pingpong.input" || rideDriveCommand(cmd) {
+				if cmd.Type == "player.input" || cmd.Type == "player.destination" || cmd.Type == "race.input" || cmd.Type == "blaster.input" || cmd.Type == "pingpong.input" || rideDriveCommand(cmd) || clawMoveCommand(cmd) {
 					movement++
 					if movement > 60 {
 						reason = "movement rate exceeded"
@@ -297,6 +297,16 @@ func rideDriveCommand(cmd Command) bool {
 		Action string `json:"action"`
 	}
 	return json.Unmarshal(cmd.Payload, &p) == nil && p.Action == "drive"
+}
+
+func clawMoveCommand(cmd Command) bool {
+	if cmd.Type != "activity.claw" {
+		return false
+	}
+	var p struct {
+		Action string `json:"action"`
+	}
+	return json.Unmarshal(cmd.Payload, &p) == nil && p.Action == "claw.move"
 }
 
 // The cache is scoped to one connection (eleven fixed public activity slots).

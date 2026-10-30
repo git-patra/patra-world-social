@@ -131,7 +131,7 @@ media.addEventListener('change',e=>{motion=!e.matches;updateMotion();});
 document.addEventListener('keydown',event=>{
  if(document.body.dataset.controls==='touch'||!worldVisible||document.querySelector('dialog[open]')||event.ctrlKey||event.metaKey||event.altKey||!acceptsMovement(event.target))return;
  const key=event.key.toLowerCase();
- if(key==='e'&&['walk','ride'].includes(activityInput.mode())){event.preventDefault();if(!event.repeat)world.interact();}
+ if(key==='e'&&['walk','ride','claw','fishing'].includes(activityInput.mode())){event.preventDefault();if(!event.repeat)world.interact();}
  else if(key==='m'){event.preventDefault();$('#list-button').click();}
 });
 const pointerHold=new PointerHold((dx,dy)=>activityInput.direction(dx,dy),()=>activityInput.direction(0,0));

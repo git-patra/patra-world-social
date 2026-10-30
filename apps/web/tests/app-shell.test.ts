@@ -43,6 +43,7 @@ function shellFixture(pixelRatio=1){
   focus(){if(this.parent&&dialogs.includes(this.parent)&&!this.parent.open)return;if(dialogs.some(d=>d.open&&!d.contains(this)))return;document.activeElement=this}
   scrollIntoView(){}
   closest(selector:string):Element|null{
+   if(selector==='input,textarea,select,[contenteditable="true"]'&&this.id==='input')return this;
    if(selector==='[data-project]'&&this.dataset.project)return this;
    if(selector==='#places')return this.parent?.id==='#places'?this.parent:null;
    if(selector==='button'&&(this.dataset.move||this.id.startsWith('#')))return this;
@@ -80,11 +81,11 @@ function shellFixture(pixelRatio=1){
   for(const [id,timer]of [...timers])if(timer.at<=now){if(timer.repeat)timer.at=now+timer.repeat;else timers.delete(id);timer.run()}
   const pending=[...frames.values()];frames.clear();pending.forEach(fn=>fn(now));
  }
- return{world,get,pad,tick,
+ return{world,get,pad,tick,input:environment.activityInput as InputRouter,
   routerKey:(type:string,key:string)=>emit(windowEvents,type,{type,key,target:get('body'),preventDefault(){},stopImmediatePropagation(){}}),
   padDown:(pointerId:number)=>emit(pad.listeners,'pointerdown',{pointerId,currentTarget:pad,preventDefault(){}}),
   pointerEnd:(pointerId:number)=>emit(windowEvents,'pointerup',{pointerId}),
-  repeatInput:()=>(environment.activityInput as InputRouter).repeat(),visibility:(hidden:boolean)=>{document.hidden=hidden;emit(documentEvents,'visibilitychange',{})},frameCount:()=>frames.size,keydown:(key:string,repeat=false)=>emit(documentEvents,'keydown',{key,repeat,target:pad,preventDefault(){}}),keyup:(key:string)=>emit(windowEvents,'keyup',{key}),choose(id:string){const choice=new Element();choice.dataset.project=id;choice.parent=get('#places');choice.click(1)},restore(){for(const close of activitySubscriptions)close();activities.clearLocal();world.destroy();Object.assign(globalThis,original)}};
+  repeatInput:()=>(environment.activityInput as InputRouter).repeat(),visibility:(hidden:boolean)=>{document.hidden=hidden;emit(documentEvents,'visibilitychange',{})},frameCount:()=>frames.size,keydown:(key:string,repeat=false,target=pad)=>emit(documentEvents,'keydown',{key,repeat,target,preventDefault(){}}),keyup:(key:string)=>emit(windowEvents,'keyup',{key}),choose(id:string){const choice=new Element();choice.dataset.project=id;choice.parent=get('#places');choice.click(1)},restore(){for(const close of activitySubscriptions)close();activities.clearLocal();world.destroy();Object.assign(globalThis,original)}};
 }
 
 test('actual Map selection retains its online destination after dialog close cleanup',async()=>{
@@ -282,4 +283,21 @@ for(const end of ['pointerup','lostpointercapture','pointercancel'])test(`blaste
   pointer('pointerdown');shell.routerKey('keydown','d');assert.equal(inputs.at(-1).fire,true,'movement event preserves mouse fire');
   shell.world.setPaused(true);assert.equal(inputs.at(-1).fire,false);assert.equal(inputs.at(-1).x,0);assert.equal(inputs.at(-1).y,0);
  }finally{uninstall();unregister();activityInput.setOwner('walk');shell.restore()}
+});
+
+for(const mode of ['claw','fishing'] as const)test(`E performs advertised ${mode} action and respects input guards`,async()=>{
+ const shell=shellFixture();try{
+  if(mode==='claw')activities.interactClaw({x:41,y:24});else activities.interactFishing({x:53,y:31});
+  assert.equal(activities.snapshot().inputMode,mode);shell.input.setOwner(mode);
+  const guarded=()=>{assert.equal(activities.snapshot().inputMode,mode);if(mode==='fishing')assert.equal(activities.snapshot().fishing.find(s=>s.fishing.ownerId==='guest')?.fishing.phase,'waiting')};
+  shell.keydown('e',true);assert.equal(activities.snapshot().inputMode,mode,'repeat does not interact');
+  guarded();
+  shell.keydown('e',false,shell.get('input'));assert.equal(activities.snapshot().inputMode,mode,'typing does not interact');
+  guarded();
+  shell.get('#menu-dialog').showModal();shell.keydown('e');assert.equal(activities.snapshot().inputMode,mode,'modal does not interact');
+  guarded();
+  shell.get('#menu-dialog').close();await Promise.resolve();shell.keydown('e');
+  if(mode==='claw')assert.equal(activities.snapshot().inputMode,'walk','E exits the cabinet');
+  else assert.equal(activities.snapshot().fishing.find(s=>s.fishing.ownerId==='guest')?.fishing.phase,'result','E reels the waiting cast');
+ }finally{shell.restore()}
 });

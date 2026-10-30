@@ -3,9 +3,11 @@ package realtime
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/coder/websocket"
 	"net/http"
 	"net/http/httptest"
+	"patra-world-social/server/internal/world"
 	"strings"
 	"testing"
 	"time"
@@ -302,5 +304,104 @@ func TestProtocolOneHandshakeRequiresReloadBeforeAdmission(t *testing.T) {
 	defer h.mu.Unlock()
 	if len(h.seats) != 0 {
 		t.Fatal("incompatible client admitted")
+	}
+}
+
+// The production reader must admit a full aiming stream, including neutral input.
+func TestClawTransportSustainsAimingAndKeepsDiscreteLimit(t *testing.T) {
+	for _, action := range []string{"claw.move", "claw.enter", "claw.drop", "claw.leave"} {
+		t.Run(action, func(t *testing.T) {
+			h := newTestHub(t)
+			srv := httptest.NewServer(NewHandler(h, "http://village.test", true))
+			defer srv.Close()
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			c, _, err := websocket.Dial(ctx, "ws"+strings.TrimPrefix(srv.URL, "http")+"?protocolVersion=2&worldId=a", &websocket.DialOptions{HTTPHeader: http.Header{"Origin": {"http://village.test"}, "Cookie": {"patra_session=u"}}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer c.CloseNow()
+			_, raw, err := c.Read(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var ev Event
+			json.Unmarshal(raw, &ev)
+			var first PublicSnapshot
+			json.Unmarshal(ev.Payload, &first)
+			j := JoinContext{Token: "u", WorldID: "a", SessionID: first.SessionID, Epoch: first.Epoch}
+			at := world.Point{X: 41, Y: 24}
+			if err = h.SetActivity(ctx, "a", "u", false, &at); err != nil {
+				t.Fatal(err)
+			}
+			states, err := h.ActivitySnapshots(ctx, j)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var intent world.CasualIntent
+			for _, state := range states {
+				if state.Kind == "claw" {
+					intent = world.CasualIntent{Incarnation: state.Incarnation, Generation: state.Generation, MachineID: "claw-1", Action: "claw.enter"}
+				}
+			}
+			send := func(seq int, action string) error {
+				intent.Action = action
+				if action == "claw.move" && seq%2 == 0 {
+					intent.DX = 1
+				} else {
+					intent.DX = 0
+				}
+				payload, _ := json.Marshal(intent)
+				raw, _ := json.Marshal(Command{V: 2, CommandID: fmt.Sprint(seq), Seq: uint64(seq), WorldID: "a", Type: "activity.claw", Payload: payload})
+				if err := c.Write(ctx, websocket.MessageText, raw); err != nil {
+					return err
+				}
+				for {
+					_, raw, err := c.Read(ctx)
+					if err != nil {
+						return err
+					}
+					var event Event
+					json.Unmarshal(raw, &event)
+					var result struct {
+						CommandID string `json:"commandId"`
+					}
+					json.Unmarshal(event.Payload, &result)
+					if result.CommandID == fmt.Sprint(seq) {
+						if action == "claw.move" && event.Type != "command.ack" {
+							t.Fatalf("move rejected: %s", raw)
+						}
+						return nil
+					}
+				}
+			}
+			if action == "claw.move" {
+				if err := send(1, "claw.enter"); err != nil {
+					t.Fatal(err)
+				}
+				states, _ = h.ActivitySnapshots(ctx, j)
+				for _, state := range states {
+					if state.Kind == "claw" {
+						intent.Generation = state.Generation
+					}
+				}
+				for seq := 2; seq <= 27; seq++ {
+					time.Sleep(50 * time.Millisecond)
+					if err := send(seq, action); err != nil {
+						t.Fatalf("20Hz aiming closed at input %d: %v", seq-1, err)
+					}
+				}
+			} else {
+				for seq := 1; seq <= 11; seq++ {
+					err = send(seq, action)
+					if err != nil {
+						break
+					}
+				}
+				if websocket.CloseStatus(err) != websocket.StatusPolicyViolation || !strings.Contains(err.Error(), "control rate exceeded") {
+					t.Fatalf("discrete action escaped control limit: %v", err)
+				}
+			}
+		})
 	}
 }

@@ -1,10 +1,10 @@
 # Activities combined verification — 30 October 2026
 
-Approved activities plan, through Task10 commit `c9fdec6` plus Task11 changes. No public deployment. **Only CP1 is an official PASS.** Authenticated browser, LiveKit and physical mobile remain deferred. Backend test sessions and synthetic scenes are not substitutes for those gates.
+Approved activities plan, through Task11 commit `e5909fe` plus final review fixes. No public deployment. **Only CP1 is an official PASS.** Authenticated browser, LiveKit and physical mobile remain deferred. Backend test sessions and synthetic scenes are not substitutes for those gates.
 
 ## Automated regression
 
-Root ran `npm test`, `npm run typecheck`, `npm run lint`, and `npm run build` against the final frontend: **4 JavaScript + 234 bundled TypeScript tests passed**, zero failures/skips; typecheck, syntax lint and production build exited0. Entry bundle: `index-Duq2do7L.js`. Runner/compiler include every new activity unit file, feature modules, combined fixture and authored `activities.e2e.spec.ts`. The Playwright shell command was not run; CUA drove actual guest gameplay and fixture buttons.
+Root ran `npm test`, `npm run typecheck`, `npm run lint`, and `npm run build` against the final frontend: **4 JavaScript + 239 bundled TypeScript tests passed**, zero failures/skips; typecheck, syntax lint and production build exited0. Entry bundle: `index-minbxZXK.js`. Runner/compiler include every new activity unit file, feature modules, combined fixture and authored `activities.e2e.spec.ts`. The Playwright shell command was not run; CUA drove actual guest gameplay and fixture buttons.
 
 Pinned Go1.26.8 full race/integration, vet/build and focused authority/codec/regression evidence is recorded in [server verification](activities-server.md) and the implementation report. Final-source full Go race/integration passed22test-bearing packages; vet and build exited0. The final load fixture passed all3scenarios.
 
@@ -15,9 +15,9 @@ Rebuilt immutable `3079f05` with `git archive` into an ignored baseline director
 | Measure | Result | Budget |
 |---|---:|---:|
 | Baseline initial gzip |134744B|—|
-| Candidate initial gzip |142037B|—|
-| Added initial JS |7.122KiB|≤75KiB|
-| Added all JS, including lazy/shared chunks once |30.450KiB|Reported separately|
+| Candidate initial gzip |142173B|—|
+| Added initial JS |7.255KiB|≤75KiB|
+| Added all JS, including lazy/shared chunks once |30.577KiB|Reported separately|
 | Largest additional noninitial chunk (legacy Duck lazy extraction) |about5.03KiB|New games each≤50KiB|
 | Added compressed SFX bank |0B, existing synth|≤200KiB|
 
@@ -74,3 +74,11 @@ Read-only source integrity: `patra-world` remains at `8d969212d91804e06225f5b1a7
 The final production scene was measured separately using immutable `activities-combined-CB_e5eYF.js`, SHA256 `42d20250688c922dfe557fb344fbb70420ff42b61277d5d5f8b0e98ae07207d8`. CUA clicked the explicit20s spectator button; no state/auth injection. [Raw report](activities-profile-spectator.json), [screenshot](activities-profile-spectator.png):20021ms,4lifecycles,300/600ms snapshots,603render callbacks, CPU p50/p95/p99=3.1/5.0/5.5ms, maximum51ms; frame interval p95=34.2ms and zero measured intervals>50ms. These are separate metrics; the51ms CPU outlier is retained, not hidden. All four cleanup rows are zero across RAF/timers/listeners/audio. Hidden time0. This quick mode supplies OPEN area metadata and the production-scene test verifies four free-vehicle actors in B. It validates the affected interpolation/vehicle path, not a replacement15-minute or physical60fps claim. The historical100ms fixture defaults and raw artifact remain unchanged.
 
 Final post-fix root fullfrontend4JS+234TS/typecheck/lint/build PASS; the frontend-only fix does not alter the already measured server tree. Focused review regressions went44/51→51/51; quick-fixture vehicle regression51/52→52/52.
+
+## Final branch correction validation
+
+Whole-branch review found and one correction wave addresses online claw input quota, reactive snapshot bursts, world-cache reclamation, and advertised E controls. [Review](activities-final-review.md), [implementation/RED→GREEN report](activities-final-fixes.md). Final frontend4JS+239TS/typecheck/lint/build passed. Targeted actual WebSocket-race tests passed normal20Hz claw input and retained discrete limits; focused90frontend tests cover pending/new/failed/resync snapshot reads with1s failed-read cooldown, stale response fences and modal/text/repeat control guards.
+
+CUA production build `index-minbxZXK.js` verified E at41,24 enters claw(20s) and a second E returns Ready. At53,30 E changes fishing Ready→Waiting; immediate second E produces the expected early-reel transient result “Lepas! Coba lagi”. [Claw](activities-final-claw-e.png), [fishing](activities-final-fishing-e.png). This is guest evidence only. No history/reset/account side effects were invoked.
+
+After interruption, the dedicated Colima VM was broken and PostgreSQL returned I/O errors before integration assertions. Root restarted only that existing profile/container, preserved the volume, replaced its stale loopback SSH forward, and observed PostgreSQL automatic recovery/readiness plus the host SSL protocol responseN. The failed attempt remains diagnostic, not a pass. Final full integration result is recorded in the final-review report.
