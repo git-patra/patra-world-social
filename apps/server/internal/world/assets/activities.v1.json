@@ -252,5 +252,18 @@
         "y": 0.75
       }
     ]
+  },
+  "fishingRules": {
+    "waitMinMs": 1500,
+    "waitMaxMs": 3500,
+    "biteMs": 2000,
+    "resultMs": 3000,
+    "proximity": 1.25,
+    "catches": [
+      "fish",
+      "boot",
+      "can",
+      "leaf"
+    ]
   }
 }

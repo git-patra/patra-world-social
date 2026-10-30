@@ -42,9 +42,9 @@ function updateMotion(){
 function notify(message){$('#travel-status').textContent=message;}
 function updateInteraction(){
  const state=activities.snapshot(),station=stations.find(s=>s.id===nearby);
- const riding=state.inputMode==='ride',vehicle=state.nearbyRide,football=state.nearbyFootball,claw=state.inputMode==='claw'||state.inputMode==='walk'&&state.nearbyClaw;
- $('#interact-button').disabled=!(claw||football||riding||vehicle||station);
- $('#interact-button span').textContent=claw?state.inputMode==='claw'?'Keluar capit':state.claw?.operatorId?`Dipakai ${state.claw.operatorName}`:'Capit boneka':football?'Kick':riding?'Turun':vehicle?`Naik ${vehicle.kind==='bicycle'?'Sepeda':'Mobil'}`:station?`Explore ${station.name}`:'Dekati aktivitas';
+ const riding=state.inputMode==='ride',vehicle=state.nearbyRide,football=state.nearbyFootball,fishing=state.inputMode==='fishing'||state.inputMode==='walk'&&state.nearbyFishing,claw=state.inputMode==='claw'||state.inputMode==='walk'&&state.nearbyClaw;
+ $('#interact-button').disabled=!(fishing||claw||football||riding||vehicle||station);
+ $('#interact-button span').textContent=fishing?state.inputMode==='fishing'?'Reel · pancing':state.nearbyFishing?.fishing.ownerId?'Spot dipakai':'Cast · pancing':claw?state.inputMode==='claw'?'Keluar capit':state.claw?.operatorId?`Dipakai ${state.claw.operatorName}`:'Capit boneka':football?'Kick':riding?'Turun':vehicle?`Naik ${vehicle.kind==='bicycle'?'Sepeda':'Mobil'}`:station?`Explore ${station.name}`:'Dekati aktivitas';
  if(riding)$('#current-location').textContent=stations.find(s=>s.id==='race').name;
 }
 
@@ -88,7 +88,7 @@ function openProject(id){
  if(!dialog.open)showDialog();
  else {dialog.scrollTop=0;$('#close-dialog').focus();}
  $('#back-to-world').onclick=()=>dialog.close();
- $('#walk-to-place').onclick=()=>closeDialogThen(dialog,()=>{syncWorldPause();id==='claw'?world.walkToPoint({x:41,y:24}):id==='pingpong'?world.walkToPoint({x:45,y:25}):world.travelTo(id);notify(`Walking to ${station.name}.`);});
+ $('#walk-to-place').onclick=()=>closeDialogThen(dialog,()=>{syncWorldPause();id==='river'?world.walkToPoint({x:53,y:30}):id==='claw'?world.walkToPoint({x:41,y:24}):id==='pingpong'?world.walkToPoint({x:45,y:25}):world.travelTo(id);notify(`Walking to ${station.name}.`);});
  if(id==='warkop')cleanupDemo=mountVoicePanel($('#voice-root'));
  if(['race','penalty','duck','pingpong'].includes(id))cleanupDemo=mountLobbyPanel($('#lobby-root'),id);
  if(id==='arcade')cleanupDemo=mountPenalty($('#penalty-root'));
@@ -96,7 +96,7 @@ function openProject(id){
 document.addEventListener('click',event=>{const button=event.target.closest('[data-project]');if(!button)return;
  if(button.closest('#places')){
   const station=stations.find(s=>s.id===button.dataset.project);
-  hideWelcome();closeDialogThen($('#map-dialog'),()=>{syncWorldPause();notify(`Walking to ${station.name}. Tekan E untuk membuka aktivitas setelah tiba.`);station.id==='claw'?world.walkToPoint({x:41,y:24}):station.id==='pingpong'?world.walkToPoint({x:45,y:25}):world.travelTo(station.id);});
+  hideWelcome();closeDialogThen($('#map-dialog'),()=>{syncWorldPause();notify(`Walking to ${station.name}. Tekan E untuk membuka aktivitas setelah tiba.`);station.id==='river'?world.walkToPoint({x:53,y:30}):station.id==='claw'?world.walkToPoint({x:41,y:24}):station.id==='pingpong'?world.walkToPoint({x:45,y:25}):world.travelTo(station.id);});
  }else openProject(button.dataset.project);});
 function openMap(trigger){world.stopInput();world.drawMap($('#village-map'));openCenteredDialog($('#map-dialog'),trigger);}
 $('#list-button').onclick=()=>openMap($('#list-button'));

@@ -2,6 +2,8 @@ import { activityContract } from './contracts';
 import type { ActivitySnapshot, AreaSnapshot, VehiclesSnapshot, Vehicle, FootballSnapshot, Football } from './contracts';
 import { LocalVehicles, nearbyVehicle } from './vehicles';
 import { LocalFootball, nearFootball } from './football';
+import {LocalFishing,nearbyFishing,fishingSpawn} from './fishing';
+import type {Fishing,FishingSnapshot,FishingAction,FishingView} from './contracts';
 import { LocalClaw, nearClaw } from './claw';
 import type {Claw,ClawSnapshot,ClawAction} from './contracts';
 import { audio } from '../audio/service';
@@ -47,6 +49,8 @@ type LocalSession = {
 export type ActivityState = {
     games: ActivityGame[];
     areas: AreaSnapshot[];
+    fishing:FishingView[];
+    nearbyFishing:FishingView|null;
     claw: Claw | null;
     nearbyClaw:boolean;
     football: Football | null;
@@ -55,7 +59,7 @@ export type ActivityState = {
     nearbyRide: Vehicle | null;
     active: ActivityGame | null;
     spectating: ActivityGame | null;
-    inputMode: 'walk' | 'ride' | 'claw' | ActivityKind;
+    inputMode: 'walk' | 'ride' | 'claw' | 'fishing' | ActivityKind;
     lobbies: ActivityLobby[];
     selfId: string;
     online: boolean;
@@ -75,6 +79,9 @@ function newerArea(next: AreaSnapshot, previous: AreaSnapshot) {
 }
 const penaltyPhase = { choosing: 0, animation: 1, results: 2 };
 export class ActivityStore {
+    private localFishing=new LocalFishing();
+    private fishingStates=new Map<string,FishingSnapshot>();
+    private fishingPending=false;
     private localClaw=new LocalClaw();
     private clawState:ClawSnapshot|null=null;
     private clawHeld={x:0,y:0};
@@ -110,7 +117,7 @@ export class ActivityStore {
     private sending = false;
     private lastNotify = -Infinity;
     private timer: ReturnType<typeof setInterval> | null = null;
-    private state: ActivityState = { claw:this.localClaw.claw,nearbyClaw:false,games: [], areas: [], football: this.localFootball.ball, nearbyFootball: false, vehicles: this.localVehicles.vehicles, nearbyRide: null, lobbies: [], active: null, spectating: null, inputMode: 'walk', selfId: 'guest', online: false, connected: true, now: 0, message: '' };
+    private state: ActivityState = { fishing:this.localFishing.spots,nearbyFishing:null,claw:this.localClaw.claw,nearbyClaw:false,games: [], areas: [], football: this.localFootball.ball, nearbyFootball: false, vehicles: this.localVehicles.vehicles, nearbyRide: null, lobbies: [], active: null, spectating: null, inputMode: 'walk', selfId: 'guest', online: false, connected: true, now: 0, message: '' };
     constructor(private effect: (snapshot: ActivitySnapshot) => void = () => {
     }) {
     }
@@ -145,12 +152,14 @@ export class ActivityStore {
         const ball = this.socket ? this.footballState?.payload.ball ?? null : this.localFootball.ball;
         const football = ball && penaltyClosed ? { ...ball, visible: false } : ball;
         const claw=this.socket?this.clawState?.payload.claw??null:this.localClaw.claw;
-        const inputMode = gameMode !== 'walk' ? gameMode : claw?.operatorId===selfId ? 'claw' : !raceClosed && vehicles.some(v => v.riderId === selfId) ? 'ride' : 'walk';
+        const fishing=this.socket?[...this.fishingStates.values()].map(s=>({id:s.areaId,generation:s.generation,fishing:this.socket?.status==='online'?s.payload.fishing:fishingSpawn(s.payload.fishing.castId)})):this.localFishing.spots;
+        const ownFish=fishing.find(s=>s.fishing.ownerId===selfId);
+        const inputMode = gameMode !== 'walk' ? gameMode : ownFish ? 'fishing' : claw?.operatorId===selfId ? 'claw' : !raceClosed && vehicles.some(v => v.riderId === selfId) ? 'ride' : 'walk';
         if(this.state.inputMode==='claw'&&inputMode!=='claw')this.clawHeld={x:0,y:0};
         if (this.state.inputMode === 'ride' && inputMode !== 'ride')
             this.rideHeld = { x: 0, y: 0 };
         const nearbyRide = gameMode === 'walk' && !raceClosed ? nearbyVehicle(vehicles, this.position) ?? null : null;
-        this.state = { ...this.state, claw,nearbyClaw:!active&&nearClaw(this.position),football, nearbyFootball: inputMode === 'walk' && nearFootball(football, this.position), vehicles, nearbyRide, games, areas: [...this.areas.values()], lobbies: this.lobbies, active, spectating, inputMode, selfId, online: Boolean(this.socket), connected: !this.socket || this.socket.status === 'online', now: at };
+        this.state = { ...this.state,fishing,nearbyFishing:!active?nearbyFishing(fishing,this.position)??null:null,claw,nearbyClaw:!active&&nearClaw(this.position),football, nearbyFootball: inputMode === 'walk' && nearFootball(football, this.position), vehicles, nearbyRide, games, areas: [...this.areas.values()], lobbies: this.lobbies, active, spectating, inputMode, selfId, online: Boolean(this.socket), connected: !this.socket || this.socket.status === 'online', now: at };
         for (const fn of this.sceneListeners)
             fn();
         if (force || at - this.lastNotify >= 100) {
@@ -173,6 +182,7 @@ export class ActivityStore {
         this.localVehicles.reset();
         this.localFootball.reset();
         this.localClaw.reset();
+        this.localFishing.reset();this.fishingStates.clear();this.fishingPending=false;audio.stopMode("fishing");
         this.clawState=null;
         this.clawHeld={x:0,y:0};
         this.clawPending=this.clawSending=false;
@@ -306,6 +316,7 @@ export class ActivityStore {
         if (type === 'activity.snapshot' || type === 'activity.lifecycle') {
             if (!this.socket || payload.worldId !== this.socket.worldId)
                 return;
+            if(payload.kind==='fishing'){const previous=this.fishingStates.get(payload.areaId);if(previous&&payload.incarnation!==previous.incarnation)return;this.mergeFishing(payload);const age=this.socket.serverNow()-payload.serverTimeMs;if(type==='activity.lifecycle'&&previous&&this.fishingStates.get(payload.areaId)!==previous&&age>=-250&&age<=1000){const f=payload.payload.fishing;if(f.castId>previous.payload.fishing.castId||f.phase==='result'&&previous.payload.fishing.phase!=='result')audio.play({kind:f.phase==='result'?'catch':'cast',mode:'fishing',eventId:`fishing:${payload.incarnation}:${payload.areaId}:${payload.generation}`,distance:Math.hypot(this.position.x-53,this.position.y-31)})};this.publish(this.socket.serverNow());return}
             if(payload.kind==='claw') {
                 const previous=this.clawState;
                 if(previous&&payload.incarnation!==previous.incarnation)return;
@@ -370,6 +381,7 @@ export class ActivityStore {
                 continue;
             if (area.kind === 'area')
                 this.mergeArea(area, revisions);
+            else if(area.kind==='fishing')this.mergeFishing(area,revisions);
             else if(area.kind==='claw')this.mergeClaw(area,revisions);
             else if (area.kind === 'football')
                 this.mergeFootball(area, revisions);
@@ -377,6 +389,29 @@ export class ActivityStore {
                 this.mergeVehicles(area, revisions);
         }
         this.publish(this.socket?.serverNow());
+    }
+    private mergeFishing(snapshot:FishingSnapshot,revisions?:Map<string,number>){
+        const key=snapshot.areaId,previous=this.fishingStates.get(key);
+        if(previous){if(snapshot.incarnation===previous.incarnation){if(snapshot.generation<previous.generation||snapshot.generation===previous.generation&&snapshot.tick<=previous.tick)return}else{if(this.retiredIncarnations.get(key)?.has(snapshot.incarnation)||revisions&&(revisions.get(key)??0)!==(this.areaRevisions.get(key)??0))return;const retired=this.retiredIncarnations.get(key)??new Set<string>();retired.add(previous.incarnation);this.retiredIncarnations.set(key,retired)}}
+        this.fishingStates.set(key,snapshot);this.areaRevisions.set(key,(this.areaRevisions.get(key)??0)+1);
+    }
+    interactFishing(position=this.position){
+        this.position={...position};
+        if(this.state.inputMode==='fishing'){this.reelFishing();return true}
+        if(this.state.inputMode!=='walk'||this.state.active||this.localStarting||!this.state.connected||this.fishingPending)return false;
+        const spot=nearbyFishing(this.state.fishing,position);if(!spot||spot.fishing.ownerId)return false;
+        void this.fishingAction('fishing.cast',spot);return true;
+    }
+    reelFishing(){const own=this.state.fishing.find(s=>s.fishing.ownerId===this.state.selfId);if(!own||!['waiting','bite'].includes(own.fishing.phase)||!this.state.connected||this.fishingPending)return false;void this.fishingAction('fishing.reel',own);return true}
+    leaveFishing(){const own=this.state.fishing.find(s=>s.fishing.ownerId===this.state.selfId);if(own)void this.fishingAction('fishing.leave',own)}
+    fishingControls(input:{x:number;y:number}){if(input.x||input.y)this.leaveFishing()}
+    private async fishingAction(action:FishingAction,spot:FishingView){
+        if(!this.socket){if(action==='fishing.cast')this.localFishing.cast(spot.id,this.position,this.state.now);else if(action==='fishing.reel')this.localFishing.reel(this.state.now);else this.localFishing.reset();if(action!=='fishing.leave')audio.play({kind:action==='fishing.cast'?'cast':'catch',mode:'fishing',eventId:`fishing:local:${spot.id}:${spot.generation}:${action}`});this.publish(undefined,true);return}
+        const s=this.fishingStates.get(spot.id);if(!s||this.socket.status!=='online'||this.fishingPending)return;
+        this.fishingPending=true;const epoch=this.epoch;
+        try{await this.socket.gameCommand('activity.fishing',{incarnation:s.incarnation,areaGeneration:0,generation:s.generation,spotId:spot.id,action});if(epoch===this.epoch)await this.reload()}
+        catch(e){if(epoch===this.epoch){this.state={...this.state,message:(e as Error).message};this.publish(undefined,true)}}
+        finally{if(epoch===this.epoch)this.fishingPending=false}
     }
     private mergeClaw(snapshot: ClawSnapshot, revisions?: Map<string, number>) {
         const previous = this.clawState, key = 'claw';
@@ -514,6 +549,7 @@ export class ActivityStore {
     }) {
         if (Math.hypot(position.x - this.position.x, position.y - this.position.y) < .001)
             return;
+        if(!this.socket&&this.state.inputMode==='fishing')this.localFishing.reset();
         this.position = { ...position };
         this.publish();
     }
@@ -607,6 +643,7 @@ export class ActivityStore {
         this.localVehicles.reset();
         this.localFootball.reset(kind !== 'penalty', at);
         this.localClaw.reset(at);
+        this.localFishing.reset();audio.stopMode("fishing");
         this.clawHeld={x:0,y:0};
         this.penaltyStarting = kind === 'penalty';
         this.rideHeld = { x: 0, y: 0 };
@@ -683,6 +720,7 @@ export class ActivityStore {
     tick(at = this.socket?.serverNow() ?? performance.now()) {
         this.state = { ...this.state, now: at };
         if (!this.socket) {
+            this.localFishing.tick(at);
             this.localClaw.tick(at);
             this.localVehicles.tick(at);
             this.localFootball.tick(at);
@@ -747,6 +785,7 @@ export class ActivityStore {
         }
     }
     clearLocal() {
+        this.localFishing.reset();audio.stopMode("fishing");
         this.clawHeld={x:0,y:0};
         this.sendClawInput();
         this.localClaw.reset();
@@ -774,6 +813,7 @@ export class ActivityStore {
             }, 50);
     }
     dispose() {
+        this.localFishing.reset();this.fishingStates.clear();audio.stopMode("fishing");
         this.clawHeld={x:0,y:0};this.sendClawInput();audio.stopMode('claw');
         if (this.timer)
             clearInterval(this.timer);
@@ -805,6 +845,7 @@ export function mountActivities(world: {
     });
     const raceInput = activityInput.register('race', input => activities.controls(input));
     const pingpongInput=activityInput.register('pingpong',input=>activities.paddle(input.steer));
+    const fishingInput=activityInput.register('fishing',input=>activities.fishingControls(input));
     const clawInput=activityInput.register('claw',input=>activities.clawControls(input));
     const rideInput = activityInput.register('ride', input => activities.rideControls(input));
     const attachment = (e: Event) => {
@@ -838,7 +879,7 @@ export function mountActivities(world: {
         wasOnline = online;
         activities.tick();
     };
-    const drop=(e:KeyboardEvent)=>{if(e.code==='Space'&&!e.repeat&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&activityInput.mode()==='claw'&&!(e.target instanceof Element&&e.target.closest('button,input,textarea,select,[contenteditable="true"]'))){e.preventDefault();activities.dropClaw()}};
+    const drop=(e:KeyboardEvent)=>{if(e.code==='Space'&&!e.repeat&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&activityInput.mode()==='claw'&&!(e.target instanceof Element&&e.target.closest('button,input,textarea,select,[contenteditable="true"]'))){e.preventDefault();activities.dropClaw()}else if(e.code==='Space'&&!e.repeat&&activityInput.mode()==='fishing'&&!(e.target instanceof Element&&e.target.closest('button,input,textarea,select,[contenteditable="true"]'))){e.preventDefault();activities.reelFishing()}};
     window.addEventListener('keydown',drop);
     const reset = () => {
         activityInput.release();
@@ -870,6 +911,7 @@ export function mountActivities(world: {
         rideInput();
         pingpongInput();
         clawInput();
+        fishingInput();
         activities.dispose();
         window.removeEventListener('patra-world-attachment', attachment);
         window.removeEventListener('patra-world-event', event);

@@ -157,16 +157,17 @@ test('late_spectator_reconnect_before_reveal_stays_passive_and_can_walk_away', a
     store.dispose();
 });
 
-test('socket_full_resync_requires_four_masks_vehicle_pool_football_and_claw', async () => {
+test('socket_full_resync_requires_four_masks_vehicle_pool_football_claw_and_fishing', async () => {
     const { WorldSocket } = await import('../src/net/socket');
     const { vehiclePool } = await import('../src/activities/vehicles');
     const connection = new WorldSocket('world', () => {}, () => {}, 'http://village.test');
     const masks = ['race', 'penalty', 'pingpong', 'blaster'].map(id => area(id));
     const vehicles = { ...ball(), areaId: 'race', kind: 'vehicles', payload: { vehicles: vehiclePool() } };
     const claw={...ball(),areaId:'claw-1',kind:'claw',payload:{claw:{operatorId:'',operatorName:'',leaseUntil:0,x:.5,y:.5,phase:'idle',phaseAt:0,dropId:0,prizeId:''}}};
-    let values: any[] = [...masks, vehicles, ball(),claw];
+    const fishing=[0,1,2,3].map(n=>({...ball(),areaId:`fishing-${n}`,kind:'fishing',payload:{fishing:{ownerId:'',ownerName:'',phase:'idle',castId:0,biteAt:0,endsAt:0,catchId:''}}}));
+    let values: any[] = [...masks, vehicles, ball(),claw,...fishing];
     connection.gameCommand = async () => ({ activities: values });
-    assert.equal((await connection.activitySnapshots()).length, 7);
+    assert.equal((await connection.activitySnapshots()).length, 11);
     values = [...masks, vehicles,ball()];
     await assert.rejects(connection.activitySnapshots(), /Invalid activity resync/);
     values = [...masks, vehicles, vehicles,claw];

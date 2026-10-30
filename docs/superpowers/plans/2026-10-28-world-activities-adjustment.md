@@ -10,7 +10,7 @@
 
 **Spec:** [World activities design](../specs/2026-10-28-world-activities-design.md).
 
-**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–8 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
+**Status:** Implementasi diizinkan pengguna pada 28 Oktober 2026, mencakup seluruh enam tahap ringkasan (Task 0–11). Task 0–9 telah diimplementasikan dan direview; gate perangkat fisik/voice/auth tetap terpisah. Base `3079f05`, branch `feat/world-activities`. [Bukti tahap 1](../../checkpoints/evidence/CP8/activities-stage1.md); [area authority dan scene](../../checkpoints/evidence/CP8/activities-stage2.md).
 
 ## Ringkasan tahap dan cakupan
 
@@ -163,9 +163,11 @@ Evidence: [implementation and fixes](../../checkpoints/evidence/CP8/activities-t
 
 **Files:** create `apps/server/internal/world/fishing.go`, `apps/web/src/activities/fishing.ts`, `world/scenes/fishing.ts`; extend activity asset; tests world/client/guest history.
 
-- [ ] RED `four_spots_one_owner_each`, `cast_requires_river_proximity`, `movement_or_leave_cancels_cast`, `fishing_never_calls_completion_or_persists_catch`.
-- [ ] Implementasi Cast/wait/Reel/emote dengan timer state kecil, pool visual tangkapan, teks maksimum 3 s; animasi bersama di private world dan versi lokal untuk guest. Tanpa simulasi entitas ikan/inventory, XP atau leaderboard.
-- [ ] Uji catch/repeat selama beberapa menit, reload/logout/masuk match; row count/hash history akun + guest tetap sama. Uji kontrol mobile, feedback saat sound mati dan cleanup; review dan commit.
+- [x] RED `four_spots_one_owner_each`, `cast_requires_river_proximity`, `movement_or_leave_cancels_cast`, `fishing_never_calls_completion_or_persists_catch`.
+- [x] Implementasi Cast/wait/Reel/emote dengan timer state kecil, pool visual tangkapan, teks maksimum 3 s; animasi bersama di private world dan versi lokal untuk guest. Tanpa simulasi entitas ikan/inventory, XP atau leaderboard.
+- [x] Uji catch/repeat selama beberapa menit, reload/logout/masuk match; row count/hash history akun + guest tetap sama. Uji kontrol mobile, feedback saat sound mati dan cleanup; review dan commit.
+
+Evidence: [implementation and seeded-history tests](../../checkpoints/evidence/CP8/activities-task9.md), [independent review](../../checkpoints/evidence/CP8/activities-task9-review.md), [desktop/responsive browser](../../checkpoints/evidence/CP8/activities-fishing-browser.md). All four decorative anchors retained; fourth spot reachable from(54,33). Physical/mobile/auth/voice gates remain deferred.
 
 ### Task 10: Blaster solo/co-op
 

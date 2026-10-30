@@ -1,10 +1,10 @@
-# Activities resume — 28 October 2026
+# Activities resume — 30 October 2026
 
 This is the current handoff; older T14-only summaries and README acceptance wording are historical. User requested a summary and concise prompt for a new conversation while Task8 was in progress. Do not restart completed work or discard the working tree.
 
 ## State
 
-Repo `/Users/patra/Project/patra-world-social`, branch `feat/world-activities`, latest committed HEAD `0289a10`. Public repo `git-patra/patra-world-social` already exists; locally tracked `origin/main` is `a71fd85`. New activity commits have not been pushed. User authorized local commits including plan/evidence and eventual push to main; no deployment. Source repo `/Users/patra/Project/patra-world` must stay untouched.
+Repo `/Users/patra/Project/patra-world-social`, branch `feat/world-activities`, Task8 commit `4aba8fc`; Task9 included in the current commit (use `git log -1` for its SHA). Public repo `git-patra/patra-world-social` already exists; locally tracked `origin/main` is `a71fd85`. New activity commits have not been pushed. User authorized local commits including plan/evidence and eventual push to main; no deployment. Source repo `/Users/patra/Project/patra-world` must stay untouched.
 
 Plan: `docs/superpowers/plans/2026-10-28-world-activities-adjustment.md`; spec: `docs/superpowers/specs/2026-10-28-world-activities-design.md`. Follow existing six-stage order (expanded into Tasks0–11). Ledger: `.superpowers/sdd/2026-10-28-world-activities-adjustment/progress.md`; reports/briefs in same ignored directory. Portable evidence: `docs/checkpoints/evidence/CP8/activities-*.md`.
 
@@ -17,14 +17,15 @@ Completed and reviewed:
 
 Task8 claw has completed independent review and fix round1 on 30 October 2026. Corrected invisible vertical aim and invalid JSON Schema rejection of discrete/neutral commands. Fresh checks: frontend4JS+193bundled/typecheck/lint/build, fullGo, focusedClaw, actualDB20cycles/nohistory PASS; CUA desktop and390×844responsive proxy enter/directions/drop/expiry/exit/history PASS. Portable evidence: activities-task8.md, activities-task8-review.md, activities-claw-browser.md. Included with Task8 local commit; use git log for its SHA.
 
+Task9 fishing complete after independent review: four exclusive visual spots, Cast/wait/Bite/Reel, transient3s result, no history/inventory. Existing anchor53,33 remains; standing54,33 is reachable within1.25. Automated4JS+206frontend/typecheck/lint/build/fullGo PASS; actualDB40cycles preserves seededDuck/history7tables and accountListHistory. Browserdesktop/390×844proxy Cast/Bite/Reel/expiry/movementcancel/Eresult/historyunchanged PASS. See activities-task9.md, activities-task9-review.md and activities-fishing-browser.md.
+
 Remaining in order:
-1. Task9 fishing: four spots, Cast/wait/Reel, random fun catch, no completion/history/inventory.
-2. Task10 Blaster:1–4humans solo/co-op vsbots,3waves/180s/3HP,≤8bots/48projectiles,noPvP/nofriendlyBOTroster.
-3. Task11 combined regression/optimization:20clientA/B,60clients3worlds,15minuteprofile+20lifecycles,frame/tick/traffic/chunk/heap/counters,fullpinnedGo integration-race/vet/build+frontendchecks,wholebranchreview. Then localcommits/mainpublication/showlatest.
+1. Task10 Blaster:1–4humans solo/co-op vsbots,3waves/180s/3HP,≤8bots/48projectiles,noPvP/nofriendlyBOTroster.
+2. Task11 combined regression/optimization:20clientA/B,60clients3worlds,15minuteprofile+20lifecycles,frame/tick/traffic/chunk/heap/counters,fullpinnedGo integration-race/vet/build+frontendchecks,wholebranchreview. Then localcommits/mainpublication/showlatest.
 
 ## Runtime and safeguards
 
-- Frontend dev4176, stable production preview4181, old designreference4180. Preview4181 restarted with latest production build on30October; API8080 had no listener at resume: build/start and verify health at final; don't claim live new multiplayer until done.
+- Frontend dev4176, stable production preview4181, old designreference4180. Preview4181 restarted with latest production build on30October; API8080 started fromTask8 build and healthPASS: rebuild/restart latest at final; don't claim live new multiplayer until done.
 - Pinned Go `.cache/toolchains/golang.org/toolchain@v0.0.1-go1.26.8.darwin-arm64/bin/go`, `GOTOOLCHAIN=local`, `GOCACHE=$PWD/.cache/go-build`. Export ignored `.cache/database.env` quietly. Never print/commit credentials.
 - DB dedicated Colima profile `patra-world-social`, Docker context `colima-patra-world-social`, container `patra-world-social-postgres`,127.0.0.1:55432. Root recovered broken VM and stale SSH forward preserving volume; hostPGhandshakeN andTask7/8actualtestsPASS. Never touch default/other profiles.
 - Browser through CUA only; no shell browser automation or injected authentication. Current4181history contains priorrace5/5,penalty3:5,pingpong0:1; preserveuser/testdata. Viewportoverride nowapplies: Task8verified390×844proxy; physicalmobile remainsdeferred.

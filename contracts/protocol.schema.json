@@ -58,7 +58,8 @@
         "pingpong.snapshot",
         "pingpong.input",
         "pingpong.serve",
-        "activity.claw"
+        "activity.claw",
+        "activity.fishing"
       ]
     },
     "payload": {
@@ -1236,6 +1237,60 @@
                 }
               }
             ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "activity.fishing"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "incarnation",
+              "areaGeneration",
+              "spotId",
+              "generation",
+              "action"
+            ],
+            "properties": {
+              "incarnation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "areaGeneration": {
+                "const": 0
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "spotId": {
+                "enum": [
+                  "fishing-0",
+                  "fishing-1",
+                  "fishing-2",
+                  "fishing-3"
+                ]
+              },
+              "action": {
+                "enum": [
+                  "fishing.cast",
+                  "fishing.reel",
+                  "fishing.leave"
+                ]
+              }
+            }
           }
         }
       }

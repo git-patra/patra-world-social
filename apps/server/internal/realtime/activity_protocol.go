@@ -10,17 +10,20 @@ import (
 func validateActivityPayload(raw any) error {
 	bad := errors.New("invalid activity snapshot")
 	p, ok := raw.(map[string]any)
-	if !ok || len(p) != 8 || !c.Keys(p, "worldId", "areaId", "incarnation", "generation", "serverTimeMs", "tick", "kind", "payload") || !c.Text(p["worldId"], 128) || !c.Text(p["incarnation"], 128) || (p["kind"] != "area" && p["kind"] != "vehicles" && p["kind"] != "football" && p["kind"] != "claw") {
+	if !ok || len(p) != 8 || !c.Keys(p, "worldId", "areaId", "incarnation", "generation", "serverTimeMs", "tick", "kind", "payload") || !c.Text(p["worldId"], 128) || !c.Text(p["incarnation"], 128) || (p["kind"] != "area" && p["kind"] != "vehicles" && p["kind"] != "football" && p["kind"] != "claw" && p["kind"] != "fishing") {
 		return bad
 	}
 	id, _ := p["areaId"].(string)
-	if _, ok := world.ActivityArea(id); !ok && !(p["kind"] == "claw" && id == "claw-1") {
+	if _, ok := world.ActivityArea(id); !ok && !(p["kind"] == "claw" && id == "claw-1") && !(p["kind"] == "fishing" && validFishingSpot(id)) {
 		return bad
 	}
 	for _, k := range []string{"generation", "serverTimeMs", "tick"} {
 		if !c.Integer(p[k], 0, 9007199254740991) {
 			return bad
 		}
+	}
+	if p["kind"] == "fishing" {
+		return validateFishingPayload(p)
 	}
 	if p["kind"] == "claw" {
 		return validateClawPayload(p)
@@ -183,6 +186,61 @@ func validateClawPayload(p map[string]any) error {
 		}
 	case "aiming", "dropping", "lifting", "releasing":
 		if !c.Text(b["operatorId"], 128) || !c.Text(b["operatorName"], 128) || b["leaseUntil"] == float64(0) || b["phase"] == "aiming" && prize != "" {
+			return bad
+		}
+	default:
+		return bad
+	}
+	return nil
+}
+
+func validFishingSpot(raw any) bool {
+	return raw == "fishing-0" || raw == "fishing-1" || raw == "fishing-2" || raw == "fishing-3"
+}
+func validateFishingIntent(p map[string]any) bool {
+	return len(p) == 5 && c.Keys(p, "incarnation", "areaGeneration", "generation", "spotId", "action") && c.Text(p["incarnation"], 128) && p["areaGeneration"] == float64(0) && c.Integer(p["generation"], 1, 9007199254740991) && validFishingSpot(p["spotId"]) && (p["action"] == "fishing.cast" || p["action"] == "fishing.reel" || p["action"] == "fishing.leave")
+}
+func validateFishingPayload(p map[string]any) error {
+	bad := errors.New("invalid fishing snapshot")
+	s, ok := p["payload"].(map[string]any)
+	if !ok || len(s) != 1 || !c.Keys(s, "fishing") || !validFishingSpot(p["areaId"]) || !c.Integer(p["generation"], 1, 9007199254740991) {
+		return bad
+	}
+	f, ok := s["fishing"].(map[string]any)
+	if !ok || len(f) != 7 || !c.Keys(f, "ownerId", "ownerName", "phase", "castId", "biteAt", "endsAt", "catchId") {
+		return bad
+	}
+	for _, k := range []string{"castId", "biteAt", "endsAt"} {
+		if !c.Integer(f[k], 0, 9007199254740991) {
+			return bad
+		}
+	}
+	for _, k := range []string{"ownerId", "ownerName"} {
+		v, ok := f[k].(string)
+		if !ok || len(v) > 128 {
+			return bad
+		}
+	}
+	catch, ok := f["catchId"].(string)
+	if !ok {
+		return bad
+	}
+	validCatch := catch == ""
+	for _, id := range world.FishingConfig.Catches {
+		if catch == id {
+			validCatch = true
+		}
+	}
+	if !validCatch {
+		return bad
+	}
+	switch f["phase"] {
+	case "idle":
+		if f["ownerId"] != "" || f["ownerName"] != "" || f["biteAt"] != float64(0) || f["endsAt"] != float64(0) || catch != "" {
+			return bad
+		}
+	case "waiting", "bite", "result":
+		if !c.Text(f["ownerId"], 128) || !c.Text(f["ownerName"], 128) || f["castId"] == float64(0) || f["biteAt"] == float64(0) || f["endsAt"] == float64(0) || f["phase"] != "result" && (f["endsAt"].(float64) <= f["biteAt"].(float64) || catch != "") {
 			return bad
 		}
 	default:

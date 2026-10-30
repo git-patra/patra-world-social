@@ -368,7 +368,7 @@ func (h *Hub) Submit(ctx context.Context, j JoinContext, c Command) error {
 	}
 	r := h.rooms[s.world]
 	switch c.Type {
-	case "activity.ride", "activity.kick", "activity.claw":
+	case "activity.ride", "activity.kick", "activity.claw", "activity.fishing":
 		if h.GameBusy != nil && h.GameBusy(s.user) {
 			return ErrUnsupported
 		}
@@ -390,7 +390,7 @@ func (h *Hub) Submit(ctx context.Context, j JoinContext, c Command) error {
 		}
 		err := owner.ApplyCasualIntent(ctx, s.user, s.epoch, c.Seq, intent)
 		if err == nil {
-			if (intent.Action == "mount" || intent.Action == "claw.enter") && h.VoiceRevoke != nil {
+			if (intent.Action == "mount" || intent.Action == "claw.enter" || intent.Action == "fishing.cast") && h.VoiceRevoke != nil {
 				h.VoiceRevoke(s.world, s.user, "ride entry")
 			}
 			h.areaLifecycleLocked(ctx, s.world)

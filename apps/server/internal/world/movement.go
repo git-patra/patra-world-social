@@ -18,6 +18,9 @@ func (r *Runtime) Input(ctx context.Context, id string, epoch, seq uint64, dx, d
 		if p == nil || p.Status == "playing" || r.claw.OperatorID == id || r.riding(id) != nil || p.epoch != epoch || seq <= p.Seq {
 			return
 		}
+		if dx != 0 || dy != 0 {
+			r.releaseFishing(id)
+		}
 		p.Seq = seq
 		p.dx = dx
 		p.dy = dy
@@ -42,6 +45,7 @@ func (r *Runtime) Destination(ctx context.Context, id string, epoch, seq uint64,
 			invalid = true
 			return
 		}
+		r.releaseFishing(id)
 		p.Seq = seq
 		p.dx = 0
 		p.dy = 0

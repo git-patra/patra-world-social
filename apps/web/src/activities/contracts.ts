@@ -50,7 +50,7 @@ export const footballInside = (x: number, y: number) => {
     const b = contract.areas.find(a => a.id === 'penalty')!.bounds, r = footballRules.radius;
     return x >= b.x + r && x <= b.x + b.width - r && y >= b.y + r && y <= b.y + b.height - r;
 };
-export type ActivitySnapshot = AreaSnapshot | VehiclesSnapshot | FootballSnapshot | ClawSnapshot;
+export type ActivitySnapshot = AreaSnapshot | VehiclesSnapshot | FootballSnapshot | ClawSnapshot | FishingSnapshot;
 export type RideIntent = {
     incarnation: string;
     areaGeneration: number;
@@ -103,8 +103,9 @@ const number = (v: unknown, min: number, max: number) => typeof v === 'number' &
 const int = (v: unknown) => Number.isSafeInteger(v) && Number(v) >= 0;
 const text = (v: unknown) => typeof v === 'string' && v.length > 0 && v.length <= 128;
 export function validateActivitySnapshot(raw: unknown, worldId?: string): ActivitySnapshot {
-    if (!keys(raw, ['worldId', 'areaId', 'incarnation', 'generation', 'serverTimeMs', 'tick', 'kind', 'payload']) || !text(raw.worldId) || (worldId !== undefined && raw.worldId !== worldId) || !text(raw.incarnation) || !contract.areas.some(a => a.id === raw.areaId) && !(raw.kind === 'claw' && raw.areaId === 'claw-1') || !['area', 'vehicles', 'football', 'claw'].includes(String(raw.kind)) || ![raw.generation, raw.serverTimeMs, raw.tick].every(int))
+    if (!keys(raw, ['worldId', 'areaId', 'incarnation', 'generation', 'serverTimeMs', 'tick', 'kind', 'payload']) || !text(raw.worldId) || (worldId !== undefined && raw.worldId !== worldId) || !text(raw.incarnation) || !contract.areas.some(a => a.id === raw.areaId) && !(raw.kind === 'claw' && raw.areaId === 'claw-1') && !(raw.kind === 'fishing' && contract.fishingSpots.some(s=>s.id===raw.areaId)) || !['area', 'vehicles', 'football', 'claw', 'fishing'].includes(String(raw.kind)) || ![raw.generation, raw.serverTimeMs, raw.tick].every(int))
         throw Error('Invalid activity snapshot');
+    if(raw.kind==='fishing'){if(!contract.fishingSpots.some(s=>s.id===raw.areaId)||Number(raw.generation)<1||!keys(raw.payload,['fishing'])||!validFishing(raw.payload.fishing))throw Error('Invalid fishing snapshot');return structuredClone(raw) as FishingSnapshot;}
     if (raw.kind === 'claw') {
         if (Number(raw.generation)<1 || !keys(raw.payload,['claw']) || !validClaw(raw.payload.claw)) throw Error('Invalid claw snapshot');
         return structuredClone(raw) as ClawSnapshot;
@@ -151,4 +152,22 @@ function validClaw(raw:unknown) {
  if(!keys(raw,['operatorId','operatorName','leaseUntil','x','y','phase','phaseAt','dropId','prizeId']))return false;
  const p=raw;
  return [p.leaseUntil,p.phaseAt,p.dropId].every(int)&&number(p.x,0,1)&&number(p.y,0,1)&&['idle','aiming','dropping','lifting','releasing'].includes(String(p.phase))&&typeof p.operatorId==='string'&&p.operatorId.length<=128&&typeof p.operatorName==='string'&&p.operatorName.length<=128&&(p.prizeId===''||clawRules.presets.some(v=>v.id===p.prizeId))&&(p.phase==='idle'?p.operatorId===''&&p.operatorName===''&&p.leaseUntil===0&&p.prizeId==='':text(p.operatorId)&&text(p.operatorName)&&Number(p.leaseUntil)>0&&(p.phase!=='aiming'||p.prizeId===''));
+}
+
+export const fishingRules=contract.fishingRules;
+export type Fishing={ownerId:string;ownerName:string;phase:'idle'|'waiting'|'bite'|'result';castId:number;biteAt:number;endsAt:number;catchId:string};
+export type FishingView={id:string;generation:number;fishing:Fishing};
+export type FishingSnapshot=Omit<AreaSnapshot,'kind'|'payload'>&{kind:'fishing';payload:{fishing:Fishing}};
+export type FishingAction='fishing.cast'|'fishing.reel'|'fishing.leave';
+export type FishingIntent={incarnation:string;areaGeneration:0;generation:number;spotId:string;action:FishingAction};
+export function validateFishingIntent(raw:unknown):FishingIntent {
+ if(!keys(raw,['incarnation','areaGeneration','generation','spotId','action'])||!text(raw.incarnation)||raw.areaGeneration!==0||!int(raw.generation)||Number(raw.generation)<1||!contract.fishingSpots.some(s=>s.id===raw.spotId)||!['fishing.cast','fishing.reel','fishing.leave'].includes(String(raw.action)))throw Error('Invalid fishing intent');
+ return structuredClone(raw) as FishingIntent;
+}
+function validFishing(raw:unknown){
+ if(!keys(raw,['ownerId','ownerName','phase','castId','biteAt','endsAt','catchId']))return false;
+ const f=raw;
+ if(![f.castId,f.biteAt,f.endsAt].every(int)||typeof f.ownerId!=='string'||f.ownerId.length>128||typeof f.ownerName!=='string'||f.ownerName.length>128||!(f.catchId===''||fishingRules.catches.includes(String(f.catchId))))return false;
+ if(f.phase==='idle')return f.ownerId===''&&f.ownerName===''&&f.biteAt===0&&f.endsAt===0&&f.catchId==='';
+ return ['waiting','bite','result'].includes(String(f.phase))&&text(f.ownerId)&&text(f.ownerName)&&Number(f.castId)>0&&Number(f.biteAt)>0&&Number(f.endsAt)>0&&(f.phase==='result'||Number(f.endsAt)>Number(f.biteAt)&&f.catchId==='');
 }

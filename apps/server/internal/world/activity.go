@@ -59,6 +59,7 @@ func (r *Runtime) activity(ctx context.Context, user string, playing bool, at *P
 			if playing {
 				r.dismount(user)
 				r.releaseClaw(user)
+				r.releaseFishing(user)
 				p.Status = "playing"
 			} else {
 				p.Status = "available"

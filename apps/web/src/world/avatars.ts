@@ -1,4 +1,4 @@
-import {validateActivitySnapshot,validateRideIntent,validateKickIntent,validateClawIntent} from '../activities/contracts';
+import {validateActivitySnapshot,validateRideIntent,validateKickIntent,validateClawIntent,validateFishingIntent} from '../activities/contracts';
 import { finite, point, type Point } from './map';
 export interface Avatar extends Point {
     id: string;
@@ -16,7 +16,7 @@ export function validateAvatars(state: PublicState): PublicState { if (!state ||
         throw Error('Invalid avatar');
     ids.add(a.id);
 } return structuredClone(state); }
-export const commandTypes = ['activity.claw','pingpong.snapshot','pingpong.input','pingpong.serve','activity.kick','activity.ride','activity.snapshot', 'world.join', 'world.leave', 'player.input', 'player.destination', 'player.interact', 'lobby.list', 'lobby.join', 'lobby.bot', 'lobby.ready', 'lobby.leave', 'match.start', 'race.input', 'race.snapshot', 'penalty.snapshot', 'match.return', 'match.rematch', 'penalty.choose', 'duck.shoot', 'duck.snapshot', 'duck.clock', 'duck.clock_reply', 'chat.send', 'voice.join', 'voice.leave','voice.state','voice.token','voice.unmute','voice.chat','voice.moderate', 'session.resume'] as const;
+export const commandTypes = ['activity.fishing','activity.claw','pingpong.snapshot','pingpong.input','pingpong.serve','activity.kick','activity.ride','activity.snapshot', 'world.join', 'world.leave', 'player.input', 'player.destination', 'player.interact', 'lobby.list', 'lobby.join', 'lobby.bot', 'lobby.ready', 'lobby.leave', 'match.start', 'race.input', 'race.snapshot', 'penalty.snapshot', 'match.return', 'match.rematch', 'penalty.choose', 'duck.shoot', 'duck.snapshot', 'duck.clock', 'duck.clock_reply', 'chat.send', 'voice.join', 'voice.leave','voice.state','voice.token','voice.unmute','voice.chat','voice.moderate', 'session.resume'] as const;
 export interface Command {
     v: 2;
     commandId: string;
@@ -33,6 +33,7 @@ export function validateCommand(raw: unknown): Command {
     const p = c.payload;
  if(c.type==='activity.ride')validateRideIntent(p);
  if(c.type==='activity.kick')validateKickIntent(p);
+ if(c.type==='activity.fishing')validateFishingIntent(p);
  if(c.type==='activity.claw')validateClawIntent(p);
     const integer = (n: unknown, min: number, max: number) => finite(n, min, max) && Number.isInteger(n);
     if (c.type==='pingpong.input'&&(!text(p.matchId)||!finite(p.axis,-1,1))||c.type==='pingpong.serve'&&(!text(p.matchId)||!integer(p.rallyId,1,22)))throw new Error('Invalid pingpong command');

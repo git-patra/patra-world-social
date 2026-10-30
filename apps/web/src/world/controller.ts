@@ -92,7 +92,9 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
   return{x:resolved.x,y:resolved.y};
  }
  function destination(point:Point){
-  if(paused||activityOwner)return;
+  if(paused)return;
+  if(activities.snapshot().inputMode==='fishing')activities.leaveFishing();
+  if(activityOwner)return;
   const resolved=resolvePoint(point);if(!resolved)return;
   direction={x:0,y:0};target={...resolved};
   if(online){online.destination(resolved.x,resolved.y);return}
@@ -107,6 +109,7 @@ export function createWorld(canvas:HTMLCanvasElement,{stations,minimapCanvas,res
  function interact(){
   if(paused)return;
   const position=displayPlayer??player;
+  if(activities.interactFishing(position)){stopDirection();route=[];target=null;return}
   if(activities.interactClaw(position)){stopDirection();route=[];target=null;return}
   if(nearFootball(activities.snapshot().football,position)){
    activities.interactFootball(position);

@@ -45,6 +45,7 @@ type request struct {
 
 // Runtime owns simulation state on one goroutine. No database/network work runs here.
 type Runtime struct {
+	fishing          [4]Fishing
 	claw             Claw
 	clawRevision     uint64
 	football         Football
@@ -70,6 +71,7 @@ func NewRuntime(m MapDefinition, c Clock) *Runtime {
 	r.initVehicles()
 	r.resetFootball(true)
 	r.resetClaw()
+	r.initFishing()
 	go r.run()
 	return r
 }
@@ -116,6 +118,7 @@ func (r *Runtime) advance() {
 	now := r.clock.Now()
 	r.advanceAreas()
 	r.advanceClaw()
+	r.advanceFishing()
 	vehicleSteps := 0
 	for r.last.Add(50*time.Millisecond).Compare(now) <= 0 {
 		r.last = r.last.Add(50 * time.Millisecond)
@@ -138,6 +141,7 @@ func (r *Runtime) Join(ctx context.Context, id, name string, epoch uint64) error
 	return r.call(ctx, func() {
 		r.dismount(id)
 		r.releaseClaw(id)
+		r.releaseFishing(id)
 		p := r.players[id]
 		if p == nil {
 			p = &player{Avatar: Avatar{ID: id, Name: name, X: float64(r.m.Spawn.X), Y: float64(r.m.Spawn.Y), Status: "available"}}
@@ -155,6 +159,7 @@ func (r *Runtime) Remove(ctx context.Context, id string) error {
 	return r.call(ctx, func() {
 		r.dismount(id)
 		r.releaseClaw(id)
+		r.releaseFishing(id)
 		delete(r.players, id)
 	})
 }
@@ -162,6 +167,7 @@ func (r *Runtime) Idle(ctx context.Context, id string) error {
 	return r.call(ctx, func() {
 		r.dismount(id)
 		r.releaseClaw(id)
+		r.releaseFishing(id)
 		if p := r.players[id]; p != nil {
 			p.dx = 0
 			p.dy = 0

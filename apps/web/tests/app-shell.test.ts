@@ -225,14 +225,15 @@ test('world_pad_release_preserves_held_keyboard_and_ignores_unrelated_pointerup'
 test('contextual_dock_keeps_action_text_separate_from_its_E_keycap', () => {
  const shell=shellFixture();
  try {
+  // Cross the 100ms subscriber gate; fractional performance.now() can make an exact +100 subtract below 100.
   activities.setPosition({x:28,y:46});
-  activities.tick(activities.snapshot().now+100);
+  activities.tick(activities.snapshot().now+101);
   assert.equal(shell.get('#interact-button span').textContent,'Kick');
   activities.interactRide({x:39,y:46});
   assert.equal(shell.get('#interact-button span').textContent,'Turun');
   activities.interactRide();
   activities.setPosition({x:41,y:46});
-  activities.tick(activities.snapshot().now+100);
+  activities.tick(activities.snapshot().now+101);
   assert.equal(shell.get('#interact-button span').textContent,'Naik Sepeda');
  } finally {shell.restore()}
 });

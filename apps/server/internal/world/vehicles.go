@@ -25,6 +25,7 @@ type CasualIntent struct {
 	Incarnation    string  `json:"incarnation"`
 	AreaGeneration uint64  `json:"areaGeneration"`
 	VehicleID      string  `json:"vehicleId"`
+	SpotID         string  `json:"spotId,omitempty"`
 	MachineID      string  `json:"machineId,omitempty"`
 	Generation     uint64  `json:"generation"`
 	Action         string  `json:"action"`
@@ -35,6 +36,10 @@ type CasualIntent struct {
 // MarshalJSON preserves the exact union, including explicit zero axes on neutral drive.
 func (i CasualIntent) MarshalJSON() ([]byte, error) {
 	payload := map[string]any{"incarnation": i.Incarnation, "areaGeneration": i.AreaGeneration, "vehicleId": i.VehicleID, "generation": i.Generation, "action": i.Action}
+	if i.Action == "fishing.cast" || i.Action == "fishing.reel" || i.Action == "fishing.leave" {
+		delete(payload, "vehicleId")
+		payload["spotId"] = i.SpotID
+	}
 	if i.Action == "kick" {
 		delete(payload, "vehicleId")
 	}
@@ -118,6 +123,10 @@ func (r *Runtime) ApplyCasualIntent(ctx context.Context, id string, epoch, seq u
 			result = r.applyClaw(id, epoch, seq, intent)
 			return
 		}
+		if intent.Action == "fishing.cast" || intent.Action == "fishing.reel" || intent.Action == "fishing.leave" {
+			result = r.applyFishing(id, epoch, seq, intent)
+			return
+		}
 		if intent.Action == "kick" {
 			result = r.kickFootball(id, epoch, seq, intent)
 			return
@@ -148,6 +157,7 @@ func (r *Runtime) ApplyCasualIntent(ctx context.Context, id string, epoch, seq u
 				result = ErrMovement
 				return
 			}
+			r.releaseFishing(id)
 			v.RiderID = id
 			v.Generation++
 			r.vehicleRevision++

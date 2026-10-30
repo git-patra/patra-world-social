@@ -83,11 +83,11 @@ export const stations=[
     "id": "river",
     "name": "Tepi Sungai",
     "label": "Tepi Sungai",
-    "short": "Nikmati dermaga dan jembatan. Jalur ini menghubungkan sisi timur kampung.",
+    "short": "Fishing · 4 spot di dermaga. Cast → tunggu Bite! → Reel. Jalan untuk batal; hasil lucu 3s, tanpa history.",
     "icon": "≈",
     "color": "#d5bc8a",
     "title": "Tepi Sungai",
-    "description": "Nikmati dermaga dan jembatan. Jalur ini menghubungkan sisi timur kampung.",
+    "description": "Fishing · 4 spot di dermaga. Cast → tunggu Bite! → Reel. Jalan untuk batal; hasil lucu 3s, tanpa history.",
     "status": "Ruang bersama"
   }
 ];

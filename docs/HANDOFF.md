@@ -105,3 +105,5 @@ Fullscreen kampung outdoor, semi-English, tanpa CV/sidebar. Pertahankan game/mul
 ```
 
 30 October resume: Task8 claw independently reviewed and fixed (vertical aim + schema); 4JS+193frontend/fullGo/actualDB PASS, desktop+390×844proxy browser evidence recorded. Next Task9→10→11; only CP1 official PASS. See docs/handoff/ACTIVITIES-RESUME.md.
+
+30 October Task9: four fishing spots independently reviewed; 4JS+206frontend/fullGo/seededactualDB PASS; desktop+390×844proxy browser verified. No fishing history/inventory; nextTask10Blaster thenTask11. Evidence CP8activities-task9*.md.

@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"errors"
+	"math"
 )
 
 //go:embed assets/activities.v1.json
@@ -57,8 +58,9 @@ type ActivityContract struct {
 		Entrance Point  `json:"entrance"`
 		Capacity int    `json:"capacity"`
 	} `json:"clawMachines"`
-	ClawRules ClawRules          `json:"clawRules"`
-	Caps      map[string]float64 `json:"caps"`
+	FishingRules FishingRules       `json:"fishingRules"`
+	ClawRules    ClawRules          `json:"clawRules"`
+	Caps         map[string]float64 `json:"caps"`
 }
 
 func LoadActivities(raw []byte, m MapDefinition) (ActivityContract, error) {
@@ -71,6 +73,24 @@ func LoadActivities(raw []byte, m MapDefinition) (ActivityContract, error) {
 	bad := errors.New("invalid activity contract")
 	if c.V != 1 || c.MapID != m.ID || c.ClearMs != 3000 || c.ResetMs < 0 || c.ResetMs > 2000 || len(c.Areas) != 4 {
 		return c, bad
+	}
+	f := c.FishingRules
+	if f.WaitMinMs < 500 || f.WaitMaxMs < f.WaitMinMs || f.WaitMaxMs > 5000 || f.BiteMs < 500 || f.BiteMs > 3000 || f.ResultMs < 1 || f.ResultMs > 3000 || !valid(f.Proximity, .5, 1.5) || len(f.Catches) != 4 || len(c.FishingSpots) != 4 {
+		return c, bad
+	}
+	seenSpots := map[string]bool{}
+	for _, spot := range c.FishingSpots {
+		if !validFishingID(spot.ID) || seenSpots[spot.ID] || !fishingAccessible(m, spot.Position, f.Proximity) {
+			return c, bad
+		}
+		seenSpots[spot.ID] = true
+	}
+	seenCatches := map[string]bool{}
+	for _, id := range f.Catches {
+		if (id != "fish" && id != "boot" && id != "can" && id != "leaf") || seenCatches[id] {
+			return c, bad
+		}
+		seenCatches[id] = true
 	}
 	rules := c.ClawRules
 	if rules.LeaseMs != 20000 || rules.InputExpiryMs != 250 || rules.StepMs != 50 || rules.MaxCatchupSteps != 4 || !valid(rules.Speed, .1, 2) || !valid(rules.GripTolerance, .01, .15) || rules.PhaseMs != 500 || len(rules.Presets) != 3 || len(c.ClawMachines) != 1 {
@@ -120,4 +140,17 @@ func ActivityArea(id string) (AreaDefinition, bool) {
 		}
 	}
 	return AreaDefinition{}, false
+}
+
+// Spot anchors may sit at the water's edge; admission needs reachable bank ground.
+func fishingAccessible(m MapDefinition, anchor Point, proximity float64) bool {
+	for dx := -1; dx <= 1; dx++ {
+		for dy := -1; dy <= 1; dy++ {
+			p := Point{anchor.X + dx, anchor.Y + dy}
+			if math.Hypot(float64(dx), float64(dy)) <= proximity && !m.Blocked(p) && m.Reachable(m.Spawn, p) {
+				return true
+			}
+		}
+	}
+	return false
 }

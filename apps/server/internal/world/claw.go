@@ -71,6 +71,7 @@ func (r *Runtime) applyClaw(id string, epoch, seq uint64, i CasualIntent) error 
 		if b.OperatorID != "" || math.Hypot(p.X-float64(clawEntrance.X), p.Y-float64(clawEntrance.Y)) > 2 {
 			return ErrMovement
 		}
+		r.releaseFishing(id)
 		r.resetClaw()
 		b = &r.claw
 		b.OperatorID = id

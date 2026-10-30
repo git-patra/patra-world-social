@@ -6,6 +6,7 @@ import type { RaceSnapshot } from '../features/race/local';
 import type { PublicPenalty } from '../features/penalty/local';
 import {PingpongHUD} from '../features/pingpong/PingpongHUD';
 import type {PingpongSnapshot} from '../features/pingpong/local';
+import {fishingCatchLabels} from './fishing';
 import './activities.css';
 export function ActivityHUD({ store = activities }: {
     store?: ActivityStore;
@@ -19,6 +20,11 @@ export function ActivityHUD({ store = activities }: {
             <span>{penalty.phase === 'choosing' ? `Pilihan private · ${Math.max(0, Math.ceil((penalty.choiceDeadlineAt - state.now) / 1000))}s` : penalty.phase === 'results' ? 'Penalti selesai' : 'Reveal'}</span>
             <span>Menonton dari luar · jalan untuk pergi</span>
         </section>;
+    }
+    if(!game&&(state.inputMode==='fishing'||state.inputMode==='walk'&&state.nearbyFishing)){
+        const spot=state.fishing.find(s=>s.fishing.ownerId===state.selfId)??state.nearbyFishing;
+        if(spot){const f=spot.fishing,own=f.ownerId===state.selfId,blocked=!state.connected||Boolean(typeof document!=='undefined'&&document.querySelector('dialog[open]'));
+        return <section className="activity-hud" aria-label="Fishing"><strong>Fishing · {own?f.phase==='bite'?'Bite!':f.phase==='result'?'Catch':'Waiting':f.ownerId?`Dipakai ${f.ownerName}`:'Ready'}</strong><span role="status">{own?f.phase==='waiting'?'Tunggu bobber… Reel saat Bite!':f.phase==='bite'?'Reel sekarang! · Space / E':state.now<f.endsAt?(fishingCatchLabels[f.catchId]??'Lepas! Coba lagi'):'': '4 spot · satu pemancing per spot · hasil sementara 3s'}</span><span>Cast → tunggu Bite! → Reel · jalan untuk batal</span>{own?<div className="activity-hud-controls"><button type="button" disabled={blocked||f.phase==='result'} onClick={()=>store.reelFishing()}>Reel · Space / E</button><button type="button" disabled={blocked} onClick={()=>store.leaveFishing()}>Leave</button></div>:<button type="button" disabled={blocked||Boolean(f.ownerId)} onClick={()=>store.interactFishing()}>Cast · E</button>}</section>}
     }
     if(!game&&(state.inputMode==='claw'||state.inputMode==='walk'&&state.nearbyClaw)&&state.claw) {
         const b=state.claw,own=b.operatorId===state.selfId,occupied=Boolean(b.operatorId);
